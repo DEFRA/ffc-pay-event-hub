@@ -1,10 +1,10 @@
 services:
-  ffc-template-node:
+  ffc-pay-event-hub:
     build:
       context: .
       target: production
-    image: ffc-template-node
-    container_name: ffc-template-node
+    image: ffc-pay-event-hub
+    container_name: ffc-pay-event-hub
     environment:
-      APPINSIGHTS_CLOUDROLE: ffc-template-node-local
+      APPINSIGHTS_CLOUDROLE: ffc-pay-event-hub-local
       APPINSIGHTS_INSTRUMENTATIONKEY: ${APPINSIGHTS_INSTRUMENTATIONKEY}
