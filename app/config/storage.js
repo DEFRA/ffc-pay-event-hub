@@ -4,14 +4,18 @@ const schema = Joi.object({
   useConnectionString: Joi.bool().default(false),
   connectionString: Joi.string().optional(),
   account: Joi.string().required(),
-  table: Joi.string().default('events')
+  paymentTable: Joi.string().default('payments'),
+  holdTable: Joi.string().default('holds'),
+  warningTable: Joi.string().default('warnings')
 })
 
 const config = {
   useConnectionString: process.env.AZURE_STORAGE_USE_CONNECTION_STRING,
   connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING,
   account: process.env.AZURE_STORAGE_ACCOUNT,
-  table: process.env.AZURE_STORAGE_TABLE
+  paymentTable: process.env.AZURE_STORAGE_PAYMENT_REQUEST_TABLE,
+  holdTable: process.env.AZURE_STORAGE_HOLD_TABLE,
+  warningTable: process.env.AZURE_STORAGE_WARNING_TABLE
 }
 
 const result = schema.validate(config, {
