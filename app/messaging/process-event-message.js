@@ -1,12 +1,14 @@
 const util = require('util')
 const { VALIDATION } = require('../constants/errors')
+const { processEvent } = require('../processing')
 const validateEvent = require('./validate-event')
 
 const processEventMessage = async (message, receiver) => {
   try {
-    const request = message.body
-    console.log('Event received:', util.inspect(request, false, null, true))
-    validateEvent(request)
+    const event = message.body
+    console.log('Event received:', util.inspect(event, false, null, true))
+    validateEvent(event)
+    await processEvent(event)
     await receiver.completeMessage(message)
   } catch (err) {
     console.error('Unable to process event:', err)
