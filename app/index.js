@@ -1,6 +1,7 @@
 require('./insights').setup()
 require('log-timestamp')
 const { start, stop } = require('./messaging')
+const { initialiseTable } = require('./storage')
 
 process.on(['SIGTERM', 'SIGINT', 'SIGKILL'], async () => {
   await stop()
@@ -8,5 +9,6 @@ process.on(['SIGTERM', 'SIGINT', 'SIGKILL'], async () => {
 })
 
 module.exports = (async () => {
+  await initialiseTable()
   await start()
 })()

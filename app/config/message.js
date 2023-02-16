@@ -15,7 +15,7 @@ const schema = Joi.object({
   }
 })
 
-const mqConfig = {
+const config = {
   messageQueue: {
     host: process.env.MESSAGE_QUEUE_HOST,
     username: process.env.MESSAGE_QUEUE_USER,
@@ -30,15 +30,15 @@ const mqConfig = {
   }
 }
 
-const mqResult = schema.validate(mqConfig, {
+const result = schema.validate(config, {
   abortEarly: false
 })
 
-if (mqResult.error) {
-  throw new Error(`The message config is invalid. ${mqResult.error.message}`)
+if (result.error) {
+  throw new Error(`The message config is invalid. ${result.error.message}`)
 }
 
-const eventSubscription = { ...mqResult.value.messageQueue, ...mqResult.value.eventSubscription }
+const eventSubscription = { ...result.value.messageQueue, ...result.value.eventSubscription }
 
 module.exports = {
   eventSubscription
