@@ -5,7 +5,7 @@ const { getTimestamp } = require('./get-timestamp')
 const savePaymentEvent = async (event) => {
   const timestamp = getTimestamp(event.time)
   const frnBasedEntity = {
-    partitionKey: event.data.frn,
+    partitionKey: event.data.frn.toString(),
     rowKey: `${event.data.correlationId}|${timestamp}`,
     ...event,
     data: JSON.stringify(event.data)
@@ -19,7 +19,7 @@ const savePaymentEvent = async (event) => {
   }
 
   const schemeIdBasedEntity = {
-    partitionKey: event.data.schemeId,
+    partitionKey: event.data.schemeId.toString(),
     rowKey: `${event.data.frn}|${timestamp}`,
     ...event,
     data: JSON.stringify(event.data)
