@@ -4,7 +4,7 @@ const { validateEventData } = require('./validate-event-data')
 
 const processEvent = async (event) => {
   const eventType = getEventType(event.type)
-  validateEventData(event, eventType)
+  validateEventData(event.data, eventType)
   await saveEvent(event, eventType)
 }
 
