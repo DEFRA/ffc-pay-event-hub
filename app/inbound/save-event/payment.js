@@ -1,27 +1,34 @@
-const { paymentClient } = require('../storage')
+const { PAYMENT_EVENT } = require('../../constants/event-types')
+const { getClient } = require('../../storage')
+const { getTimestamp } = require('./get-timestamp')
 
 const savePaymentEvent = async (event) => {
+  const timestamp = getTimestamp(event.time)
   const frnBasedEntity = {
-    partitionKey: event.frn,
-    rowKey: `${event.correlationId}|${event.time}`,
-    ...event
+    partitionKey: event.data.frn,
+    rowKey: `${event.data.correlationId}|${timestamp}`,
+    ...event,
+    data: JSON.stringify(event.data)
   }
 
   const correlationIdBasedEntity = {
-    partitionKey: event.correlationId,
-    rowKey: `${event.frn}|${event.time}`,
-    ...event
+    partitionKey: event.data.correlationId,
+    rowKey: `${event.data.frn}|${timestamp}`,
+    ...event,
+    data: JSON.stringify(event.data)
   }
 
   const schemeIdBasedEntity = {
-    partitionKey: event.schemeId,
-    rowKey: `${event.frn}|${event.time}`,
-    ...event
+    partitionKey: event.data.schemeId,
+    rowKey: `${event.data.frn}|${timestamp}`,
+    ...event,
+    data: JSON.stringify(event.data)
   }
 
-  await paymentClient.createEntity(frnBasedEntity)
-  await paymentClient.createEntity(correlationIdBasedEntity)
-  await paymentClient.createEntity(schemeIdBasedEntity)
+  const client = getClient(PAYMENT_EVENT)
+  await client.createEntity(frnBasedEntity)
+  await client.createEntity(correlationIdBasedEntity)
+  await client.createEntity(schemeIdBasedEntity)
 }
 
 module.exports = {

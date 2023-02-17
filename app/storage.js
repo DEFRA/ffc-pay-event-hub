@@ -1,6 +1,7 @@
 const { DefaultAzureCredential } = require('@azure/identity')
 const { TableClient } = require('@azure/data-tables')
 const { storageConfig } = require('./config')
+const { PAYMENT_EVENT, HOLD_EVENT, WARNING_EVENT } = require('./constants/event-types')
 
 let paymentClient
 let holdClient
@@ -24,9 +25,20 @@ const initialiseTable = async () => {
   await warningClient.createTable(storageConfig.warningTable)
 }
 
+const getClient = (eventType) => {
+  switch (eventType) {
+    case PAYMENT_EVENT:
+      return paymentClient
+    case HOLD_EVENT:
+      return holdClient
+    case WARNING_EVENT:
+      return warningClient
+    default:
+      throw new Error(`Unknown event type: ${eventType}`)
+  }
+}
+
 module.exports = {
   initialiseTable,
-  paymentClient,
-  holdClient,
-  warningClient
+  getClient
 }

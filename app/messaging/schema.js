@@ -6,7 +6,7 @@ module.exports = Joi.object({
   source: Joi.string().required(),
   id: Joi.string().uuid().required(),
   time: Joi.date().required(),
-  subject: Joi.string().optional(),
-  datacontenttype: Joi.string().optional(),
-  data: Joi.any().optional()
+  subject: Joi.string().default('None'),
+  datacontenttype: Joi.string().default('None'),
+  data: Joi.any().default({})
 }).required()

@@ -1,4 +1,4 @@
-const saveEvent = require('./save')
+const { saveEvent } = require('./save')
 
 module.exports = {
   saveEvent

@@ -1,7 +1,7 @@
 const util = require('util')
 const { VALIDATION } = require('../constants/errors')
 const { processEvent } = require('../inbound')
-const validateEvent = require('./validate-event')
+const { validateEvent } = require('./validate-event')
 
 const processEventMessage = async (message, receiver) => {
   try {

@@ -1,7 +1,7 @@
 const { PAYMENT_EVENT, HOLD_EVENT, WARNING_EVENT } = require('../../constants/event-types')
-const saveHoldEvent = require('./hold')
-const savePaymentEvent = require('./payment')
-const saveWarningEvent = require('./warning')
+const { saveHoldEvent } = require('./hold')
+const { savePaymentEvent } = require('./payment')
+const { saveWarningEvent } = require('./warning')
 
 const saveEvent = async (event, eventType) => {
   switch (eventType) {
