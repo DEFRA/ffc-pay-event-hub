@@ -24,4 +24,9 @@ const initialiseTable = async () => {
   await warningClient.createTable(storageConfig.warningTable)
 }
 
-module.exports = { initialiseTable }
+module.exports = {
+  initialiseTable,
+  paymentClient,
+  holdClient,
+  warningClient
+}
