@@ -1,15 +1,15 @@
-const schema = require('./schema')
 const { VALIDATION } = require('../constants/errors')
 
-const validateEvent = (event) => {
+const validateEventData = (event, eventType) => {
+  const schema = require(`./schemas/${eventType}`)
   const validationResult = schema.validate(event, { abortEarly: false, allowUnknown: true })
   if (validationResult.error) {
-    const error = new Error(`Event is invalid, ${validationResult.error.message}`)
+    const error = new Error(`Event data is invalid, ${validationResult.error.message}`)
     error.category = VALIDATION
     throw error
   }
 }
 
 module.exports = {
-  validateEvent
+  validateEventData
 }

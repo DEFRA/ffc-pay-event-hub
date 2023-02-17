@@ -1,6 +1,6 @@
 const util = require('util')
 const { VALIDATION } = require('../constants/errors')
-const { processEvent } = require('../processing')
+const { processEvent } = require('../inbound')
 const validateEvent = require('./validate-event')
 
 const processEventMessage = async (message, receiver) => {
@@ -18,4 +18,6 @@ const processEventMessage = async (message, receiver) => {
   }
 }
 
-module.exports = processEventMessage
+module.exports = {
+  processEventMessage
+}

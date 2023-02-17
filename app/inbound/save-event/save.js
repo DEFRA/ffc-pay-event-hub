@@ -17,4 +17,6 @@ const saveEvent = async (event, eventType) => {
   }
 }
 
-module.exports = saveEvent
+module.exports = {
+  saveEvent
+}

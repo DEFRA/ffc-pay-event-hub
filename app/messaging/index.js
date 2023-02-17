@@ -1,5 +1,5 @@
 const { messageConfig } = require('../config')
-const processEventMessage = require('./process-event-message')
+const { processEventMessage } = require('./process-event-message')
 const { MessageReceiver } = require('ffc-messaging')
 let receiver
 

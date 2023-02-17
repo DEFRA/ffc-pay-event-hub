@@ -13,4 +13,6 @@ const getEventType = (type) => {
   }
 }
 
-module.exports = getEventType
+module.exports = {
+  getEventType
+}

@@ -1,4 +1,6 @@
 const savePaymentEvent = async (event) => {
 }
 
-module.exports = savePaymentEvent
+module.exports = {
+  savePaymentEvent
+}
