@@ -9,7 +9,7 @@ labels:
   component: service
 
 appInsights:
-  key:
+  connectionString:
 
 containerConfigMap:
   name: ffc-pay-event-hub-config-map
