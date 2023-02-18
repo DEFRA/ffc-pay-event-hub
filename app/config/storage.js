@@ -25,7 +25,7 @@ const result = schema.validate(config, {
 })
 
 if (result.error) {
-  throw new Error(`The message config is invalid. ${result.error.message}`)
+  throw new Error(`The storage config is invalid. ${result.error.message}`)
 }
 
 module.exports = result.value
