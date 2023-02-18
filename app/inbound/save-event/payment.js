@@ -7,6 +7,7 @@ const savePaymentEvent = async (event) => {
   const frnBasedEntity = {
     partitionKey: event.data.frn.toString(),
     rowKey: `${event.data.correlationId}|${timestamp}`,
+    category: 'frn',
     ...event,
     data: JSON.stringify(event.data)
   }
@@ -14,6 +15,7 @@ const savePaymentEvent = async (event) => {
   const correlationIdBasedEntity = {
     partitionKey: event.data.correlationId,
     rowKey: `${event.data.frn}|${timestamp}`,
+    category: 'correlationId',
     ...event,
     data: JSON.stringify(event.data)
   }
@@ -21,6 +23,7 @@ const savePaymentEvent = async (event) => {
   const schemeIdBasedEntity = {
     partitionKey: event.data.schemeId.toString(),
     rowKey: `${event.data.frn}|${timestamp}`,
+    category: 'schemeId',
     ...event,
     data: JSON.stringify(event.data)
   }

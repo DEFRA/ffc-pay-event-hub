@@ -7,6 +7,7 @@ const saveBatchEvent = async (event) => {
   const batchEntity = {
     partitionKey: event.data.filename,
     rowKey: timestamp.toString(),
+    category: 'batch',
     ...event,
     data: JSON.stringify(event.data)
   }
