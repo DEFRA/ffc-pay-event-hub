@@ -1,4 +1,15 @@
 #!/usr/bin/env sh
+if [ -z "$(docker network ls --filter name=^ffc-pay$ --format={{.Name}})" ]; then
+  echo "Creating ffc-pay Docker network"
+  docker network create ffc-pay
+fi
+
+if [ -n "$(docker container ls --filter label=com.docker.compose.pay.role=ffc-pay-event-store-azurite --format={{.ID}})" ]; then
+  echo "Azurite container already exists, skipping creation"
+  args="--scale ffc-pay-event-store-azurite=0"
+fi
+
+
 set -e
 projectRoot="$(a="/$0"; a=${a%/*}; a=${a:-.}; a=${a#/}/; cd "$a/.." || return; pwd)"
 

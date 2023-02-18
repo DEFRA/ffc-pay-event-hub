@@ -14,7 +14,7 @@ services:
       - ./app:/home/node/app
       - ./package.json:/home/node/package.json
 
-  ffc-pay-event-hub-azurite:
+  ffc-pay-event-store-azurite:
     volumes:
       - azurite_data:/data
     ports:
