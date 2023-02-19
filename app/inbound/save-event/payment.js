@@ -33,7 +33,7 @@ const savePaymentEvent = async (event) => {
   await client.createEntity(correlationIdBasedEntity)
   await client.createEntity(schemeIdBasedEntity)
 
-  if(event.data.batch) {
+  if (event.data.batch) {
     const batchBasedEntity = {
       partitionKey: event.data.batch,
       rowKey: `${event.data.frn}|${timestamp}`,
