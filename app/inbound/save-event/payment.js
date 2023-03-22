@@ -1,32 +1,12 @@
+const { FRN, CORRELATION_ID, SCHEME_ID, BATCH } = require('../../constants/categories')
 const { PAYMENT_EVENT } = require('../../constants/event-types')
 const { getClient } = require('../../storage')
-const { getTimestamp } = require('./get-timestamp')
+const { createEntity } = require('./create-entity')
 
 const savePaymentEvent = async (event) => {
-  const timestamp = getTimestamp(event.time)
-  const frnBasedEntity = {
-    partitionKey: event.data.frn.toString(),
-    rowKey: `${event.data.correlationId}|${timestamp}`,
-    category: 'frn',
-    ...event,
-    data: JSON.stringify(event.data)
-  }
-
-  const correlationIdBasedEntity = {
-    partitionKey: event.data.correlationId,
-    rowKey: `${event.data.frn}|${timestamp}`,
-    category: 'correlationId',
-    ...event,
-    data: JSON.stringify(event.data)
-  }
-
-  const schemeIdBasedEntity = {
-    partitionKey: event.data.schemeId.toString(),
-    rowKey: `${event.data.frn}|${timestamp}`,
-    category: 'schemeId',
-    ...event,
-    data: JSON.stringify(event.data)
-  }
+  const frnBasedEntity = createEntity(event.data.frn, event.data.correlationId, FRN, event)
+  const correlationIdBasedEntity = createEntity(event.data.correlationId, event.data.frn, CORRELATION_ID, event)
+  const schemeIdBasedEntity = createEntity(event.data.schemeId, event.data.frn, SCHEME_ID, event)
 
   const client = getClient(PAYMENT_EVENT)
   await client.createEntity(frnBasedEntity)
@@ -34,13 +14,7 @@ const savePaymentEvent = async (event) => {
   await client.createEntity(schemeIdBasedEntity)
 
   if (event.data.batch) {
-    const batchBasedEntity = {
-      partitionKey: event.data.batch,
-      rowKey: `${event.data.frn}|${timestamp}`,
-      category: 'batch',
-      ...event,
-      data: JSON.stringify(event.data)
-    }
+    const batchBasedEntity = createEntity(event.data.batch, event.data.frn, BATCH, event)
     await client.createEntity(batchBasedEntity)
   }
 }
