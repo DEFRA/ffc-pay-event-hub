@@ -13,11 +13,11 @@ mockGetClient.mockReturnValue(mockClient)
 jest.mock('../../../../app/inbound/save-event/create-entity')
 const { createEntity: mockCreatePaymentEntity } = require('../../../../app/inbound/save-event/create-entity')
 
-const holdEntity = {
+const paymentEntity = {
   partitionKey: 'mock-partition-key',
   rowKey: 'mock-row-key'
 }
-mockCreatePaymentEntity.mockReturnValue(holdEntity)
+mockCreatePaymentEntity.mockReturnValue(paymentEntity)
 
 const { savePaymentEvent } = require('../../../../app/inbound/save-event/payment')
 
