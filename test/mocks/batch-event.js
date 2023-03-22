@@ -1,10 +1,12 @@
 const event = require('./event')
 
+const FILENAME = 'batch-file.dat'
+
 module.exports = {
   ...event,
   type: 'uk.gov.defra.ffc.pay.batch.event',
+  subject: FILENAME,
   data: {
-    schemeId: 1,
-    filename: 'batch-file.dat'
+    filename: FILENAME
   }
 }
