@@ -1,4 +1,5 @@
 const Joi = require('joi')
+const { PRODUCTION } = require('../constants/environments')
 
 const schema = Joi.object({
   messageQueue: {
@@ -20,8 +21,8 @@ const config = {
     host: process.env.MESSAGE_QUEUE_HOST,
     username: process.env.MESSAGE_QUEUE_USER,
     password: process.env.MESSAGE_QUEUE_PASSWORD,
-    useCredentialChain: process.env.NODE_ENV === 'production',
-    appInsights: process.env.NODE_ENV === 'production' ? require('applicationinsights') : undefined
+    useCredentialChain: process.env.NODE_ENV === PRODUCTION,
+    appInsights: process.env.NODE_ENV === PRODUCTION ? require('applicationinsights') : undefined
   },
   eventSubscription: {
     address: process.env.EVENT_SUBSCRIPTION_ADDRESS,
