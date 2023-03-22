@@ -16,7 +16,7 @@ jest.mock('../../../app/storage')
 const messageService = require('../../../app/messaging')
 
 describe('messaging', () => {
-  beforeEach(()=>{
+  beforeEach(() => {
     jest.clearAllMocks()
   })
 
