@@ -5,6 +5,8 @@ services:
       target: production
     image: ffc-pay-event-hub
     container_name: ffc-pay-event-hub
+    depends_on:
+      - ffc-pay-event-store-azurite
     environment:
       APPINSIGHTS_CLOUDROLE: ffc-pay-event-hub-local
       APPINSIGHTS_CONNECTIONSTRING: ${APPINSIGHTS_CONNECTIONSTRING}
