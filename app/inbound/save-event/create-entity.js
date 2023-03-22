@@ -1,6 +1,6 @@
 const { getTimestamp } = require('./get-timestamp')
 
-const createEntity = async (partitionKey, rowKey, category, event) => {
+const createEntity = (partitionKey, rowKey, category, event) => {
   const timestamp = getTimestamp(event.time)
   return {
     partitionKey: partitionKey.toString(),
