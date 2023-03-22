@@ -8,7 +8,7 @@ let holdClient
 let warningClient
 let batchClient
 
-const initialiseTable = async () => {
+const initialiseTables = async () => {
   if (storageConfig.useConnectionString) {
     console.log('Using connection string for Table Client')
     paymentClient = TableClient.fromConnectionString(storageConfig.connectionString, storageConfig.paymentTable, { allowInsecureConnection: true })
@@ -45,6 +45,6 @@ const getClient = (eventType) => {
 }
 
 module.exports = {
-  initialiseTable,
+  initialiseTables,
   getClient
 }
