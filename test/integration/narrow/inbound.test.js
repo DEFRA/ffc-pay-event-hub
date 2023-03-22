@@ -1,4 +1,4 @@
-const { FRN, CORRELATION_ID, SCHEME_ID, BATCH } = require('../../../app/constants/categories')
+const { FRN, CORRELATION_ID, SCHEME_ID, BATCH, WARNING } = require('../../../app/constants/categories')
 
 const mockTableClient = {
   createTable: jest.fn(),
@@ -75,6 +75,59 @@ describe('inbound payment event', () => {
     expect(mockTableClient.createEntity).toHaveBeenCalledWith(expect.objectContaining({
       partitionKey: paymentEvent.data.batch,
       category: BATCH
+    }))
+  })
+})
+
+describe('inbound hold event', () => {
+  test('saves two hold entities', async () => {
+    await processEvent(holdEvent)
+    expect(mockTableClient.createEntity).toHaveBeenCalledTimes(2)
+  })
+
+  test('saves FRN hold entity', async () => {
+    await processEvent(holdEvent)
+    expect(mockTableClient.createEntity).toHaveBeenCalledWith(expect.objectContaining({
+      partitionKey: holdEvent.data.frn.toString(),
+      category: FRN
+    }))
+  })
+
+  test('saves scheme id hold entity', async () => {
+    await processEvent(holdEvent)
+    expect(mockTableClient.createEntity).toHaveBeenCalledWith(expect.objectContaining({
+      partitionKey: holdEvent.data.schemeId.toString(),
+      category: SCHEME_ID
+    }))
+  })
+})
+
+describe('inbound batch event', () => {
+  test('saves one batch entity', async () => {
+    await processEvent(batchEvent)
+    expect(mockTableClient.createEntity).toHaveBeenCalledTimes(1)
+  })
+
+  test('saves batch batch entity', async () => {
+    await processEvent(batchEvent)
+    expect(mockTableClient.createEntity).toHaveBeenCalledWith(expect.objectContaining({
+      partitionKey: batchEvent.data.filename,
+      category: BATCH
+    }))
+  })
+})
+
+describe('inbound warning event', () => {
+  test('saves one warning entity', async () => {
+    await processEvent(warningEvent)
+    expect(mockTableClient.createEntity).toHaveBeenCalledTimes(1)
+  })
+
+  test('saves warning entity', async () => {
+    await processEvent(warningEvent)
+    expect(mockTableClient.createEntity).toHaveBeenCalledWith(expect.objectContaining({
+      partitionKey: 'event',
+      category: WARNING
     }))
   })
 })
