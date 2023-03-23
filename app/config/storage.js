@@ -13,7 +13,7 @@ const schema = Joi.object({
 const config = {
   useConnectionString: process.env.AZURE_STORAGE_USE_CONNECTION_STRING,
   connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING,
-  account: process.env.AZURE_STORAGE_ACCOUNT,
+  account: process.env.AZURE_STORAGE_ACCOUNT_NAME,
   paymentTable: process.env.AZURE_STORAGE_PAYMENT_REQUEST_TABLE,
   holdTable: process.env.AZURE_STORAGE_HOLD_TABLE,
   warningTable: process.env.AZURE_STORAGE_WARNING_TABLE,
