@@ -42,13 +42,22 @@ beforeEach(async () => {
   warningEvent = JSON.parse(JSON.stringify(require('../../mocks/warning-event')))
 })
 
+const countAsyncIterator = async (iterator) => {
+  let count = 0
+  for await (const _ of iterator) { // eslint-disable-line no-unused-vars
+    count++
+  }
+  return count
+}
+
 describe('process event message', () => {
   test('saves FRN payment event', async () => {
     await processEventMessage({ body: paymentEvent }, receiver)
     const results = paymentClient.listEntities({
-      queryOptions: { filter: odata`PartitionKey eq ${paymentEvent.data.frn}` }
+      queryOptions: { filter: odata`PartitionKey eq ${paymentEvent.data.frn.toString()}` }
     })
-    expect(results.length).toBe(1)
+    const total = await countAsyncIterator(results)
+    expect(total).toBe(1)
   })
 
   test('saves correlation id payment event', async () => {
@@ -56,15 +65,17 @@ describe('process event message', () => {
     const results = paymentClient.listEntities({
       queryOptions: { filter: odata`PartitionKey eq ${paymentEvent.data.correlationId}` }
     })
-    expect(results.length).toBe(1)
+    const total = await countAsyncIterator(results)
+    expect(total).toBe(1)
   })
 
   test('saves scheme id payment event', async () => {
     await processEventMessage({ body: paymentEvent }, receiver)
     const results = paymentClient.listEntities({
-      queryOptions: { filter: odata`PartitionKey eq ${paymentEvent.data.schemeId}` }
+      queryOptions: { filter: odata`PartitionKey eq ${paymentEvent.data.schemeId.toString()}` }
     })
-    expect(results.length).toBe(1)
+    const total = await countAsyncIterator(results)
+    expect(total).toBe(1)
   })
 
   test('saves batch payment event', async () => {
@@ -73,6 +84,43 @@ describe('process event message', () => {
     const results = paymentClient.listEntities({
       queryOptions: { filter: odata`PartitionKey eq ${paymentEvent.data.batch}` }
     })
-    expect(results.length).toBe(1)
+    const total = await countAsyncIterator(results)
+    expect(total).toBe(1)
+  })
+
+  test('saves FRN hold event', async () => {
+    await processEventMessage({ body: holdEvent }, receiver)
+    const results = holdClient.listEntities({
+      queryOptions: { filter: odata`PartitionKey eq ${holdEvent.data.frn.toString()}` }
+    })
+    const total = await countAsyncIterator(results)
+    expect(total).toBe(1)
+  })
+
+  test('saves scheme id hold event', async () => {
+    await processEventMessage({ body: holdEvent }, receiver)
+    const results = holdClient.listEntities({
+      queryOptions: { filter: odata`PartitionKey eq ${holdEvent.data.schemeId.toString()}` }
+    })
+    const total = await countAsyncIterator(results)
+    expect(total).toBe(1)
+  })
+
+  test('saves batch event', async () => {
+    await processEventMessage({ body: batchEvent }, receiver)
+    const results = batchClient.listEntities({
+      queryOptions: { filter: odata`PartitionKey eq ${batchEvent.data.filename}` }
+    })
+    const total = await countAsyncIterator(results)
+    expect(total).toBe(1)
+  })
+
+  test('saves warning event', async () => {
+    await processEventMessage({ body: warningEvent }, receiver)
+    const results = warningClient.listEntities({
+      queryOptions: { filter: odata`PartitionKey eq ${'event'}` }
+    })
+    const total = await countAsyncIterator(results)
+    expect(total).toBe(1)
   })
 })
