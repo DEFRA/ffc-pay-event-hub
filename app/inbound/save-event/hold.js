@@ -7,10 +7,12 @@ const { createEntity } = require('./create-entity')
 const saveHoldEvent = async (event) => {
   const frnBasedEntity = createEntity(event.data.frn, event.data.schemeId, FRN, event)
   const schemeIdBasedEntity = createEntity(event.data.schemeId, event.data.frn, SCHEME_ID, event)
+  const holdCategoryIdBasedEntity = createEntity(event.data.holdCategoryId, event.data.frn, SCHEME_ID, event)
 
   const client = getClient(HOLD_EVENT)
   await client.createEntity(frnBasedEntity)
   await client.createEntity(schemeIdBasedEntity)
+  await client.createEntity(holdCategoryIdBasedEntity)
 }
 
 module.exports = {

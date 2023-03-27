@@ -46,22 +46,22 @@ describe('save payment event', () => {
 
   test('creates entity frn category', async () => {
     await savePaymentEvent(event)
-    expect(mockCreatePaymentEntity).toHaveBeenCalledWith(event.data.frn, event.data.correlationId, FRN, event)
+    expect(mockCreatePaymentEntity).toHaveBeenCalledWith(event.data.frn, `${event.data.correlationId}|${event.data.invoiceNumber}`, FRN, event)
   })
 
   test('creates entity scheme id category', async () => {
     await savePaymentEvent(event)
-    expect(mockCreatePaymentEntity).toHaveBeenCalledWith(event.data.schemeId, event.data.frn, SCHEME_ID, event)
+    expect(mockCreatePaymentEntity).toHaveBeenCalledWith(event.data.schemeId, `${event.data.frn}|${event.data.invoiceNumber}`, SCHEME_ID, event)
   })
 
   test('creates entity correlation id category', async () => {
     await savePaymentEvent(event)
-    expect(mockCreatePaymentEntity).toHaveBeenCalledWith(event.data.correlationId, event.data.frn, CORRELATION_ID, event)
+    expect(mockCreatePaymentEntity).toHaveBeenCalledWith(event.data.correlationId, `${event.data.frn}|${event.data.invoiceNumber}`, CORRELATION_ID, event)
   })
 
   test('creates entity batch category if batch', async () => {
     event.data.batch = 'mock-batch'
     await savePaymentEvent(event)
-    expect(mockCreatePaymentEntity).toHaveBeenCalledWith(event.data.batch, event.data.frn, BATCH, event)
+    expect(mockCreatePaymentEntity).toHaveBeenCalledWith(event.data.batch, `${event.data.frn}|${event.data.invoiceNumber}`, BATCH, event)
   })
 })

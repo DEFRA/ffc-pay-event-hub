@@ -80,4 +80,24 @@ describe('payment schema', () => {
     event.schemeId = -1
     expect(schema.validate(event).error).toBeDefined()
   })
+
+  test('should not validate a payment event with an undefined invoiceNumber', () => {
+    delete event.invoiceNumber
+    expect(schema.validate(event).error).toBeDefined()
+  })
+
+  test('should not validate a payment event with a null invoiceNumber', () => {
+    event.invoiceNumber = null
+    expect(schema.validate(event).error).toBeDefined()
+  })
+
+  test('should not validate a payment event with a non-string invoiceNumber', () => {
+    event.invoiceNumber = 1
+    expect(schema.validate(event).error).toBeDefined()
+  })
+
+  test('should not validate a payment event with an empty invoiceNumber', () => {
+    event.invoiceNumber = ''
+    expect(schema.validate(event).error).toBeDefined()
+  })
 })

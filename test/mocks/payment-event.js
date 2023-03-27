@@ -6,6 +6,7 @@ module.exports = {
   data: {
     frn: 1234567890,
     correlationId: '82f962a4-99d9-4f27-b3c1-4083b402d58d',
-    schemeId: 1
+    schemeId: 1,
+    invoiceNumber: 'S1234567S1234567V001'
   }
 }

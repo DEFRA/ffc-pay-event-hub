@@ -5,6 +5,7 @@ module.exports = {
   type: 'uk.gov.defra.ffc.pay.hold.event',
   data: {
     frn: 1234567890,
-    schemeId: 1
+    schemeId: 1,
+    holdCategoryId: 1
   }
 }

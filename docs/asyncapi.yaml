@@ -51,6 +51,7 @@ components:
         - frn
         - schemeId
         - correlationId
+        - invoiceNumber
       properties:
         frn:
           $ref: '#/components/schemas/Frn'
@@ -58,6 +59,8 @@ components:
           $ref: '#/components/schemas/SchemeId'
         correlationId:
           $ref: '#/components/schemas/CorrelationId'
+        invoiceNumber:
+          $ref: '#/components/schemas/InvoiceNumber'
     BatchData:
       type: object
       required:
@@ -70,10 +73,13 @@ components:
       required:
         - frn
         - schemeId
+        - holdCategoryId
       schemeId:
         $ref: '#/components/schemas/SchemeId'
       frn:
         $ref: '#/components/schemas/Frn'
+      holdCategoryId:
+        $ref: '#/components/schemas/HoldCategoryId'
     WarningData:
       type: object
       required:
@@ -128,6 +134,15 @@ components:
       format: uuid
       description: Correlation ID for payment request chain.
       example: 123e4567-e89b-12d3-a456-426655440000
+    InvoiceNumber:
+      type: string
+      description: Invoice number.
+      example: S1234567S1234567V001
+    HoldCategoryId:
+      type: integer
+      format: int32
+      description: Hold category identifier.
+      example: 1
     Filename:
       type: string
       description: Name of the file containing the payment requests.

@@ -80,9 +80,9 @@ describe('inbound payment event', () => {
 })
 
 describe('inbound hold event', () => {
-  test('saves two hold entities', async () => {
+  test('saves three hold entities', async () => {
     await processEvent(holdEvent)
-    expect(mockTableClient.createEntity).toHaveBeenCalledTimes(2)
+    expect(mockTableClient.createEntity).toHaveBeenCalledTimes(3)
   })
 
   test('saves FRN hold entity', async () => {

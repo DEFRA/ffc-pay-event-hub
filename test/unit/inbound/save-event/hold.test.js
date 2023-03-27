@@ -33,9 +33,9 @@ describe('save hold event', () => {
     expect(mockGetClient).toHaveBeenCalledWith(HOLD_EVENT)
   })
 
-  test('creates two entities', async () => {
+  test('creates three entities', async () => {
     await saveHoldEvent(event)
-    expect(mockCreateEntity).toHaveBeenCalledTimes(2)
+    expect(mockCreateEntity).toHaveBeenCalledTimes(3)
   })
 
   test('creates entity frn category', async () => {
@@ -46,5 +46,10 @@ describe('save hold event', () => {
   test('creates entity scheme id category', async () => {
     await saveHoldEvent(event)
     expect(mockCreateHoldEntity).toHaveBeenCalledWith(event.data.schemeId, event.data.frn, SCHEME_ID, event)
+  })
+
+  test('creates entity hold category id category', async () => {
+    await saveHoldEvent(event)
+    expect(mockCreateHoldEntity).toHaveBeenCalledWith(event.data.holdCategoryId, event.data.frn, SCHEME_ID, event)
   })
 })

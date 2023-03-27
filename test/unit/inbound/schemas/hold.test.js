@@ -60,4 +60,29 @@ describe('hold schema', () => {
     event.schemeId = -1
     expect(schema.validate(event).error).toBeDefined()
   })
+
+  test('should not validate a hold event with an undefined holdCategoryId', () => {
+    delete event.holdCategoryId
+    expect(schema.validate(event).error).toBeDefined()
+  })
+
+  test('should not validate a hold event with a null holdCategoryId', () => {
+    event.holdCategoryId = null
+    expect(schema.validate(event).error).toBeDefined()
+  })
+
+  test('should not validate a hold event with a non-number holdCategoryId', () => {
+    event.holdCategoryId = 'abc'
+    expect(schema.validate(event).error).toBeDefined()
+  })
+
+  test('should not validate a hold event with a non-integer holdCategoryId', () => {
+    event.holdCategoryId = 1.1
+    expect(schema.validate(event).error).toBeDefined()
+  })
+
+  test('should not validate a hold event with a negative holdCategoryId', () => {
+    event.holdCategoryId = -1
+    expect(schema.validate(event).error).toBeDefined()
+  })
 })
