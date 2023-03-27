@@ -22,7 +22,7 @@ describe('messaging', () => {
 
   test('creates receiver for events topic', async () => {
     await messageService.start()
-    expect(MockReceiver).toHaveBeenCalledWith(config.eventSubscription, expect.anything())
+    expect(MockReceiver).toHaveBeenCalledWith(config.eventsSubscription, expect.anything())
   })
 
   test('subscribes to topic', async () => {
