@@ -2,7 +2,7 @@ asyncapi: 2.6.0
 info:
   title: FFC Payment Event Hub
   version: '1.0.0'
-  description: Validate and enrichment of payment requests for downstream payment processing
+  description: Persist events raised from Payment Hub
 channels:
   ffc-pay-events:
     subscribe:
@@ -18,47 +18,39 @@ components:
   schemas:
     Event:
       type: object
+      required:
+        - specversion
+        - type
+        - source
+        - id
+        - time
       properties:
         specversion:
-          type: string
-          description: The version of the CloudEvents specification which the event uses.
-          example: '1.0'
+          $ref: '#/components/schemas/Specversion'
         type:
-          type: string
-          description: The type of event in reverse DNS notation.
-          example: uk.gov.defra.ffc.pay.payment.enriched
+          $ref: '#/components/schemas/Type'
         source:
-          type: string
-          description: The service publishing the event.
-          example: ffc-pay-enrichment
+          $ref: '#/components/schemas/Source'
         id:
-          type: string
-          format: uuid
-          description: The unique ID of the event.
-          example: 123e4567-e89b-12d3-a456-426655440000
+          $ref: '#/components/schemas/Id'
         time:
-          type: string
-          format: date-time
-          description: The time the event was published.
-          example: '2020-01-01T12:00:00Z'
+          $ref: '#/components/schemas/Time'
         subject:
-          type: string
-          description: The subject of the event.
-          example: Payment request enriched
+          $ref: '#/components/schemas/Subject'
         datacontenttype:
-          type: string
-          description: The content type of the event payload.
-          example: text/json
+          $ref: '#/components/schemas/Datacontenttype'
         data:
-          type: object
-          properties:
-            oneOf:
-              - $ref: '#/components/schemas/PaymentData'
-              - $ref: '#/components/schemas/BatchData'
-              - $ref: '#/components/schemas/HoldData'
-              - $ref: '#/components/schemas/WarningData'
+          oneOf:
+          - $ref: '#/components/schemas/PaymentData'
+          - $ref: '#/components/schemas/BatchData'
+          - $ref: '#/components/schemas/HoldData'
+          - $ref: '#/components/schemas/WarningData'
     PaymentData:
       type: object
+      required:
+        - frn
+        - schemeId
+        - correlationId
       properties:
         frn:
           $ref: '#/components/schemas/Frn'
@@ -68,19 +60,59 @@ components:
           $ref: '#/components/schemas/CorrelationId'
     BatchData:
       type: object
+      required:
+        - filename
       properties:
         filename:
           $ref: '#/components/schemas/Filename'
     HoldData:
+      type: object
+      required:
+        - frn
+        - schemeId
       schemeId:
         $ref: '#/components/schemas/SchemeId'
       frn:
         $ref: '#/components/schemas/Frn'
     WarningData:
       type: object
+      required:
+        - frn
+        - schemeId
+        - message
       properties:
         message:
           $ref: '#/components/schemas/Message'
+    Specversion:
+          type: string
+          description: The version of the CloudEvents specification which the event uses.
+          example: '1.0'
+    Type:
+      type: string
+      description: The type of event in reverse DNS notation.
+      example: uk.gov.defra.ffc.pay.payment.enriched
+    Source:
+      type: string
+      description: The service publishing the event.
+      example: ffc-pay-enrichment
+    Id:
+      type: string
+      format: uuid
+      description: The unique ID of the event.
+      example: 123e4567-e89b-12d3-a456-426655440000
+    Time:
+      type: string
+      format: date-time
+      description: The time the event was published.
+      example: '2020-01-01T12:00:00Z'
+    Subject:
+      type: string
+      description: The subject of the event.
+      example: Payment request enriched
+    Datacontenttype:
+      type: string
+      description: The content type of the event payload.
+      example: text/json
     Frn:
       type: integer
       format: int64
