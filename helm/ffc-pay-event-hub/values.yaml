@@ -18,27 +18,26 @@ containerSecret:
   name: ffc-pay-event-hub-container-secret
   type: Opaque
 
-deployment: {}
+deployment:
+  minReplicas: 1
+  maxReplicas: 4
+  cpuThreshold: 80
+  memoryThreshold: 80 
 
 container:
   requestMemory: 100Mi
   requestCpu: 100m
   limitMemory: 100Mi
   limitCpu: 100m
-  port: 3000
+  messageQueueHost: namespace.servicebus.windows.net
+  eventsTopicAddress: ffc-pay-events
+  eventsSubscriptionAddress: ffc-pay-event-hub
+  azureStorageConnectionString: dummy
+  azureStorageUseConnectionString: false
+  azureStorageAccountName: ffcpay
 
-livenessProbe:
-  path: /healthz
-  port: 3000
-  initialDelaySeconds: 20
-  periodSeconds: 10
-  failureThreshold: 3
-  timeoutSeconds: 5
+aadPodIdentity: true
 
-readinessProbe:
-  path: /healthy
-  port: 3000
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  failureThreshold: 3
-  timeoutSeconds: 5
+azureIdentity:
+  clientID: not-a-real-clientID
+  resourceID: not-a-real-resourceID

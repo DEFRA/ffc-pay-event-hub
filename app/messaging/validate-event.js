@@ -1,4 +1,4 @@
-const schema = require('./schema')
+const schema = require('./event-schema')
 const { VALIDATION } = require('../constants/errors')
 
 const validateEvent = (event) => {

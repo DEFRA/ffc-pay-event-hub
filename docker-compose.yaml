@@ -5,17 +5,19 @@ services:
       target: production
     image: ffc-pay-event-hub
     container_name: ffc-pay-event-hub
+    depends_on:
+      - ffc-pay-event-store-azurite
     environment:
       APPINSIGHTS_CLOUDROLE: ffc-pay-event-hub-local
       APPINSIGHTS_CONNECTIONSTRING: ${APPINSIGHTS_CONNECTIONSTRING}
       MESSAGE_QUEUE_HOST: ${MESSAGE_QUEUE_HOST}
       MESSAGE_QUEUE_PASSWORD: ${MESSAGE_QUEUE_PASSWORD}
       MESSAGE_QUEUE_USER: ${MESSAGE_QUEUE_USER}
-      EVENT_TOPIC_ADDRESS: ${EVENT_TOPIC_ADDRESS:-ffc-pay-events}${MESSAGE_QUEUE_SUFFIX}
-      EVENT_SUBSCRIPTION_ADDRESS: ${EVENT_SUBSCRIPTION_ADDRESS:-ffc-pay-event-hub}${MESSAGE_QUEUE_SUFFIX}
+      EVENTS_TOPIC_ADDRESS: ${EVENT_TOPIC_ADDRESS:-ffc-pay-events}${MESSAGE_QUEUE_SUFFIX}
+      EVENTS_SUBSCRIPTION_ADDRESS: ${EVENT_SUBSCRIPTION_ADDRESS:-ffc-pay-event-hub}${MESSAGE_QUEUE_SUFFIX}
       AZURE_STORAGE_USE_CONNECTION_STRING: "true"
       AZURE_STORAGE_CONNECTION_STRING: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;TableEndpoint=http://ffc-pay-event-store-azurite:10002/devstoreaccount1;
-      AZURE_STORAGE_ACCOUNT: devstoreaccount1
+      AZURE_STORAGE_ACCOUNT_NAME: devstoreaccount1
 
   ffc-pay-event-store-azurite:
     image: mcr.microsoft.com/azure-storage/azurite:3.17.1

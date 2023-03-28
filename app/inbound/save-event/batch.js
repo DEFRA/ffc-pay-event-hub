@@ -1,3 +1,4 @@
+const { BATCH } = require('../../constants/categories')
 const { BATCH_EVENT } = require('../../constants/event-types')
 const { getClient } = require('../../storage')
 const { getTimestamp } = require('./get-timestamp')
@@ -7,7 +8,7 @@ const saveBatchEvent = async (event) => {
   const batchEntity = {
     partitionKey: event.data.filename,
     rowKey: timestamp.toString(),
-    category: 'batch',
+    category: BATCH,
     ...event,
     data: JSON.stringify(event.data)
   }

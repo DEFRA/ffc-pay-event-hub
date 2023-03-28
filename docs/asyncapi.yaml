@@ -1,0 +1,153 @@
+asyncapi: 2.6.0
+info:
+  title: FFC Payment Event Hub
+  version: '1.0.0'
+  description: Persist events raised from Payment Hub
+channels:
+  ffc-pay-events:
+    subscribe:
+      message:
+        $ref: '#/components/messages/Event'
+components:
+  messages:
+    Event:
+      name: Payment event
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/Event'
+  schemas:
+    Event:
+      type: object
+      required:
+        - specversion
+        - type
+        - source
+        - id
+        - time
+      properties:
+        specversion:
+          $ref: '#/components/schemas/Specversion'
+        type:
+          $ref: '#/components/schemas/Type'
+        source:
+          $ref: '#/components/schemas/Source'
+        id:
+          $ref: '#/components/schemas/Id'
+        time:
+          $ref: '#/components/schemas/Time'
+        subject:
+          $ref: '#/components/schemas/Subject'
+        datacontenttype:
+          $ref: '#/components/schemas/Datacontenttype'
+        data:
+          oneOf:
+          - $ref: '#/components/schemas/PaymentData'
+          - $ref: '#/components/schemas/BatchData'
+          - $ref: '#/components/schemas/HoldData'
+          - $ref: '#/components/schemas/WarningData'
+    PaymentData:
+      type: object
+      required:
+        - frn
+        - schemeId
+        - correlationId
+        - invoiceNumber
+      properties:
+        frn:
+          $ref: '#/components/schemas/Frn'
+        schemeId:
+          $ref: '#/components/schemas/SchemeId'
+        correlationId:
+          $ref: '#/components/schemas/CorrelationId'
+        invoiceNumber:
+          $ref: '#/components/schemas/InvoiceNumber'
+    BatchData:
+      type: object
+      required:
+        - filename
+      properties:
+        filename:
+          $ref: '#/components/schemas/Filename'
+    HoldData:
+      type: object
+      required:
+        - frn
+        - schemeId
+        - holdCategoryId
+      schemeId:
+        $ref: '#/components/schemas/SchemeId'
+      frn:
+        $ref: '#/components/schemas/Frn'
+      holdCategoryId:
+        $ref: '#/components/schemas/HoldCategoryId'
+    WarningData:
+      type: object
+      required:
+        - frn
+        - schemeId
+        - message
+      properties:
+        message:
+          $ref: '#/components/schemas/Message'
+    Specversion:
+          type: string
+          description: The version of the CloudEvents specification which the event uses.
+          example: '1.0'
+    Type:
+      type: string
+      description: The type of event in reverse DNS notation.
+      example: uk.gov.defra.ffc.pay.payment.enriched
+    Source:
+      type: string
+      description: The service publishing the event.
+      example: ffc-pay-enrichment
+    Id:
+      type: string
+      format: uuid
+      description: The unique ID of the event.
+      example: 123e4567-e89b-12d3-a456-426655440000
+    Time:
+      type: string
+      format: date-time
+      description: The time the event was published.
+      example: '2020-01-01T12:00:00Z'
+    Subject:
+      type: string
+      description: The subject of the event.
+      example: Payment request enriched
+    Datacontenttype:
+      type: string
+      description: The content type of the event payload.
+      example: text/json
+    Frn:
+      type: integer
+      format: int64
+      description: Firm Reference Number.
+      example: 1234567890
+    SchemeId:
+      type: integer
+      format: int32
+      description: Scheme identifier.
+      example: 1
+    CorrelationId:
+      type: string
+      format: uuid
+      description: Correlation ID for payment request chain.
+      example: 123e4567-e89b-12d3-a456-426655440000
+    InvoiceNumber:
+      type: string
+      description: Invoice number.
+      example: S1234567S1234567V001
+    HoldCategoryId:
+      type: integer
+      format: int32
+      description: Hold category identifier.
+      example: 1
+    Filename:
+      type: string
+      description: Name of the file containing the payment requests.
+      example: SITISFI0001_AP_20230302192230.dat
+    Message:
+      type: string
+      description: Warning message.
+      example: 'Warning: Payment request for FRN 1234567890 is missing a scheme identifier.'

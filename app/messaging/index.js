@@ -5,7 +5,7 @@ let receiver
 
 const start = async () => {
   const action = message => processEventMessage(message, receiver)
-  receiver = new MessageReceiver(messageConfig.eventSubscription, action)
+  receiver = new MessageReceiver(messageConfig.eventsSubscription, action)
   await receiver.subscribe()
 
   console.info('Ready to process events')
