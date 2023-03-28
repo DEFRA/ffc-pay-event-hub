@@ -1,4 +1,4 @@
-const WARNING_IDENTIFIER = '.warning.'
+const { WARNING_IDENTIFIER } = require('../../constants/warning-identifier')
 
 const getWarningType = (eventType) => {
   return eventType.split(WARNING_IDENTIFIER)[1]
