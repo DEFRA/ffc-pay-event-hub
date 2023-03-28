@@ -1,6 +1,6 @@
 const { getTimestamp } = require('./get-timestamp')
 
-const createEntity = (partitionKey, rowKey, category, event) => {
+const createRow = (partitionKey, rowKey, category, event) => {
   const timestamp = getTimestamp(event.time)
   return {
     partitionKey: partitionKey.toString(),
@@ -12,5 +12,5 @@ const createEntity = (partitionKey, rowKey, category, event) => {
 }
 
 module.exports = {
-  createEntity
+  createRow
 }

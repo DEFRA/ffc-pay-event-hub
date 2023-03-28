@@ -10,14 +10,14 @@ const mockClient = {
 }
 mockGetClient.mockReturnValue(mockClient)
 
-jest.mock('../../../../app/inbound/save-event/create-entity')
-const { createEntity: mockCreateHoldEntity } = require('../../../../app/inbound/save-event/create-entity')
+jest.mock('../../../../app/inbound/save-event/create-row')
+const { createRow: mockCreateRow } = require('../../../../app/inbound/save-event/create-row')
 
 const holdEntity = {
   partitionKey: 'mock-partition-key',
   rowKey: 'mock-row-key'
 }
-mockCreateHoldEntity.mockReturnValue(holdEntity)
+mockCreateRow.mockReturnValue(holdEntity)
 
 const { saveHoldEvent } = require('../../../../app/inbound/save-event/hold')
 
@@ -40,16 +40,16 @@ describe('save hold event', () => {
 
   test('creates entity frn category', async () => {
     await saveHoldEvent(event)
-    expect(mockCreateHoldEntity).toHaveBeenCalledWith(event.data.frn, event.data.schemeId, FRN, event)
+    expect(mockCreateRow).toHaveBeenCalledWith(event.data.frn, event.data.schemeId, FRN, event)
   })
 
   test('creates entity scheme id category', async () => {
     await saveHoldEvent(event)
-    expect(mockCreateHoldEntity).toHaveBeenCalledWith(event.data.schemeId, event.data.frn, SCHEME_ID, event)
+    expect(mockCreateRow).toHaveBeenCalledWith(event.data.schemeId, event.data.frn, SCHEME_ID, event)
   })
 
   test('creates entity hold category id category', async () => {
     await saveHoldEvent(event)
-    expect(mockCreateHoldEntity).toHaveBeenCalledWith(event.data.holdCategoryId, event.data.frn, SCHEME_ID, event)
+    expect(mockCreateRow).toHaveBeenCalledWith(event.data.holdCategoryId, event.data.frn, SCHEME_ID, event)
   })
 })

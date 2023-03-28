@@ -10,8 +10,8 @@ const mockClient = {
 }
 mockGetClient.mockReturnValue(mockClient)
 
-jest.mock('../../../../app/inbound/save-event/create-entity')
-const { createEntity: mockCreateWarningEntity } = require('../../../../app/inbound/save-event/create-entity')
+jest.mock('../../../../app/inbound/save-event/create-row')
+const { createRow: mockCreateRow } = require('../../../../app/inbound/save-event/create-row')
 
 jest.mock('../../../../app/inbound/save-event/get-warning-type')
 const { getWarningType: mockGetWarningType } = require('../../../../app/inbound/save-event/get-warning-type')
@@ -22,7 +22,7 @@ const warningEntity = {
   partitionKey: 'mock-partition-key',
   rowKey: 'mock-row-key'
 }
-mockCreateWarningEntity.mockReturnValue(warningEntity)
+mockCreateRow.mockReturnValue(warningEntity)
 
 const { saveWarningEvent } = require('../../../../app/inbound/save-event/warning')
 
@@ -45,6 +45,6 @@ describe('save warning event', () => {
 
   test('creates entity warning category', async () => {
     await saveWarningEvent(event)
-    expect(mockCreateWarningEntity).toHaveBeenCalledWith('event', event.id, WARNING, event)
+    expect(mockCreateRow).toHaveBeenCalledWith('event', event.id, WARNING, event)
   })
 })
