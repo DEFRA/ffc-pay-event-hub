@@ -21,7 +21,7 @@ mockCreateRow.mockReturnValue(holdEntity)
 
 const { saveHoldEvent } = require('../../../../app/inbound/save-event/hold')
 
-const event = require('../../../mocks/hold-event')
+const event = require('../../../mocks/events/hold')
 
 describe('save hold event', () => {
   beforeEach(() => {

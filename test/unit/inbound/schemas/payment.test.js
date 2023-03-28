@@ -4,7 +4,7 @@ let event
 
 describe('payment schema', () => {
   beforeEach(() => {
-    event = JSON.parse(JSON.stringify(require('../../../mocks/payment-event').data))
+    event = JSON.parse(JSON.stringify(require('../../../mocks/events/payment').data))
   })
 
   test('should validate a valid payment event', () => {

@@ -17,7 +17,7 @@ mockGetTimestamp.mockReturnValue(mockTimestamp)
 
 const { saveBatchEvent } = require('../../../../app/inbound/save-event/batch')
 
-const event = require('../../../mocks/batch-event')
+const event = require('../../../mocks/events/batch')
 
 describe('save batch event', () => {
   beforeEach(() => {

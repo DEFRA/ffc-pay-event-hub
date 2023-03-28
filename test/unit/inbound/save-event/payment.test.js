@@ -21,7 +21,7 @@ mockCreateRow.mockReturnValue(paymentEntity)
 
 const { savePaymentEvent } = require('../../../../app/inbound/save-event/payment')
 
-const event = require('../../../mocks/payment-event')
+const event = require('../../../mocks/events/payment')
 
 describe('save payment event', () => {
   beforeEach(() => {

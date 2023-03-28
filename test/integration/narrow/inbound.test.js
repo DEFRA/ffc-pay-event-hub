@@ -27,10 +27,10 @@ beforeAll(async () => {
 
 beforeEach(() => {
   jest.clearAllMocks()
-  paymentEvent = JSON.parse(JSON.stringify(require('../../mocks/payment-event')))
-  holdEvent = JSON.parse(JSON.stringify(require('../../mocks/hold-event')))
-  batchEvent = JSON.parse(JSON.stringify(require('../../mocks/batch-event')))
-  warningEvent = JSON.parse(JSON.stringify(require('../../mocks/warning-event')))
+  paymentEvent = JSON.parse(JSON.stringify(require('../../mocks/events/payment')))
+  holdEvent = JSON.parse(JSON.stringify(require('../../mocks/events/hold')))
+  batchEvent = JSON.parse(JSON.stringify(require('../../mocks/events/batch')))
+  warningEvent = JSON.parse(JSON.stringify(require('../../mocks/events/warning')))
 })
 
 describe('inbound payment event', () => {

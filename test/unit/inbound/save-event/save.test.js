@@ -12,7 +12,7 @@ const { saveBatchEvent: mockSaveBatchEvent } = require('../../../../app/inbound/
 
 const { saveEvent } = require('../../../../app/inbound/save-event/save')
 
-const event = require('../../../mocks/event')
+const event = require('../../../mocks/events/event')
 const { HOLD_EVENT, WARNING_EVENT, PAYMENT_EVENT, BATCH_EVENT } = require('../../../../app/constants/event-types')
 
 describe('save event', () => {

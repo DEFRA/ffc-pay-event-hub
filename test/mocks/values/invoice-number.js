@@ -1,0 +1,3 @@
+module.exports = {
+  INVOICE_NUMBER: 'S1234567S1234567V001'
+}

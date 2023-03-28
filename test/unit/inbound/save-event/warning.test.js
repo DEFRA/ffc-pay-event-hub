@@ -26,7 +26,7 @@ mockCreateRow.mockReturnValue(warningEntity)
 
 const { saveWarningEvent } = require('../../../../app/inbound/save-event/warning')
 
-const event = require('../../../mocks/warning-event')
+const event = require('../../../mocks/events/warning')
 
 describe('save warning event', () => {
   beforeEach(() => {

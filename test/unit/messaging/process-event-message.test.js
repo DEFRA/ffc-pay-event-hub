@@ -6,7 +6,7 @@ const { processEvent: mockProcessEvent } = require('../../../app/inbound')
 jest.mock('../../../app/messaging/validate-event')
 const { validateEvent: mockValidateEvent } = require('../../../app/messaging/validate-event')
 
-const message = require('../../mocks/event')
+const message = require('../../mocks/events/event')
 
 const { processEventMessage } = require('../../../app/messaging/process-event-message')
 

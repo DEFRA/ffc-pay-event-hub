@@ -4,7 +4,7 @@ let event
 
 describe('batch schema', () => {
   beforeEach(() => {
-    event = JSON.parse(JSON.stringify(require('../../../mocks/batch-event').data))
+    event = JSON.parse(JSON.stringify(require('../../../mocks/events/batch').data))
   })
 
   test('should validate a valid batch event', () => {

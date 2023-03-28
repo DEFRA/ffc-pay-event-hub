@@ -7,7 +7,7 @@ const { saveEvent: mockSaveEvent } = require('../../../app/inbound/save-event')
 jest.mock('../../../app/inbound/validate-event-data')
 const { validateEventData: mockValidateEventData } = require('../../../app/inbound/validate-event-data')
 
-const event = require('../../mocks/event')
+const event = require('../../mocks/events/event')
 
 const MOCK_EVENT_TYPE = 'mock-event-type'
 

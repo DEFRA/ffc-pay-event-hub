@@ -4,7 +4,7 @@ let event
 
 describe('warning schema', () => {
   beforeEach(() => {
-    event = JSON.parse(JSON.stringify(require('../../../mocks/warning-event').data))
+    event = JSON.parse(JSON.stringify(require('../../../mocks/events/warning').data))
   })
 
   test('should validate a valid warning event', () => {
