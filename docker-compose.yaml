@@ -20,7 +20,7 @@ services:
       AZURE_STORAGE_ACCOUNT_NAME: devstoreaccount1
 
   ffc-pay-event-store-azurite:
-    image: mcr.microsoft.com/azure-storage/azurite:3.17.1
+    image: mcr.microsoft.com/azure-storage/azurite:3.23.0
     command: "azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --loose"
     labels:
       com.docker.compose.pay.role: ffc-pay-event-store-azurite
