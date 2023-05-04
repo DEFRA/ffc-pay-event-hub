@@ -7,7 +7,11 @@ const { saveEvent: mockSaveEvent } = require('../../../app/inbound/save-event')
 jest.mock('../../../app/inbound/validate-event-data')
 const { validateEventData: mockValidateEventData } = require('../../../app/inbound/validate-event-data')
 
+jest.mock('../../../app/messaging/send-alert')
+const { sendAlert: mockSendAlert } = require('../../../app/messaging/send-alert')
+
 const event = require('../../mocks/events/event')
+const { WARNING } = require('../../../app/constants/categories')
 
 const MOCK_EVENT_TYPE = 'mock-event-type'
 
@@ -32,5 +36,16 @@ describe('process event', () => {
   test('should save the event', async () => {
     await processEvent(event)
     expect(mockSaveEvent).toHaveBeenCalledWith(event, MOCK_EVENT_TYPE)
+  })
+
+  test('should send an alert if the event type is warning', async () => {
+    mockGetEventType.mockReturnValue(WARNING)
+    await processEvent(event)
+    expect(mockSendAlert).toHaveBeenCalledWith(event)
+  })
+
+  test('should not send an alert if the event type is not warning', async () => {
+    await processEvent(event)
+    expect(mockSendAlert).not.toHaveBeenCalled()
   })
 })

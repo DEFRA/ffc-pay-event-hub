@@ -1,5 +1,18 @@
 const { FRN, CORRELATION_ID, SCHEME_ID, BATCH, WARNING } = require('../../../app/constants/categories')
 
+const mockSendMessage = jest.fn()
+
+jest.mock('ffc-messaging', () => {
+  return {
+    MessageSender: jest.fn().mockImplementation(() => {
+      return {
+        sendMessage: mockSendMessage,
+        closeConnection: jest.fn()
+      }
+    })
+  }
+})
+
 const mockTableClient = {
   createTable: jest.fn(),
   createEntity: jest.fn()
@@ -77,6 +90,11 @@ describe('inbound payment event', () => {
       category: BATCH
     }))
   })
+
+  test('does not send event for payment', async () => {
+    await processEvent(paymentEvent)
+    expect(mockSendMessage).not.toHaveBeenCalled()
+  })
 })
 
 describe('inbound hold event', () => {
@@ -100,6 +118,11 @@ describe('inbound hold event', () => {
       category: SCHEME_ID
     }))
   })
+
+  test('does not send alert for hold', async () => {
+    await processEvent(holdEvent)
+    expect(mockSendMessage).not.toHaveBeenCalled()
+  })
 })
 
 describe('inbound batch event', () => {
@@ -115,6 +138,11 @@ describe('inbound batch event', () => {
       category: BATCH
     }))
   })
+
+  test('does not send alert for batch', async () => {
+    await processEvent(batchEvent)
+    expect(mockSendMessage).not.toHaveBeenCalled()
+  })
 })
 
 describe('inbound warning event', () => {
@@ -129,5 +157,10 @@ describe('inbound warning event', () => {
       partitionKey: 'event',
       category: WARNING
     }))
+  })
+
+  test('sends alert for warning', async () => {
+    await processEvent(warningEvent)
+    expect(mockSendMessage.mock.calls[0][0].body).toBe(warningEvent)
   })
 })
