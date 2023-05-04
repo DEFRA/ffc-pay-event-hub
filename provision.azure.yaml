@@ -1,3 +1,4 @@
 resources:
   topics:
     - name: events
+    - name: alert
