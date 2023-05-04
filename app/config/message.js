@@ -13,6 +13,9 @@ const schema = Joi.object({
     address: Joi.string(),
     topic: Joi.string(),
     type: Joi.string().default('subscription')
+  },
+  alertTopic: {
+    address: Joi.string()
   }
 })
 
@@ -28,6 +31,9 @@ const config = {
     address: process.env.EVENTS_SUBSCRIPTION_ADDRESS,
     topic: process.env.EVENTS_TOPIC_ADDRESS,
     type: 'subscription'
+  },
+  alertTopic: {
+    address: process.env.ALERT_TOPIC_ADDRESS
   }
 }
 
@@ -40,7 +46,9 @@ if (result.error) {
 }
 
 const eventsSubscription = { ...result.value.messageQueue, ...result.value.eventsSubscription }
+const alertTopic = { ...result.value.messageQueue, ...result.value.alertTopic }
 
 module.exports = {
-  eventsSubscription
+  eventsSubscription,
+  alertTopic
 }
