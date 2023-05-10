@@ -1,5 +1,20 @@
+const mockSendMessage = jest.fn()
+
+jest.mock('ffc-messaging', () => {
+  return {
+    MessageSender: jest.fn().mockImplementation(() => {
+      return {
+        sendMessage: mockSendMessage,
+        closeConnection: jest.fn()
+      }
+    })
+  }
+})
+
 const { odata } = require('@azure/data-tables')
+
 const { PAYMENT_EVENT, HOLD_EVENT, BATCH_EVENT, WARNING_EVENT } = require('../../../app/constants/event-types')
+
 const { processEventMessage } = require('../../../app/messaging/process-event-message')
 const { initialiseTables, getClient } = require('../../../app/storage')
 
@@ -122,5 +137,10 @@ describe('process event message', () => {
     })
     const total = await countAsyncIterator(results)
     expect(total).toBe(1)
+  })
+
+  test('sends alert for warning', async () => {
+    await processEventMessage({ body: warningEvent }, receiver)
+    expect(mockSendMessage).toHaveBeenCalled()
   })
 })

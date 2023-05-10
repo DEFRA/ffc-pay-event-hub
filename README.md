@@ -8,6 +8,7 @@ This service is part of the [Payment Hub](https://github.com/DEFRA/ffc-pay-core)
 flowchart LR
 ffc-pay-event-hub(Kubernetes - ffc-pay-event-hub)
 topic-events[Azure Service Bus Topic - ffc-pay-events]
+topic-alert[Azure Service Bus Topic - ffc-pay-alert]
 storage-payments[Azure Table Storage - payments]
 storage-batches[Azure Table Storage - batches]
 storage-holds[Azure Table Storage - holds]
@@ -17,6 +18,7 @@ ffc-pay-event-hub ==> storage-payments
 ffc-pay-event-hub ==> storage-batches
 ffc-pay-event-hub ==> storage-holds
 ffc-pay-event-hub ==> storage-warnings
+ffc-pay-event-hub ==> topic-alert
 ```
 
 ## Prerequisites
@@ -45,6 +47,7 @@ This service publishes responses as messages to Azure Service Bus topics.
 | `MESSAGE_QUEUE_SUFFIX` | Developer initials, optional, will be automatically added to topic names, e.g. `-jw `|
 | `EVENT_TOPIC_ADDRESS` | Azure Service Bus topic name for events, e.g. `ffc-pay-events` |
 | `EVENT_SUBSCRIPTION_ADDRESS` | Azure Service Bus subscription name for events, e.g. `ffc-pay-event-hub` |
+| `ALERT_TOPIC_ADDRESS` | Azure Service Bus topic name for events, e.g. `ffc-pay-alert` |
 
 ##### Message schemas
 
