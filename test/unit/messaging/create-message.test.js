@@ -1,7 +1,7 @@
+const event = require('../../mocks/events/event')
+
 const { ALERT } = require('../../../app/constants/message-types')
 const { SOURCE } = require('../../../app/constants/source')
-
-const event = require('../../mocks/events/event')
 
 const { createMessage } = require('../../../app/messaging/create-message')
 
