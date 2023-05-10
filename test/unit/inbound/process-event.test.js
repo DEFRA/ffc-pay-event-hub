@@ -11,11 +11,12 @@ jest.mock('../../../app/messaging/send-alert')
 const { sendAlert: mockSendAlert } = require('../../../app/messaging/send-alert')
 
 const event = require('../../mocks/events/event')
+
 const { WARNING } = require('../../../app/constants/categories')
 
-const MOCK_EVENT_TYPE = 'mock-event-type'
-
 const { processEvent } = require('../../../app/inbound/process-event')
+
+const MOCK_EVENT_TYPE = 'mock-event-type'
 
 describe('process event', () => {
   beforeEach(() => {
