@@ -1,5 +1,5 @@
-const { SOURCE } = require('../constants/source')
 const { ALERT } = require('../constants/message-types')
+const { SOURCE } = require('../constants/source')
 
 const createMessage = (body) => {
   return {

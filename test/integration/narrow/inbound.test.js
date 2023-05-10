@@ -1,5 +1,3 @@
-const { FRN, CORRELATION_ID, SCHEME_ID, BATCH, WARNING } = require('../../../app/constants/categories')
-
 const mockSendMessage = jest.fn()
 
 jest.mock('ffc-messaging', () => {
@@ -24,6 +22,8 @@ jest.mock('@azure/data-tables', () => {
     }
   }
 })
+
+const { FRN, CORRELATION_ID, SCHEME_ID, BATCH, WARNING } = require('../../../app/constants/categories')
 
 const { initialiseTables } = require('../../../app/storage')
 
@@ -91,7 +91,7 @@ describe('inbound payment event', () => {
     }))
   })
 
-  test('does not send event for payment', async () => {
+  test('does not send event for payment event', async () => {
     await processEvent(paymentEvent)
     expect(mockSendMessage).not.toHaveBeenCalled()
   })
@@ -119,7 +119,7 @@ describe('inbound hold event', () => {
     }))
   })
 
-  test('does not send alert for hold', async () => {
+  test('does not send alert for hold event', async () => {
     await processEvent(holdEvent)
     expect(mockSendMessage).not.toHaveBeenCalled()
   })
@@ -139,7 +139,7 @@ describe('inbound batch event', () => {
     }))
   })
 
-  test('does not send alert for batch', async () => {
+  test('does not send alert for batch event', async () => {
     await processEvent(batchEvent)
     expect(mockSendMessage).not.toHaveBeenCalled()
   })

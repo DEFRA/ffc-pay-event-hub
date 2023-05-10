@@ -1,6 +1,6 @@
-const { SOURCE } = require('../../../app/constants/source')
-const { ALERT } = require('../../../app/constants/message-types')
 const { BODY } = require('./body')
+const { ALERT } = require('../../../app/constants/message-types')
+const { SOURCE } = require('../../../app/constants/source')
 
 module.exports = {
   MESSAGE: {

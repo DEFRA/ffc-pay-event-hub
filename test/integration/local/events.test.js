@@ -12,7 +12,9 @@ jest.mock('ffc-messaging', () => {
 })
 
 const { odata } = require('@azure/data-tables')
+
 const { PAYMENT_EVENT, HOLD_EVENT, BATCH_EVENT, WARNING_EVENT } = require('../../../app/constants/event-types')
+
 const { processEventMessage } = require('../../../app/messaging/process-event-message')
 const { initialiseTables, getClient } = require('../../../app/storage')
 
