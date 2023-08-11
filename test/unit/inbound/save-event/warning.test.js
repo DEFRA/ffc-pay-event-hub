@@ -13,6 +13,9 @@ mockGetClient.mockReturnValue(mockClient)
 jest.mock('../../../../app/inbound/save-event/create-row')
 const { createRow: mockCreateRow } = require('../../../../app/inbound/save-event/create-row')
 
+jest.mock('../../../../app/inbound/save-event/create-if-not-exists')
+const { createIfNotExists: mockCreateIfNotExists } = require('../../../../app/inbound/save-event/create-if-not-exists')
+
 jest.mock('../../../../app/inbound/save-event/get-warning-type')
 const { getWarningType: mockGetWarningType } = require('../../../../app/inbound/save-event/get-warning-type')
 
@@ -40,7 +43,7 @@ describe('save warning event', () => {
 
   test('creates one entity', async () => {
     await saveWarningEvent(event)
-    expect(mockCreateEntity).toHaveBeenCalledTimes(1)
+    expect(mockCreateIfNotExists).toHaveBeenCalledTimes(1)
   })
 
   test('creates entity warning category', async () => {

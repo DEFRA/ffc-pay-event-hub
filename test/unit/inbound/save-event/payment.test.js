@@ -4,6 +4,9 @@ const { PAYMENT_EVENT } = require('../../../../app/constants/event-types')
 jest.mock('../../../../app/storage')
 const { getClient: mockGetClient } = require('../../../../app/storage')
 
+jest.mock('../../../../app/inbound/save-event/create-if-not-exists')
+const { createIfNotExists: mockCreateIfNotExists } = require('../../../../app/inbound/save-event/create-if-not-exists')
+
 const mockCreateEntity = jest.fn()
 const mockClient = {
   createEntity: mockCreateEntity
@@ -35,13 +38,13 @@ describe('save payment event', () => {
 
   test('creates three entities if no batch', async () => {
     await savePaymentEvent(event)
-    expect(mockCreateEntity).toHaveBeenCalledTimes(3)
+    expect(mockCreateIfNotExists).toHaveBeenCalledTimes(3)
   })
 
   test('creates four entities if batch', async () => {
     event.data.batch = 'mock-batch'
     await savePaymentEvent(event)
-    expect(mockCreateEntity).toHaveBeenCalledTimes(4)
+    expect(mockCreateIfNotExists).toHaveBeenCalledTimes(4)
   })
 
   test('creates entity frn category', async () => {
