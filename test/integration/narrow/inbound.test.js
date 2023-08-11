@@ -11,15 +11,21 @@ jest.mock('ffc-messaging', () => {
   }
 })
 
+const mockListEntities = jest.fn().mockImplementation(() => {
+  return []
+})
+
 const mockTableClient = {
   createTable: jest.fn(),
-  createEntity: jest.fn()
+  createEntity: jest.fn(),
+  listEntities: mockListEntities
 }
 jest.mock('@azure/data-tables', () => {
   return {
     TableClient: {
       fromConnectionString: jest.fn().mockReturnValue(mockTableClient)
-    }
+    },
+    odata: jest.fn()
   }
 })
 
