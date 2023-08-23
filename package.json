@@ -15,7 +15,8 @@
   },
   "author": "Defra",
   "contributors": [
-    "John Watson <john.watson2@rpa.gov.uk>"
+    "John Watson <john.watson2@rpa.gov.uk>",
+    "Sam Plackett <samuel.plackett@eviden.com>"
   ],
   "license": "OGL-UK-3.0",
   "dependencies": {
