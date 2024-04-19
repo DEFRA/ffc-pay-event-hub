@@ -17,7 +17,7 @@ const mockListEntities = jest.fn().mockImplementation(() => {
 
 const mockTableClient = {
   createTable: jest.fn(),
-  createEntity: jest.fn(),
+  upsertEntity: jest.fn(),
   listEntities: mockListEntities
 }
 jest.mock('@azure/data-tables', () => {
@@ -55,46 +55,46 @@ beforeEach(() => {
 describe('inbound payment event', () => {
   test('saves three payment entities if no batch', async () => {
     await processEvent(paymentEvent)
-    expect(mockTableClient.createEntity).toHaveBeenCalledTimes(3)
+    expect(mockTableClient.upsertEntity).toHaveBeenCalledTimes(3)
   })
 
   test('saves four payment entities if batch', async () => {
     paymentEvent.data.batch = 'mock-batch'
     await processEvent(paymentEvent)
-    expect(mockTableClient.createEntity).toHaveBeenCalledTimes(4)
+    expect(mockTableClient.upsertEntity).toHaveBeenCalledTimes(4)
   })
 
   test('saves FRN payment entity', async () => {
     await processEvent(paymentEvent)
-    expect(mockTableClient.createEntity).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockTableClient.upsertEntity).toHaveBeenCalledWith(expect.objectContaining({
       partitionKey: paymentEvent.data.frn.toString(),
       category: FRN
-    }))
+    }), 'Merge')
   })
 
   test('saves correlation id payment entity', async () => {
     await processEvent(paymentEvent)
-    expect(mockTableClient.createEntity).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockTableClient.upsertEntity).toHaveBeenCalledWith(expect.objectContaining({
       partitionKey: paymentEvent.data.correlationId,
       category: CORRELATION_ID
-    }))
+    }), 'Merge')
   })
 
   test('saves scheme id payment entity', async () => {
     await processEvent(paymentEvent)
-    expect(mockTableClient.createEntity).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockTableClient.upsertEntity).toHaveBeenCalledWith(expect.objectContaining({
       partitionKey: paymentEvent.data.schemeId.toString(),
       category: SCHEME_ID
-    }))
+    }), 'Merge')
   })
 
   test('saves batch payment entity if batch', async () => {
     paymentEvent.data.batch = 'mock-batch'
     await processEvent(paymentEvent)
-    expect(mockTableClient.createEntity).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockTableClient.upsertEntity).toHaveBeenCalledWith(expect.objectContaining({
       partitionKey: paymentEvent.data.batch,
       category: BATCH
-    }))
+    }), 'Merge')
   })
 
   test('does not send event for payment event', async () => {
@@ -106,23 +106,23 @@ describe('inbound payment event', () => {
 describe('inbound hold event', () => {
   test('saves three hold entities', async () => {
     await processEvent(holdEvent)
-    expect(mockTableClient.createEntity).toHaveBeenCalledTimes(3)
+    expect(mockTableClient.upsertEntity).toHaveBeenCalledTimes(3)
   })
 
   test('saves FRN hold entity', async () => {
     await processEvent(holdEvent)
-    expect(mockTableClient.createEntity).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockTableClient.upsertEntity).toHaveBeenCalledWith(expect.objectContaining({
       partitionKey: holdEvent.data.frn.toString(),
       category: FRN
-    }))
+    }), 'Merge')
   })
 
   test('saves scheme id hold entity', async () => {
     await processEvent(holdEvent)
-    expect(mockTableClient.createEntity).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockTableClient.upsertEntity).toHaveBeenCalledWith(expect.objectContaining({
       partitionKey: holdEvent.data.schemeId.toString(),
       category: SCHEME_ID
-    }))
+    }), 'Merge')
   })
 
   test('does not send alert for hold event', async () => {
@@ -134,15 +134,15 @@ describe('inbound hold event', () => {
 describe('inbound batch event', () => {
   test('saves one batch entity', async () => {
     await processEvent(batchEvent)
-    expect(mockTableClient.createEntity).toHaveBeenCalledTimes(1)
+    expect(mockTableClient.upsertEntity).toHaveBeenCalledTimes(1)
   })
 
   test('saves batch batch entity', async () => {
     await processEvent(batchEvent)
-    expect(mockTableClient.createEntity).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockTableClient.upsertEntity).toHaveBeenCalledWith(expect.objectContaining({
       partitionKey: batchEvent.data.filename,
       category: BATCH
-    }))
+    }), 'Merge')
   })
 
   test('does not send alert for batch event', async () => {
@@ -154,15 +154,15 @@ describe('inbound batch event', () => {
 describe('inbound warning event', () => {
   test('saves one warning entity', async () => {
     await processEvent(warningEvent)
-    expect(mockTableClient.createEntity).toHaveBeenCalledTimes(1)
+    expect(mockTableClient.upsertEntity).toHaveBeenCalledTimes(1)
   })
 
   test('saves warning entity', async () => {
     await processEvent(warningEvent)
-    expect(mockTableClient.createEntity).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockTableClient.upsertEntity).toHaveBeenCalledWith(expect.objectContaining({
       partitionKey: 'event',
       category: WARNING
-    }))
+    }), 'Merge')
   })
 
   test('sends alert for warning', async () => {

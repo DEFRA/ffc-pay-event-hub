@@ -4,12 +4,9 @@ const { HOLD_EVENT } = require('../../../../app/constants/event-types')
 jest.mock('../../../../app/storage')
 const { getClient: mockGetClient } = require('../../../../app/storage')
 
-jest.mock('../../../../app/inbound/save-event/create-if-not-exists')
-const { createIfNotExists: mockCreateIfNotExists } = require('../../../../app/inbound/save-event/create-if-not-exists')
-
-const mockCreateEntity = jest.fn()
+const mockUpsertEntity = jest.fn()
 const mockClient = {
-  createEntity: mockCreateEntity
+  upsertEntity: mockUpsertEntity
 }
 mockGetClient.mockReturnValue(mockClient)
 
@@ -38,7 +35,7 @@ describe('save hold event', () => {
 
   test('creates three entities', async () => {
     await saveHoldEvent(event)
-    expect(mockCreateIfNotExists).toHaveBeenCalledTimes(3)
+    expect(mockUpsertEntity).toHaveBeenCalledTimes(3)
   })
 
   test('creates entity frn category', async () => {

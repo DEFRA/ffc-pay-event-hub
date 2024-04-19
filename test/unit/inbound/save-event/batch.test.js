@@ -3,12 +3,9 @@ const { BATCH_EVENT } = require('../../../../app/constants/event-types')
 jest.mock('../../../../app/storage')
 const { getClient: mockGetClient } = require('../../../../app/storage')
 
-jest.mock('../../../../app/inbound/save-event/create-if-not-exists')
-const { createIfNotExists: mockCreateIfNotExists } = require('../../../../app/inbound/save-event/create-if-not-exists')
-
-const mockCreateEntity = jest.fn()
+const mockUpsertEntity = jest.fn()
 const mockClient = {
-  createEntity: mockCreateEntity
+  upsertEntity: mockUpsertEntity
 }
 mockGetClient.mockReturnValue(mockClient)
 
@@ -34,17 +31,17 @@ describe('save batch event', () => {
 
   test('creates one entity', async () => {
     await saveBatchEvent(event)
-    expect(mockCreateIfNotExists).toHaveBeenCalledTimes(1)
+    expect(mockUpsertEntity).toHaveBeenCalledTimes(1)
   })
 
   test('creates entity with filename as partition key', async () => {
     await saveBatchEvent(event)
-    expect(mockCreateIfNotExists).toHaveBeenCalledWith(mockClient, {
+    expect(mockUpsertEntity).toHaveBeenCalledWith({
       partitionKey: event.data.filename,
       rowKey: mockTimestamp.toString(),
       category: BATCH_EVENT,
       ...event,
       data: JSON.stringify(event.data)
-    })
+    }, 'Merge')
   })
 })

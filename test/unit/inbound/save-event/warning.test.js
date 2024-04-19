@@ -4,17 +4,14 @@ const { WARNING_EVENT } = require('../../../../app/constants/event-types')
 jest.mock('../../../../app/storage')
 const { getClient: mockGetClient } = require('../../../../app/storage')
 
-const mockCreateEntity = jest.fn()
+const mockUpsertEntity = jest.fn()
 const mockClient = {
-  createEntity: mockCreateEntity
+  upsertEntity: mockUpsertEntity
 }
 mockGetClient.mockReturnValue(mockClient)
 
 jest.mock('../../../../app/inbound/save-event/create-row')
 const { createRow: mockCreateRow } = require('../../../../app/inbound/save-event/create-row')
-
-jest.mock('../../../../app/inbound/save-event/create-if-not-exists')
-const { createIfNotExists: mockCreateIfNotExists } = require('../../../../app/inbound/save-event/create-if-not-exists')
 
 jest.mock('../../../../app/inbound/save-event/get-warning-type')
 const { getWarningType: mockGetWarningType } = require('../../../../app/inbound/save-event/get-warning-type')
@@ -43,7 +40,7 @@ describe('save warning event', () => {
 
   test('creates one entity', async () => {
     await saveWarningEvent(event)
-    expect(mockCreateIfNotExists).toHaveBeenCalledTimes(1)
+    expect(mockUpsertEntity).toHaveBeenCalledTimes(1)
   })
 
   test('creates entity warning category', async () => {
