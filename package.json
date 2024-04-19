@@ -1,6 +1,6 @@
 {
   "name": "ffc-pay-event-hub",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Event hub",
   "homepage": "https://github.com/DEFRA/ffc-pay-event-hub",
   "main": "app/index.js",
