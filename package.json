@@ -1,6 +1,6 @@
 {
   "name": "ffc-pay-event-hub",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "description": "Event hub",
   "homepage": "https://github.com/DEFRA/ffc-pay-event-hub",
   "main": "app/index.js",
@@ -22,7 +22,7 @@
   "dependencies": {
     "@azure/data-tables": "13.2.2",
     "@azure/identity": "4.3.0",
-    "applicationinsights": "2.7.0",
+    "applicationinsights": "3.3.0",
     "ffc-messaging": "2.9.1",
     "joi": "17.7.1",
     "log-timestamp": "0.3.0"
