@@ -7,7 +7,8 @@ const schema = Joi.object({
   paymentTable: Joi.string().default('payments'),
   holdTable: Joi.string().default('holds'),
   warningTable: Joi.string().default('warnings'),
-  batchTable: Joi.string().default('batches')
+  batchTable: Joi.string().default('batches'),
+  managedIdentityClientId: Joi.string().optional()
 })
 
 const config = {
@@ -17,7 +18,8 @@ const config = {
   paymentTable: process.env.AZURE_STORAGE_PAYMENT_REQUEST_TABLE,
   holdTable: process.env.AZURE_STORAGE_HOLD_TABLE,
   warningTable: process.env.AZURE_STORAGE_WARNING_TABLE,
-  batchTable: process.env.AZURE_STORAGE_BATCH_TABLE
+  batchTable: process.env.AZURE_STORAGE_BATCH_TABLE,
+  managedIdentityClientId: process.env.AZURE_CLIENT_ID
 }
 
 const result = schema.validate(config, {
