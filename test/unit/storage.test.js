@@ -4,13 +4,8 @@ const { PAYMENT_EVENT, BATCH_EVENT, HOLD_EVENT, WARNING_EVENT } = require('../..
 const mockTableClient = {
   createTable: jest.fn()
 }
-jest.mock('@azure/data-tables', () => {
-  return {
-    TableClient: {
-      fromConnectionString: jest.fn().mockReturnValue(mockTableClient)
-    }
-  }
-})
+
+jest.mock('@azure/data-tables')
 jest.mock('@azure/identity')
 
 const { initialiseTables, getClient } = require('../../app/storage')
@@ -20,6 +15,13 @@ const { DefaultAzureCredential } = require('@azure/identity')
 const storageConfig = require('../../app/config/storage')
 
 describe('storage', () => {
+  jest.mock('@azure/data-tables', () => {
+    return {
+      TableClient: {
+        fromConnectionString: jest.fn().mockReturnValue(mockTableClient)
+      }
+    }
+  })
   beforeEach(() => {
     jest.clearAllMocks()
   })
