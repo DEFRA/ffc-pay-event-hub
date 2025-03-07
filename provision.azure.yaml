@@ -1,4 +1,9 @@
 resources:
+  identity: pay-event-hub
   topics:
-    - name: events
-    - name: alert
+    - name: ffc-pay-events
+      role: receiver
+      subscriptions:
+        - name: ffc-pay-event-hub
+    - name: ffc-pay-alert
+      role: sender

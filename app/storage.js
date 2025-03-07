@@ -3,30 +3,35 @@ const { TableClient } = require('@azure/data-tables')
 const { storageConfig } = require('./config')
 const { PAYMENT_EVENT, HOLD_EVENT, WARNING_EVENT, BATCH_EVENT } = require('./constants/event-types')
 
-let paymentClient
-let holdClient
-let warningClient
-let batchClient
+let paymentClient, holdClient, warningClient, batchClient
 
 const initialiseTables = async () => {
-  if (storageConfig.useConnectionString) {
-    console.log('Using connection string for Table Client')
-    paymentClient = TableClient.fromConnectionString(storageConfig.connectionString, storageConfig.paymentTable, { allowInsecureConnection: true })
-    holdClient = TableClient.fromConnectionString(storageConfig.connectionString, storageConfig.holdTable, { allowInsecureConnection: true })
-    warningClient = TableClient.fromConnectionString(storageConfig.connectionString, storageConfig.warningTable, { allowInsecureConnection: true })
-    batchClient = TableClient.fromConnectionString(storageConfig.connectionString, storageConfig.batchTable, { allowInsecureConnection: true })
-  } else {
-    console.log('Using DefaultAzureCredential for Table Client')
-    paymentClient = new TableClient(`https://${storageConfig.account}.table.core.windows.net`, storageConfig.paymentTable, new DefaultAzureCredential())
-    holdClient = new TableClient(`https://${storageConfig.account}.table.core.windows.net`, storageConfig.holdTable, new DefaultAzureCredential())
-    warningClient = new TableClient(`https://${storageConfig.account}.table.core.windows.net`, storageConfig.warningTable, new DefaultAzureCredential())
-    batchClient = new TableClient(`https://${storageConfig.account}.table.core.windows.net`, storageConfig.batchTable, new DefaultAzureCredential())
+  const createTableClient = (tableName) => {
+    if (storageConfig.useConnectionString) {
+      return TableClient.fromConnectionString(storageConfig.connectionString, tableName, { allowInsecureConnection: true })
+    } else {
+      return new TableClient(
+        `https://${storageConfig.account}.table.core.windows.net`,
+        tableName,
+        new DefaultAzureCredential({ managedIdentityClientId: storageConfig.managedIdentityClientId })
+      )
+    }
   }
+
+  console.log(storageConfig.useConnectionString ? 'Using connection string for Table Client' : 'Using DefaultAzureCredential for Table Client')
+
+  paymentClient = createTableClient(storageConfig.paymentTable)
+  holdClient = createTableClient(storageConfig.holdTable)
+  warningClient = createTableClient(storageConfig.warningTable)
+  batchClient = createTableClient(storageConfig.batchTable)
+
   console.log('Making sure tables exist')
-  await paymentClient.createTable(storageConfig.paymentTable)
-  await holdClient.createTable(storageConfig.holdTable)
-  await warningClient.createTable(storageConfig.warningTable)
-  await batchClient.createTable(storageConfig.batchTable)
+  await Promise.all([
+    paymentClient.createTable(storageConfig.paymentTable),
+    holdClient.createTable(storageConfig.holdTable),
+    warningClient.createTable(storageConfig.warningTable),
+    batchClient.createTable(storageConfig.batchTable)
+  ])
 }
 
 const getClient = (eventType) => {
