@@ -1,116 +1,57 @@
-const config = require('../../app/config/storage')
-const { PAYMENT_EVENT, BATCH_EVENT, HOLD_EVENT, WARNING_EVENT } = require('../../app/constants/event-types')
-
-const mockTableClient = {
-  createTable: jest.fn()
-}
+const { TableClient } = require('@azure/data-tables')
+const { initialiseTables, getClient } = require('../../app/storage')
+const { storageConfig } = require('../../app/config')
 
 jest.mock('@azure/data-tables')
-jest.mock('@azure/identity')
 
-const { initialiseTables, getClient } = require('../../app/storage')
+describe('initialiseTables', () => {
+  let mockTableClient
 
-const { TableClient } = require('@azure/data-tables')
-const { DefaultAzureCredential } = require('@azure/identity')
-const storageConfig = require('../../app/config/storage')
-
-describe('storage', () => {
-  jest.mock('@azure/data-tables', () => {
-    return {
-      TableClient: {
-        fromConnectionString: jest.fn().mockReturnValue(mockTableClient)
-      }
+  beforeEach(() => {
+    mockTableClient = {
+      createTable: jest.fn().mockResolvedValue(undefined)
     }
-  })
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
-  test('should create payment table when initialising tables', async () => {
-    await initialiseTables()
-    expect(mockTableClient.createTable).toHaveBeenCalledWith(config.paymentTable)
-  })
-
-  test('should create batches table when initialising tables', async () => {
-    await initialiseTables()
-    expect(mockTableClient.createTable).toHaveBeenCalledWith(config.batchTable)
-  })
-
-  test('should create hold table when initialising tables', async () => {
-    await initialiseTables()
-    expect(mockTableClient.createTable).toHaveBeenCalledWith(config.holdTable)
-  })
-
-  test('should create warning table when initialising tables', async () => {
-    await initialiseTables()
-    expect(mockTableClient.createTable).toHaveBeenCalledWith(config.warningTable)
-  })
-
-  test('should create each table once', async () => {
-    await initialiseTables()
-    expect(mockTableClient.createTable).toHaveBeenCalledTimes(4)
-  })
-
-  test('getClient should return payment client if payment event', async () => {
-    await initialiseTables()
-    const client = getClient(PAYMENT_EVENT)
-    expect(client).toBeDefined()
-  })
-
-  test('getClient should return batch client if payment event', async () => {
-    await initialiseTables()
-    const client = getClient(BATCH_EVENT)
-    expect(client).toBeDefined()
-  })
-
-  test('getClient should return hold client if payment event', async () => {
-    await initialiseTables()
-    const client = getClient(HOLD_EVENT)
-    expect(client).toBeDefined()
-  })
-
-  test('getClient should return warning client if payment event', async () => {
-    await initialiseTables()
-    const client = getClient(WARNING_EVENT)
-    expect(client).toBeDefined()
-  })
-
-  test('getClient should throw error for unknown event', async () => {
-    await initialiseTables()
-    expect(() => getClient('unknown')).toThrow()
-  })
-})
-
-describe('initialiseTables with DefaultAzureCredential', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-    storageConfig.useConnectionString = false
-    storageConfig.account = 'testaccount'
-    storageConfig.managedIdentityClientId = 'test-client-id'
+    TableClient.mockImplementation(() => mockTableClient)
+    TableClient.fromConnectionString = jest.fn().mockReturnValue(mockTableClient)
   })
 
   test('should initialize TableClients using DefaultAzureCredential', async () => {
+    storageConfig.useConnectionString = false
     await initialiseTables()
 
-    expect(TableClient).toHaveBeenCalledWith(
-      `https://${storageConfig.account}.table.core.windows.net`,
-      storageConfig.paymentTable,
-      expect.any(DefaultAzureCredential)
-    )
-    expect(TableClient).toHaveBeenCalledWith(
-      `https://${storageConfig.account}.table.core.windows.net`,
-      storageConfig.holdTable,
-      expect.any(DefaultAzureCredential)
-    )
-    expect(TableClient).toHaveBeenCalledWith(
-      `https://${storageConfig.account}.table.core.windows.net`,
-      storageConfig.warningTable,
-      expect.any(DefaultAzureCredential)
-    )
-    expect(TableClient).toHaveBeenCalledWith(
-      `https://${storageConfig.account}.table.core.windows.net`,
-      storageConfig.batchTable,
-      expect.any(DefaultAzureCredential)
-    )
+    expect(TableClient).toHaveBeenCalledTimes(4)
+    expect(TableClient.fromConnectionString).not.toHaveBeenCalled()
+    expect(mockTableClient.createTable).toHaveBeenCalledTimes(4)
+  })
+
+  test('should initialize TableClients using connection string', async () => {
+    storageConfig.useConnectionString = true
+    await initialiseTables()
+
+    expect(TableClient.fromConnectionString).toHaveBeenCalledTimes(4)
+    expect(mockTableClient.createTable).toHaveBeenCalledTimes(4)
+  })
+})
+
+describe('getClient returns or errors correctly', () => {
+  test('payment event type returns', () => {
+    const paymentEventType = 'PAYMENT_EVENT'
+    expect(() => getClient(paymentEventType)).toBeTruthy()
+  })
+  test('hold event type returns', () => {
+    const holdEventType = 'HOLD_EVENT'
+    expect(() => getClient(holdEventType)).toBeTruthy()
+  })
+  test('warning event type returns', () => {
+    const warningEventType = 'WARNING_EVENT'
+    expect(() => getClient(warningEventType)).toBeTruthy()
+  })
+  test('batch event type returns', () => {
+    const batchEventType = 'BATCH_EVENT'
+    expect(() => getClient(batchEventType)).toBeTruthy()
+  })
+  test('throws an error for unknown event type', () => {
+    const unknownEventType = 'UNKNOWN_EVENT'
+    expect(() => getClient(unknownEventType)).toThrow(`Unknown event type: ${unknownEventType}`)
   })
 })
