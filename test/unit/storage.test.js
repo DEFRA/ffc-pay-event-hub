@@ -75,25 +75,13 @@ describe('storage', () => {
   })
 })
 
-describe('BlobServiceClient initialization', () => {
+describe('TabelClient initialization', () => {
   let consoleLogSpy
   let config
-  let BlobServiceClient
   let DefaultAzureCredential
+  let TableClient
 
   beforeAll(() => {
-    jest.doMock('@azure/storage-blob', () => {
-      const getContainerClientMock = jest.fn()
-      const fromConnectionStringMock = jest.fn().mockReturnValue({
-        getContainerClient: getContainerClientMock
-      })
-      const BlobServiceClientMock = jest.fn().mockImplementation(() => ({
-        getContainerClient: getContainerClientMock
-      }))
-      BlobServiceClientMock.fromConnectionString = fromConnectionStringMock
-      return { BlobServiceClient: BlobServiceClientMock }
-    })
-
     jest.doMock('@azure/identity', () => ({
       DefaultAzureCredential: jest.fn().mockImplementation((options) => ({
         type: 'DefaultAzureCredential',
@@ -107,8 +95,8 @@ describe('BlobServiceClient initialization', () => {
     jest.clearAllMocks()
 
     config = require('../../app/config/storage')
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    ({ BlobServiceClient } = require('@azure/storage-blob'));
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
+    ({ TableClient } = require('@azure/data-tables'))
     ({ DefaultAzureCredential } = require('@azure/identity'))
   })
 
@@ -124,7 +112,7 @@ describe('BlobServiceClient initialization', () => {
     require('../../app/storage')
 
     expect(consoleLogSpy).toHaveBeenCalledWith('Using connection string for Table Client')
-    expect(BlobServiceClient.fromConnectionString).toHaveBeenCalledWith(config.connectionStr)
+    expect(TableClient.fromConnectionString).toHaveBeenCalledWith(config.connectionStr)
   })
 
   test('should use DefaultAzureCredential when config.useConnectionStr is false', () => {
@@ -138,7 +126,7 @@ describe('BlobServiceClient initialization', () => {
 
     expect(consoleLogSpy).toHaveBeenCalledWith('Using DefaultAzureCredential for Table Client')
     expect(DefaultAzureCredential).toHaveBeenCalledWith({ managedIdentityClientId: config.managedIdentityClientId })
-    expect(BlobServiceClient).toHaveBeenCalledWith(expectedUri,
+    expect(TableClient).toHaveBeenCalledWith(expectedUri,
       expect.objectContaining({
         type: 'DefaultAzureCredential',
         options: { managedIdentityClientId: config.managedIdentityClientId }
