@@ -96,8 +96,9 @@ describe('TabelClient initialization', () => {
 
     config = require('../../app/config/storage')
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
-    ({ TableClient } = require('@azure/data-tables'))
-    ({ DefaultAzureCredential } = require('@azure/identity'))
+
+    TableClient = require('@azure/data-tables')
+    DefaultAzureCredential = require('@azure/identity')
   })
 
   afterEach(() => {
