@@ -110,7 +110,7 @@ describe('TabelClient initialization', () => {
     config.useConnectionStr = true
     config.connectionStr = 'fake-connection-string'
 
-    require('../../app/storage')
+    require('../../app/storage').initialiseTables()
 
     expect(consoleLogSpy).toHaveBeenCalledWith('Using connection string for Table Client')
     expect(TableClient.fromConnectionString).toHaveBeenCalledWith(config.connectionStr)
@@ -121,7 +121,7 @@ describe('TabelClient initialization', () => {
     config.storageAccount = 'fakeaccount'
     config.managedIdentityClientId = 'fake-managed-id'
 
-    require('../../app/storage')
+    require('../../app/storage').initialiseTables()
 
     const expectedUri = `https://${config.storageAccount}.blob.core.windows.net`
 
