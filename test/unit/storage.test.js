@@ -15,6 +15,10 @@ jest.mock('@azure/identity')
 
 const { initialiseTables, getClient } = require('../../app/storage')
 
+const { TableClient } = require('@azure/data-tables')
+const { DefaultAzureCredential } = require('@azure/identity')
+const storageConfig = require('../../app/config/storage')
+
 describe('storage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -75,63 +79,36 @@ describe('storage', () => {
   })
 })
 
-describe('TabelClient initialization', () => {
-  let consoleLogSpy
-  let config
-  let DefaultAzureCredential
-  let TableClient
-
-  beforeAll(() => {
-    jest.doMock('@azure/identity', () => ({
-      DefaultAzureCredential: jest.fn().mockImplementation((options) => ({
-        type: 'DefaultAzureCredential',
-        options
-      }))
-    }))
-  })
-
+describe('initialiseTables with DefaultAzureCredential', () => {
   beforeEach(() => {
-    jest.resetModules()
     jest.clearAllMocks()
-
-    config = require('../../app/config/storage')
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
-
-    TableClient = require('@azure/data-tables')
-    DefaultAzureCredential = require('@azure/identity')
+    storageConfig.useConnectionString = false
+    storageConfig.account = 'testaccount'
+    storageConfig.managedIdentityClientId = 'test-client-id'
   })
 
-  afterEach(() => {
-    consoleLogSpy.mockRestore()
-    jest.clearAllMocks()
-  })
+  test('should initialize TableClients using DefaultAzureCredential', async () => {
+    await initialiseTables()
 
-  test('should use connection string when config.useConnectionStr is true', () => {
-    config.useConnectionStr = true
-    config.connectionStr = 'fake-connection-string'
-
-    require('../../app/storage').initialiseTables()
-
-    expect(consoleLogSpy).toHaveBeenCalledWith('Using connection string for Table Client')
-    expect(TableClient.fromConnectionString).toHaveBeenCalledWith(config.connectionStr)
-  })
-
-  test('should use DefaultAzureCredential when config.useConnectionStr is false', () => {
-    config.useConnectionStr = false
-    config.storageAccount = 'fakeaccount'
-    config.managedIdentityClientId = 'fake-managed-id'
-
-    require('../../app/storage').initialiseTables()
-
-    const expectedUri = `https://${config.storageAccount}.blob.core.windows.net`
-
-    expect(consoleLogSpy).toHaveBeenCalledWith('Using DefaultAzureCredential for Table Client')
-    expect(DefaultAzureCredential).toHaveBeenCalledWith({ managedIdentityClientId: config.managedIdentityClientId })
-    expect(TableClient).toHaveBeenCalledWith(expectedUri,
-      expect.objectContaining({
-        type: 'DefaultAzureCredential',
-        options: { managedIdentityClientId: config.managedIdentityClientId }
-      })
+    expect(TableClient).toHaveBeenCalledWith(
+      `https://${storageConfig.account}.table.core.windows.net`,
+      storageConfig.paymentTable,
+      expect.any(DefaultAzureCredential)
+    )
+    expect(TableClient).toHaveBeenCalledWith(
+      `https://${storageConfig.account}.table.core.windows.net`,
+      storageConfig.holdTable,
+      expect.any(DefaultAzureCredential)
+    )
+    expect(TableClient).toHaveBeenCalledWith(
+      `https://${storageConfig.account}.table.core.windows.net`,
+      storageConfig.warningTable,
+      expect.any(DefaultAzureCredential)
+    )
+    expect(TableClient).toHaveBeenCalledWith(
+      `https://${storageConfig.account}.table.core.windows.net`,
+      storageConfig.batchTable,
+      expect.any(DefaultAzureCredential)
     )
   })
 })
