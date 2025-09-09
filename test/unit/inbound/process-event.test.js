@@ -49,4 +49,14 @@ describe('process event', () => {
     await processEvent(event)
     expect(mockSendAlert).not.toHaveBeenCalled()
   })
+
+  test('should send an alert even if saveEvent fails', async () => {
+    mockGetEventType.mockReturnValue(WARNING)
+    mockSaveEvent.mockImplementationOnce(() => {
+      throw new Error('saveEvent failed')
+    })
+
+    await expect(processEvent(event)).rejects.toThrow('saveEvent failed')
+    expect(mockSendAlert).toHaveBeenCalledWith(event)
+  })
 })

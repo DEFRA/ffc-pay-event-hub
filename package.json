@@ -16,7 +16,7 @@
   "author": "Defra",
   "contributors": [
     "John Watson <john.watson2@rpa.gov.uk>",
-    "Sam Plackett <samuel.plackett@eviden.com>"
+    "Sam Plackett <samuel.plackett@atos.net>"
   ],
   "license": "OGL-UK-3.0",
   "dependencies": {
@@ -25,7 +25,8 @@
     "applicationinsights": "2.9.6",
     "ffc-messaging": "2.10.1",
     "joi": "17.7.1",
-    "log-timestamp": "0.3.0"
+    "log-timestamp": "0.3.0",
+    "uuid": "9.0.0"
   },
   "devDependencies": {
     "jest": "29.6.4",
