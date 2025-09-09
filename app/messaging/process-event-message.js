@@ -19,7 +19,6 @@ const processEventMessage = async (message, receiver) => {
     await receiver.completeMessage(message)
   } catch (err) {
     console.error('Unable to process event:', err)
-    console.log(lastAlertTriggered)
     if (!lastAlertTriggered || lastAlertTriggered + oneHourInSeconds < Date.now()) {
       const alert = {
         type: alertTypes.EVENT_SAVE_ALERT,
