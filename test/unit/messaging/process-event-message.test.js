@@ -6,6 +6,9 @@ const { processEvent: mockProcessEvent } = require('../../../app/inbound')
 jest.mock('../../../app/messaging/validate-event')
 const { validateEvent: mockValidateEvent } = require('../../../app/messaging/validate-event')
 
+const { sendAlert } = require('../../../app/messaging/send-alert')
+jest.mock('../../../app/messaging/send-alert')
+
 const message = require('../../mocks/events/event')
 
 const { processEventMessage } = require('../../../app/messaging/process-event-message')
@@ -16,9 +19,18 @@ const receiver = {
 }
 
 describe('process event message', () => {
+  let nowSpy
+
   beforeEach(() => {
     jest.clearAllMocks()
     mockValidateEvent.mockReset()
+  })
+
+  afterEach(() => {
+    if (nowSpy) {
+      nowSpy.mockRestore()
+    }
+    jest.useRealTimers()
   })
 
   test('should validate message body', async () => {
@@ -70,5 +82,27 @@ describe('process event message', () => {
     })
     await processEventMessage(message, receiver)
     expect(receiver.completeMessage).not.toHaveBeenCalledWith(message)
+  })
+
+  test('should correctly handle alerts based on time passing', async () => {
+    jest.useFakeTimers()
+    const oneHourInMilliseconds = 3600000
+    const alertTime = Date.now() + oneHourInMilliseconds
+    nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => alertTime)
+    mockProcessEvent.mockImplementation(() => {
+      throw new Error('Processing error')
+    })
+    await processEventMessage(message, receiver)
+    expect(sendAlert).toHaveBeenCalledWith(expect.objectContaining({
+      type: expect.any(String),
+      source: expect.any(String),
+      id: expect.any(String),
+      data: expect.objectContaining({
+        message: expect.stringContaining('Processing error'),
+        originalEvent: message.body
+      })
+    }))
+    await processEventMessage(message, receiver)
+    expect(sendAlert).toHaveBeenCalledTimes(1)
   })
 })
