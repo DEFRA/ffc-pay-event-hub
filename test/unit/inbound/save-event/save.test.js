@@ -30,9 +30,17 @@ describe('save event', () => {
     expect(mockSaveWarningEvent).toHaveBeenCalledWith(event)
   })
 
-  test('saves payment event if payment', async () => {
-    await saveEvent(event, PAYMENT_EVENT)
-    expect(mockSavePaymentEvent).toHaveBeenCalledWith(event)
+  test('saves payment event if payment and frn', async () => {
+    const frnEvent = { ...event, data: { frn: 1234567890 } }
+    await saveEvent(frnEvent, PAYMENT_EVENT)
+    expect(mockSavePaymentEvent).toHaveBeenCalledWith(frnEvent)
+  })
+
+  test('does not save payment event if payment and no frn', async () => {
+    const frnlessEvent = { ...event }
+    delete frnlessEvent.data.frn
+    await saveEvent(frnlessEvent, PAYMENT_EVENT)
+    expect(mockSavePaymentEvent).not.toHaveBeenCalled()
   })
 
   test('saves batch event if batch', async () => {
