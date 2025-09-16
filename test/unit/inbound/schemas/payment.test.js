@@ -1,6 +1,6 @@
 const schema = require('../../../../app/inbound/schemas/payment')
 
-let event
+let event = JSON.parse(JSON.stringify(require('../../../mocks/events/payment').data))
 
 describe('payment schema', () => {
   beforeEach(() => {
@@ -11,28 +11,51 @@ describe('payment schema', () => {
     expect(schema.validate(event).error).toBeUndefined()
   })
 
-  test('should not validate a payment event with an undefined frn', () => {
+  test('should not validate a payment event with all customer identifiers missing', () => {
     delete event.frn
     expect(schema.validate(event).error).toBeDefined()
   })
 
-  test('should not validate a payment event with a null frn', () => {
-    event.frn = null
+  test('should validate a payment event with only sbi', () => {
+    delete event.frn
+    event.sbi = 123
+    expect(schema.validate(event).error).toBeUndefined()
+  })
+
+  test('should validate a payment event with only trader', () => {
+    delete event.frn
+    event.trader = 'someTrader'
+    expect(schema.validate(event).error).toBeUndefined()
+  })
+
+  test('should validate a payment event with only vendor', () => {
+    delete event.frn
+    event.vendor = 'someVendor'
+    expect(schema.validate(event).error).toBeUndefined()
+  })
+
+  test('should not validate a payment event with a non-number sbi', () => {
+    event.sbi = 'abc'
     expect(schema.validate(event).error).toBeDefined()
   })
 
-  test('should not validate a payment event with a non-number frn', () => {
-    event.frn = 'abc'
+  test('should not validate a payment event with a non-integer sbi', () => {
+    event.sbi = 1.1
     expect(schema.validate(event).error).toBeDefined()
   })
 
-  test('should not validate a payment event with a non-integer frn', () => {
-    event.frn = 1.1
+  test('should not validate a payment event with a negative sbi', () => {
+    event.sbi = -1
     expect(schema.validate(event).error).toBeDefined()
   })
 
-  test('should not validate a payment event with a negative frn', () => {
-    event.frn = -1
+  test('should not validate a payment event with a non-string trader', () => {
+    event.trader = 1
+    expect(schema.validate(event).error).toBeDefined()
+  })
+
+  test('should not validate a payment event with a non-string vendor', () => {
+    event.vendor = 1
     expect(schema.validate(event).error).toBeDefined()
   })
 

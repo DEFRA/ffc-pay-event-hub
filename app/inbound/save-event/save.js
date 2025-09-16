@@ -7,7 +7,9 @@ const { saveBatchEvent } = require('./batch')
 const saveEvent = async (event, eventType) => {
   switch (eventType) {
     case PAYMENT_EVENT:
-      await savePaymentEvent(event)
+      if (event.data?.frn) {
+        await savePaymentEvent(event)
+      }
       break
     case HOLD_EVENT:
       await saveHoldEvent(event)
