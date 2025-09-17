@@ -1,7 +1,7 @@
 const Joi = require('joi')
 
 module.exports = Joi.object({
-  frn: Joi.number().integer().positive().optional(),
+  frn: Joi.number().integer().positive().optional().allow('', null),
   sbi: Joi.number().integer().positive().optional().allow('', null),
   trader: Joi.string().optional().allow('', null),
   vendor: Joi.string().optional().allow('', null),
