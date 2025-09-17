@@ -1,10 +1,10 @@
 const Joi = require('joi')
 
 module.exports = Joi.object({
-  frn: Joi.number().integer().positive().optional(),
-  sbi: Joi.number().integer().positive().optional(),
-  trader: Joi.string().optional(),
-  vendor: Joi.string().optional(),
+  frn: Joi.number().integer().positive().optional().allow('', null),
+  sbi: Joi.number().integer().positive().optional().allow('', null),
+  trader: Joi.string().optional().allow('', null),
+  vendor: Joi.string().optional().allow('', null),
   correlationId: Joi.string().guid().required(),
   schemeId: Joi.number().integer().positive().required(),
   invoiceNumber: Joi.string().required()
