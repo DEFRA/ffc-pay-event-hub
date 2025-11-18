@@ -1,44 +1,28 @@
 const mockSendMessage = jest.fn()
 
-jest.mock('ffc-messaging', () => {
-  return {
-    MessageSender: jest.fn().mockImplementation(() => {
-      return {
-        sendMessage: mockSendMessage,
-        closeConnection: jest.fn()
-      }
-    })
-  }
-})
-
-const mockListEntities = jest.fn().mockImplementation(() => {
-  return []
-})
+jest.mock('ffc-messaging', () => ({
+  MessageSender: jest.fn().mockImplementation(() => ({
+    sendMessage: mockSendMessage,
+    closeConnection: jest.fn()
+  }))
+}))
 
 const mockTableClient = {
   createTable: jest.fn(),
   upsertEntity: jest.fn(),
-  listEntities: mockListEntities
+  listEntities: jest.fn().mockReturnValue([])
 }
-jest.mock('@azure/data-tables', () => {
-  return {
-    TableClient: {
-      fromConnectionString: jest.fn().mockReturnValue(mockTableClient)
-    },
-    odata: jest.fn()
-  }
-})
+
+jest.mock('@azure/data-tables', () => ({
+  TableClient: { fromConnectionString: jest.fn().mockReturnValue(mockTableClient) },
+  odata: jest.fn()
+}))
 
 const { FRN, CORRELATION_ID, SCHEME_ID, BATCH, WARNING } = require('../../../app/constants/categories')
-
 const { initialiseTables } = require('../../../app/storage')
-
 const { processEvent } = require('../../../app/inbound/process-event')
 
-let paymentEvent
-let holdEvent
-let batchEvent
-let warningEvent
+let events = {}
 
 beforeAll(async () => {
   await initialiseTables()
@@ -46,127 +30,92 @@ beforeAll(async () => {
 
 beforeEach(() => {
   jest.clearAllMocks()
-  paymentEvent = JSON.parse(JSON.stringify(require('../../mocks/events/payment')))
-  holdEvent = JSON.parse(JSON.stringify(require('../../mocks/events/hold')))
-  batchEvent = JSON.parse(JSON.stringify(require('../../mocks/events/batch')))
-  warningEvent = JSON.parse(JSON.stringify(require('../../mocks/events/warning')))
+  events = {
+    payment: structuredClone(require('../../mocks/events/payment')),
+    hold: structuredClone(require('../../mocks/events/hold')),
+    batch: structuredClone(require('../../mocks/events/batch')),
+    warning: structuredClone(require('../../mocks/events/warning'))
+  }
 })
 
+const expectUpsertCalledWith = (entity, category) => {
+  expect(mockTableClient.upsertEntity).toHaveBeenCalledWith(
+    expect.objectContaining({ partitionKey: entity, category }),
+    'Merge'
+  )
+}
+
 describe('inbound payment event', () => {
-  test('saves three payment entities if no batch', async () => {
-    await processEvent(paymentEvent)
+  test.each([
+    ['FRN', e => e.data.frn.toString(), FRN],
+    ['CorrelationId', e => e.data.correlationId, CORRELATION_ID],
+    ['SchemeId', e => e.data.schemeId.toString(), SCHEME_ID]
+  ])('saves %s payment entity without batch', async (name, keyFn, category) => {
+    await processEvent(events.payment)
+    expectUpsertCalledWith(keyFn(events.payment), category)
+  })
+
+  test('saves 3 payment entities if no batch', async () => {
+    await processEvent(events.payment)
     expect(mockTableClient.upsertEntity).toHaveBeenCalledTimes(3)
   })
 
-  test('saves four payment entities if batch', async () => {
-    paymentEvent.data.batch = 'mock-batch'
-    await processEvent(paymentEvent)
+  test('saves batch payment entity if batch exists', async () => {
+    events.payment.data.batch = 'mock-batch'
+    await processEvent(events.payment)
+    expectUpsertCalledWith(events.payment.data.batch, BATCH)
+  })
+
+  test('saves 4 payment entities if batch exists', async () => {
+    events.payment.data.batch = 'mock-batch'
+    await processEvent(events.payment)
     expect(mockTableClient.upsertEntity).toHaveBeenCalledTimes(4)
   })
 
-  test('saves FRN payment entity', async () => {
-    await processEvent(paymentEvent)
-    expect(mockTableClient.upsertEntity).toHaveBeenCalledWith(expect.objectContaining({
-      partitionKey: paymentEvent.data.frn.toString(),
-      category: FRN
-    }), 'Merge')
-  })
-
-  test('saves correlation id payment entity', async () => {
-    await processEvent(paymentEvent)
-    expect(mockTableClient.upsertEntity).toHaveBeenCalledWith(expect.objectContaining({
-      partitionKey: paymentEvent.data.correlationId,
-      category: CORRELATION_ID
-    }), 'Merge')
-  })
-
-  test('saves scheme id payment entity', async () => {
-    await processEvent(paymentEvent)
-    expect(mockTableClient.upsertEntity).toHaveBeenCalledWith(expect.objectContaining({
-      partitionKey: paymentEvent.data.schemeId.toString(),
-      category: SCHEME_ID
-    }), 'Merge')
-  })
-
-  test('saves batch payment entity if batch', async () => {
-    paymentEvent.data.batch = 'mock-batch'
-    await processEvent(paymentEvent)
-    expect(mockTableClient.upsertEntity).toHaveBeenCalledWith(expect.objectContaining({
-      partitionKey: paymentEvent.data.batch,
-      category: BATCH
-    }), 'Merge')
-  })
-
-  test('does not send event for payment event', async () => {
-    await processEvent(paymentEvent)
+  test('does not send alert for payment', async () => {
+    await processEvent(events.payment)
     expect(mockSendMessage).not.toHaveBeenCalled()
   })
 })
 
 describe('inbound hold event', () => {
-  test('saves three hold entities', async () => {
-    await processEvent(holdEvent)
-    expect(mockTableClient.upsertEntity).toHaveBeenCalledTimes(3)
+  test.each([
+    ['FRN', e => e.data.frn.toString(), FRN],
+    ['SchemeId', e => e.data.schemeId.toString(), SCHEME_ID]
+  ])('saves %s hold entity', async (name, keyFn, category) => {
+    await processEvent(events.hold)
+    expectUpsertCalledWith(keyFn(events.hold), category)
   })
 
-  test('saves FRN hold entity', async () => {
-    await processEvent(holdEvent)
-    expect(mockTableClient.upsertEntity).toHaveBeenCalledWith(expect.objectContaining({
-      partitionKey: holdEvent.data.frn.toString(),
-      category: FRN
-    }), 'Merge')
-  })
-
-  test('saves scheme id hold entity', async () => {
-    await processEvent(holdEvent)
-    expect(mockTableClient.upsertEntity).toHaveBeenCalledWith(expect.objectContaining({
-      partitionKey: holdEvent.data.schemeId.toString(),
-      category: SCHEME_ID
-    }), 'Merge')
-  })
-
-  test('does not send alert for hold event', async () => {
-    await processEvent(holdEvent)
+  test('does not send alert for hold', async () => {
+    await processEvent(events.hold)
     expect(mockSendMessage).not.toHaveBeenCalled()
   })
 })
 
 describe('inbound batch event', () => {
-  test('saves one batch entity', async () => {
-    await processEvent(batchEvent)
+  test('saves batch entity', async () => {
+    await processEvent(events.batch)
     expect(mockTableClient.upsertEntity).toHaveBeenCalledTimes(1)
+    expectUpsertCalledWith(events.batch.data.filename, BATCH)
   })
 
-  test('saves batch batch entity', async () => {
-    await processEvent(batchEvent)
-    expect(mockTableClient.upsertEntity).toHaveBeenCalledWith(expect.objectContaining({
-      partitionKey: batchEvent.data.filename,
-      category: BATCH
-    }), 'Merge')
-  })
-
-  test('does not send alert for batch event', async () => {
-    await processEvent(batchEvent)
+  test('does not send alert for batch', async () => {
+    await processEvent(events.batch)
     expect(mockSendMessage).not.toHaveBeenCalled()
   })
 })
 
 describe('inbound warning event', () => {
-  test('saves one warning entity', async () => {
-    await processEvent(warningEvent)
-    expect(mockTableClient.upsertEntity).toHaveBeenCalledTimes(1)
-  })
-
   test('saves warning entity', async () => {
-    await processEvent(warningEvent)
-    expect(mockTableClient.upsertEntity).toHaveBeenCalledWith(expect.objectContaining({
-      partitionKey: 'event',
-      category: WARNING
-    }), 'Merge')
+    await processEvent(events.warning)
+    expect(mockTableClient.upsertEntity).toHaveBeenCalledTimes(1)
+    expectUpsertCalledWith('event', WARNING)
   })
 
   test('sends alert for warning', async () => {
-    await processEvent(warningEvent)
-    expect(mockSendMessage.mock.calls[0][0].body).toBe(warningEvent)
+    await processEvent(events.warning)
+    expect(mockSendMessage).toHaveBeenCalledTimes(1)
+    expect(mockSendMessage.mock.calls[0][0].body).toBe(events.warning)
   })
 })
