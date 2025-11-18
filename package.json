@@ -1,6 +1,6 @@
 {
   "name": "ffc-pay-event-hub",
-  "version": "1.2.15",
+  "version": "1.2.16",
   "description": "Event hub",
   "homepage": "https://github.com/DEFRA/ffc-pay-event-hub",
   "main": "app/index.js",
@@ -16,7 +16,8 @@
   "author": "Defra",
   "contributors": [
     "John Watson <john.watson2@rpa.gov.uk>",
-    "Sam Plackett <samuel.plackett@atos.net>"
+    "Sam Plackett <samuel.plackett@atos.net>",
+    "Oliver Lewington <oliver.lewington@atos.net>"
   ],
   "license": "OGL-UK-3.0",
   "dependencies": {
