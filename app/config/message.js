@@ -13,7 +13,8 @@ const schema = Joi.object({
   eventsSubscription: {
     address: Joi.string(),
     topic: Joi.string(),
-    type: Joi.string().default('subscription')
+    type: Joi.string().default('subscription'),
+    maxConcurrentCalls: Joi.number().integer().min(1).default(10)
   },
   alertTopic: {
     address: Joi.string()
@@ -32,7 +33,8 @@ const config = {
   eventsSubscription: {
     address: process.env.EVENTS_SUBSCRIPTION_ADDRESS,
     topic: process.env.EVENTS_TOPIC_ADDRESS,
-    type: 'subscription'
+    type: 'subscription',
+    maxConcurrentCalls: parseInt(process.env.MAX_CONCURRENT_CALLS, 10) || 10
   },
   alertTopic: {
     address: process.env.ALERT_TOPIC_ADDRESS
