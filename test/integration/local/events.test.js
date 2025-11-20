@@ -1,146 +1,83 @@
 const mockSendMessage = jest.fn()
 
-jest.mock('ffc-messaging', () => {
-  return {
-    MessageSender: jest.fn().mockImplementation(() => {
-      return {
-        sendMessage: mockSendMessage,
-        closeConnection: jest.fn()
-      }
-    })
-  }
-})
+jest.mock('ffc-messaging', () => ({
+  MessageSender: jest.fn().mockImplementation(() => ({
+    sendMessage: mockSendMessage,
+    closeConnection: jest.fn()
+  }))
+}))
 
 const { odata } = require('@azure/data-tables')
-
 const { PAYMENT_EVENT, HOLD_EVENT, BATCH_EVENT, WARNING_EVENT } = require('../../../app/constants/event-types')
-
 const { processEventMessage } = require('../../../app/messaging/process-event-message')
 const { initialiseTables, getClient } = require('../../../app/storage')
 
-const receiver = {
-  completeMessage: jest.fn()
-}
+const receiver = { completeMessage: jest.fn() }
 
-let paymentClient
-let holdClient
-let batchClient
-let warningClient
-
-let paymentEvent
-let holdEvent
-let batchEvent
-let warningEvent
+let clients, events
 
 beforeAll(async () => {
   await initialiseTables()
-  paymentClient = getClient(PAYMENT_EVENT)
-  holdClient = getClient(HOLD_EVENT)
-  batchClient = getClient(BATCH_EVENT)
-  warningClient = getClient(WARNING_EVENT)
+  clients = {
+    [PAYMENT_EVENT]: getClient(PAYMENT_EVENT),
+    [HOLD_EVENT]: getClient(HOLD_EVENT),
+    [BATCH_EVENT]: getClient(BATCH_EVENT),
+    [WARNING_EVENT]: getClient(WARNING_EVENT)
+  }
 })
 
 beforeEach(async () => {
-  paymentClient.deleteTable()
-  holdClient.deleteTable()
-  batchClient.deleteTable()
-  warningClient.deleteTable()
+  // Reset tables
+  await Promise.all(Object.values(clients).map(async (c) => {
+    await c.deleteTable()
+    await c.createTable()
+  }))
 
-  paymentClient.createTable()
-  holdClient.createTable()
-  batchClient.createTable()
-  warningClient.createTable()
-
-  paymentEvent = JSON.parse(JSON.stringify(require('../../mocks/events/payment')))
-  holdEvent = JSON.parse(JSON.stringify(require('../../mocks/events/hold')))
-  batchEvent = JSON.parse(JSON.stringify(require('../../mocks/events/batch')))
-  warningEvent = JSON.parse(JSON.stringify(require('../../mocks/events/warning')))
+  // Load fresh event mocks
+  events = {
+    payment: JSON.parse(JSON.stringify(require('../../mocks/events/payment'))),
+    hold: JSON.parse(JSON.stringify(require('../../mocks/events/hold'))),
+    batch: JSON.parse(JSON.stringify(require('../../mocks/events/batch'))),
+    warning: JSON.parse(JSON.stringify(require('../../mocks/events/warning')))
+  }
 })
 
 const countAsyncIterator = async (iterator) => {
   let count = 0
-  for await (const _ of iterator) { // eslint-disable-line no-unused-vars
+  while (!(await iterator.next()).done) {
     count++
   }
   return count
 }
 
-describe('process event message', () => {
-  test('saves FRN payment event', async () => {
-    await processEventMessage({ body: paymentEvent }, receiver)
-    const results = paymentClient.listEntities({
-      queryOptions: { filter: odata`PartitionKey eq ${paymentEvent.data.frn.toString()}` }
-    })
-    const total = await countAsyncIterator(results)
-    expect(total).toBe(1)
-  })
+describe('processEventMessage', () => {
+  const eventTests = [
+    [PAYMENT_EVENT, 'payment', ['frn', 'correlationId', 'schemeId', 'batch']],
+    [HOLD_EVENT, 'hold', ['frn', 'schemeId']],
+    [BATCH_EVENT, 'batch', ['filename']],
+    [WARNING_EVENT, 'warning', ['event']]
+  ]
 
-  test('saves correlation id payment event', async () => {
-    await processEventMessage({ body: paymentEvent }, receiver)
-    const results = paymentClient.listEntities({
-      queryOptions: { filter: odata`PartitionKey eq ${paymentEvent.data.correlationId}` }
-    })
-    const total = await countAsyncIterator(results)
-    expect(total).toBe(1)
-  })
+  test.each(eventTests)(
+    'saves %s event by %p',
+    async (eventType, key, partitions) => {
+      const event = events[key]
+      if (eventType === PAYMENT_EVENT) {
+        event.data.batch = 'mock-batch'
+      }
 
-  test('saves scheme id payment event', async () => {
-    await processEventMessage({ body: paymentEvent }, receiver)
-    const results = paymentClient.listEntities({
-      queryOptions: { filter: odata`PartitionKey eq ${paymentEvent.data.schemeId.toString()}` }
-    })
-    const total = await countAsyncIterator(results)
-    expect(total).toBe(1)
-  })
+      await processEventMessage({ body: event }, receiver)
 
-  test('saves batch payment event', async () => {
-    paymentEvent.data.batch = 'mock-batch'
-    await processEventMessage({ body: paymentEvent }, receiver)
-    const results = paymentClient.listEntities({
-      queryOptions: { filter: odata`PartitionKey eq ${paymentEvent.data.batch}` }
-    })
-    const total = await countAsyncIterator(results)
-    expect(total).toBe(1)
-  })
-
-  test('saves FRN hold event', async () => {
-    await processEventMessage({ body: holdEvent }, receiver)
-    const results = holdClient.listEntities({
-      queryOptions: { filter: odata`PartitionKey eq ${holdEvent.data.frn.toString()}` }
-    })
-    const total = await countAsyncIterator(results)
-    expect(total).toBe(1)
-  })
-
-  test('saves scheme id hold event', async () => {
-    await processEventMessage({ body: holdEvent }, receiver)
-    const results = holdClient.listEntities({
-      queryOptions: { filter: odata`PartitionKey eq ${holdEvent.data.schemeId.toString()}` }
-    })
-    const total = await countAsyncIterator(results)
-    expect(total).toBe(1)
-  })
-
-  test('saves batch event', async () => {
-    await processEventMessage({ body: batchEvent }, receiver)
-    const results = batchClient.listEntities({
-      queryOptions: { filter: odata`PartitionKey eq ${batchEvent.data.filename}` }
-    })
-    const total = await countAsyncIterator(results)
-    expect(total).toBe(1)
-  })
-
-  test('saves warning event', async () => {
-    await processEventMessage({ body: warningEvent }, receiver)
-    const results = warningClient.listEntities({
-      queryOptions: { filter: odata`PartitionKey eq ${'event'}` }
-    })
-    const total = await countAsyncIterator(results)
-    expect(total).toBe(1)
-  })
+      for (const p of partitions) {
+        const filterValue = event.data[p]?.toString() || 'event'
+        const results = clients[eventType].listEntities({ queryOptions: { filter: odata`PartitionKey eq ${filterValue}` } })
+        expect(await countAsyncIterator(results)).toBe(1)
+      }
+    }
+  )
 
   test('sends alert for warning', async () => {
-    await processEventMessage({ body: warningEvent }, receiver)
+    await processEventMessage({ body: events.warning }, receiver)
     expect(mockSendMessage).toHaveBeenCalled()
   })
 })

@@ -5,9 +5,7 @@ jest.mock('../../../../app/storage')
 const { getClient: mockGetClient } = require('../../../../app/storage')
 
 const mockUpsertEntity = jest.fn()
-const mockClient = {
-  upsertEntity: mockUpsertEntity
-}
+const mockClient = { upsertEntity: mockUpsertEntity }
 mockGetClient.mockReturnValue(mockClient)
 
 jest.mock('../../../../app/inbound/save-event/create-row')
@@ -18,33 +16,23 @@ const { getWarningType: mockGetWarningType } = require('../../../../app/inbound/
 
 mockGetWarningType.mockReturnValue('event')
 
-const warningEntity = {
-  partitionKey: 'mock-partition-key',
-  rowKey: 'mock-row-key'
-}
+const warningEntity = { partitionKey: 'mock-partition-key', rowKey: 'mock-row-key' }
 mockCreateRow.mockReturnValue(warningEntity)
 
 const { saveWarningEvent } = require('../../../../app/inbound/save-event/warning')
-
 const event = require('../../../mocks/events/warning')
 
 describe('save warning event', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
+  beforeEach(() => jest.clearAllMocks())
 
-  test('uses hold client', async () => {
+  test('uses warning client', async () => {
     await saveWarningEvent(event)
     expect(mockGetClient).toHaveBeenCalledWith(WARNING_EVENT)
   })
 
-  test('creates one entity', async () => {
+  test('creates one warning entity', async () => {
     await saveWarningEvent(event)
     expect(mockUpsertEntity).toHaveBeenCalledTimes(1)
-  })
-
-  test('creates entity warning category', async () => {
-    await saveWarningEvent(event)
     expect(mockCreateRow).toHaveBeenCalledWith('event', event.id, WARNING, event)
   })
 })

@@ -1,126 +1,59 @@
 const schema = require('../../../../app/inbound/schemas/payment')
 
-let event = JSON.parse(JSON.stringify(require('../../../mocks/events/payment').data))
+let baseEvent
 
 describe('payment schema', () => {
   beforeEach(() => {
-    event = JSON.parse(JSON.stringify(require('../../../mocks/events/payment').data))
+    baseEvent = structuredClone(require('../../../mocks/events/payment').data)
   })
 
-  test('should validate a valid payment event', () => {
+  test('validates a correct payment event', () => {
+    const event = structuredClone(baseEvent)
     expect(schema.validate(event).error).toBeUndefined()
   })
 
-  test('should not validate a payment event with all customer identifiers missing', () => {
-    delete event.frn
-    expect(schema.validate(event).error).toBeDefined()
+  test('validates event with only one customer identifier (sbi, trader, vendor)', () => {
+    const identifiers = [
+      { mutate: e => { delete e.frn; e.sbi = 123 }, name: 'sbi' },
+      { mutate: e => { delete e.frn; e.trader = 'someTrader' }, name: 'trader' },
+      { mutate: e => { delete e.frn; e.vendor = 'someVendor' }, name: 'vendor' }
+    ]
+
+    identifiers.forEach(({ mutate }) => {
+      const event = structuredClone(baseEvent)
+      mutate(event)
+      expect(schema.validate(event).error).toBeUndefined()
+    })
   })
 
-  test('should validate a payment event with only sbi', () => {
-    delete event.frn
-    event.sbi = 123
-    expect(schema.validate(event).error).toBeUndefined()
-  })
+  const invalidCases = [
+    ['non-number sbi', e => { e.sbi = 'abc' }],
+    ['non-integer sbi', e => { e.sbi = 1.1 }],
+    ['negative sbi', e => { e.sbi = -1 }],
 
-  test('should validate a payment event with only trader', () => {
-    delete event.frn
-    event.trader = 'someTrader'
-    expect(schema.validate(event).error).toBeUndefined()
-  })
+    ['non-string trader', e => { e.trader = 1 }],
+    ['non-string vendor', e => { e.vendor = 1 }],
 
-  test('should validate a payment event with only vendor', () => {
-    delete event.frn
-    event.vendor = 'someVendor'
-    expect(schema.validate(event).error).toBeUndefined()
-  })
+    ['undefined correlationId', e => { delete e.correlationId }],
+    ['null correlationId', e => { e.correlationId = null }],
+    ['non-string correlationId', e => { e.correlationId = 1 }],
+    ['non-uuid correlationId', e => { e.correlationId = 'abc' }],
 
-  test('should not validate a payment event with a non-number sbi', () => {
-    event.sbi = 'abc'
-    expect(schema.validate(event).error).toBeDefined()
-  })
+    ['undefined schemeId', e => { delete e.schemeId }],
+    ['null schemeId', e => { e.schemeId = null }],
+    ['non-number schemeId', e => { e.schemeId = 'abc' }],
+    ['non-integer schemeId', e => { e.schemeId = 1.1 }],
+    ['negative schemeId', e => { e.schemeId = -1 }],
 
-  test('should not validate a payment event with a non-integer sbi', () => {
-    event.sbi = 1.1
-    expect(schema.validate(event).error).toBeDefined()
-  })
+    ['undefined invoiceNumber', e => { delete e.invoiceNumber }],
+    ['null invoiceNumber', e => { e.invoiceNumber = null }],
+    ['non-string invoiceNumber', e => { e.invoiceNumber = 1 }],
+    ['empty invoiceNumber', e => { e.invoiceNumber = '' }]
+  ]
 
-  test('should not validate a payment event with a negative sbi', () => {
-    event.sbi = -1
-    expect(schema.validate(event).error).toBeDefined()
-  })
-
-  test('should not validate a payment event with a non-string trader', () => {
-    event.trader = 1
-    expect(schema.validate(event).error).toBeDefined()
-  })
-
-  test('should not validate a payment event with a non-string vendor', () => {
-    event.vendor = 1
-    expect(schema.validate(event).error).toBeDefined()
-  })
-
-  test('should not validate a payment event with an undefined correlationId', () => {
-    delete event.correlationId
-    expect(schema.validate(event).error).toBeDefined()
-  })
-
-  test('should not validate a payment event with a null correlationId', () => {
-    event.correlationId = null
-    expect(schema.validate(event).error).toBeDefined()
-  })
-
-  test('should not validate a payment event with a non-string correlationId', () => {
-    event.correlationId = 1
-    expect(schema.validate(event).error).toBeDefined()
-  })
-
-  test('should not validate a payment event with a non-uuid correlationId', () => {
-    event.correlationId = 'abc'
-    expect(schema.validate(event).error).toBeDefined()
-  })
-
-  test('should not validate a payment event with an undefined schemeId', () => {
-    delete event.schemeId
-    expect(schema.validate(event).error).toBeDefined()
-  })
-
-  test('should not validate a payment event with a null schemeId', () => {
-    event.schemeId = null
-    expect(schema.validate(event).error).toBeDefined()
-  })
-
-  test('should not validate a payment event with a non-number schemeId', () => {
-    event.schemeId = 'abc'
-    expect(schema.validate(event).error).toBeDefined()
-  })
-
-  test('should not validate a payment event with a non-integer schemeId', () => {
-    event.schemeId = 1.1
-    expect(schema.validate(event).error).toBeDefined()
-  })
-
-  test('should not validate a payment event with a negative schemeId', () => {
-    event.schemeId = -1
-    expect(schema.validate(event).error).toBeDefined()
-  })
-
-  test('should not validate a payment event with an undefined invoiceNumber', () => {
-    delete event.invoiceNumber
-    expect(schema.validate(event).error).toBeDefined()
-  })
-
-  test('should not validate a payment event with a null invoiceNumber', () => {
-    event.invoiceNumber = null
-    expect(schema.validate(event).error).toBeDefined()
-  })
-
-  test('should not validate a payment event with a non-string invoiceNumber', () => {
-    event.invoiceNumber = 1
-    expect(schema.validate(event).error).toBeDefined()
-  })
-
-  test('should not validate a payment event with an empty invoiceNumber', () => {
-    event.invoiceNumber = ''
+  test.each(invalidCases)('does not validate payment event with %s', (_, mutate) => {
+    const event = structuredClone(baseEvent)
+    mutate(event)
     expect(schema.validate(event).error).toBeDefined()
   })
 })
