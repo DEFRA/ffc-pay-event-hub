@@ -26,7 +26,10 @@ describe('process event message', () => {
   })
 
   afterEach(() => {
-    if (nowSpy) nowSpy.mockRestore()
+    if (nowSpy) {
+      nowSpy.mockRestore()
+    }
+    
     jest.useRealTimers()
   })
 

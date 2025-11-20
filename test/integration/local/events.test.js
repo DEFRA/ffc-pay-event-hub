@@ -62,7 +62,9 @@ describe('processEventMessage', () => {
     'saves %s event by %p',
     async (eventType, key, partitions) => {
       const event = events[key]
-      if (eventType === PAYMENT_EVENT) event.data.batch = 'mock-batch'
+      if (eventType === PAYMENT_EVENT) {
+        event.data.batch = 'mock-batch'
+      }
 
       await processEventMessage({ body: event }, receiver)
 
