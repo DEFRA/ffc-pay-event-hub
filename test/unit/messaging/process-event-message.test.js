@@ -29,7 +29,7 @@ describe('process event message', () => {
     if (nowSpy) {
       nowSpy.mockRestore()
     }
-    
+
     jest.useRealTimers()
   })
 
