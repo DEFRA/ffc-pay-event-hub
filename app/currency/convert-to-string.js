@@ -1,15 +1,16 @@
-const { convertToPounds } = require('./convert-to-pounds')
-
 const convertToString = (valueInPence) => {
-  if (!valueInPence) {
-    return '£0.00'
-  }
-  const numParts = convertToPounds(valueInPence).split('.')
-  numParts[0] = numParts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  numParts[1] = numParts[1] ? numParts[1].padEnd(2, '0') : '00'
-  return `£${numParts.join('.')}`
+  if (!valueInPence) return '£0.00'
+
+  const pounds = valueInPence / 100
+  const isNegative = pounds < 0
+  const absPounds = Math.abs(pounds)
+
+  const formatted = absPounds.toLocaleString('en-GB', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+
+  return isNegative ? `£-${formatted}` : `£${formatted}`
 }
 
-module.exports = {
-  convertToString
-}
+module.exports = { convertToString }

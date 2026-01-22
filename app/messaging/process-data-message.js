@@ -1,6 +1,10 @@
-const util = require('util')
+const util = require('node:util')
 const { validateMessage } = require('./validate-message')
-const { getCachedResponse, setCachedResponse, getCacheKey } = require('../cache')
+const {
+  getCachedResponse,
+  setCachedResponse,
+  getCacheKey,
+} = require('../cache')
 const { cacheConfig, messageConfig } = require('../config')
 const { getData } = require('../data')
 const { sendMessage } = require('./send-message')
@@ -10,14 +14,21 @@ const { writeDataRequestFile } = require('../storage')
 
 const processDataMessage = async (message, receiver) => {
   try {
-    console.log('Data request received:', util.inspect(message.body, false, null, true))
+    console.log(
+      'Data request received:',
+      util.inspect(message.body, false, null, true)
+    )
 
     validateMessage(message)
     const { body, messageId } = message
     const { category, value } = body
 
     const key = getCacheKey(category, value)
-    const cachedResponse = await getCachedResponse(cacheConfig.cache, body, key)
+    const cachedResponse = await getCachedResponse(
+      cacheConfig.cache,
+      body,
+      key
+    )
     const response = cachedResponse ?? { data: await getData(category, value) }
 
     if (!cachedResponse) {
@@ -25,12 +36,20 @@ const processDataMessage = async (message, receiver) => {
     }
 
     const filename = `${messageId}.json`
-    const blobClient = await writeDataRequestFile(filename, JSON.stringify(response))
+    const blobClient = await writeDataRequestFile(
+      filename,
+      JSON.stringify(response)
+    )
     const blobUri = blobClient.url
 
-    await sendMessage({ uri: blobUri }, TYPE, messageConfig.dataQueue, { sessionId: messageId })
+    await sendMessage({ uri: blobUri }, TYPE, messageConfig.dataQueue, {
+      sessionId: messageId,
+    })
     await receiver.completeMessage(message)
-    console.log('Data request completed:', util.inspect(response, false, null, true))
+    console.log(
+      'Data request completed:',
+      util.inspect(response, false, null, true)
+    )
   } catch (err) {
     console.error('Unable to process data request:', err)
     if (err.category === VALIDATION) {
@@ -42,5 +61,5 @@ const processDataMessage = async (message, receiver) => {
 }
 
 module.exports = {
-  processDataMessage
+  processDataMessage,
 }

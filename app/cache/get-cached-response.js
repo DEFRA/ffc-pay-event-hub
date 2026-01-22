@@ -1,4 +1,4 @@
-const { isDeepStrictEqual } = require('util')
+const { isDeepStrictEqual } = require('node:util')
 const { get } = require('./get')
 const { update } = require('./update')
 const { getRequestIndex } = require('./get-request-index')
@@ -12,7 +12,7 @@ const getCachedResponse = async (cache, request, key) => {
   }
 
   // if request is unique, add to cache
-  if (!cacheData.requests.some(x => isDeepStrictEqual(x.request, request))) {
+  if (!cacheData.requests.some((x) => isDeepStrictEqual(x.request, request))) {
     cacheData.requests.push({ request })
     await update(cache, key, cacheData)
   }
@@ -26,5 +26,5 @@ const getCachedResponse = async (cache, request, key) => {
 }
 
 module.exports = {
-  getCachedResponse
+  getCachedResponse,
 }

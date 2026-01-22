@@ -3,11 +3,14 @@ const { PAYMENT_PROCESSED_NO_FURTHER_ACTION_STATUS } = require('../../constants/
 
 const createPendingEvents = () => {
   return Object.entries(eventDetails)
-    .map((event) => ({ type: event[0], ...event[1] }))
+    .map(([type, details]) => ({ type, ...details }))
 }
 
 const filterPendingEvents = (events, pendingEvents) => {
-  return pendingEvents.filter(event => event.default && !events.some(e => e.events.some(e => e.type === event.type)))
+  return pendingEvents.filter(pendingEvent =>
+    pendingEvent.default &&
+    !events.some(group => group.events.some(evt => evt.type === pendingEvent.type))
+  )
 }
 
 const addPendingEventsToGroup = (group, events) => {
