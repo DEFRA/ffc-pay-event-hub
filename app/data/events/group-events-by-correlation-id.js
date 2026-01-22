@@ -1,7 +1,7 @@
 const groupEventsByCorrelationId = (events) => {
   return [
     ...events.reduce((map, event) => {
-      const key = event.correlationId
+      const key = event.correlationId || event.data.correlationId
 
       const item = map.get(key) || {
         frn: event.data.frn,
