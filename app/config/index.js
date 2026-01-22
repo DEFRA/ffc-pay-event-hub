@@ -1,11 +1,11 @@
-const messageConfig = require('./message')
 const storageConfig = require('./storage')
 const reportsConfig = require('./reports')
 const cacheConfig = require('./cache')
+const messageConfig = require('./message')
 
 module.exports = {
-  messageConfig,
   storageConfig,
   reportsConfig,
-  cacheConfig
+  cacheConfig,
+  messageConfig
 }

@@ -23,15 +23,16 @@ describe('messaging', () => {
   test('creates receiver for events topic', async () => {
     await messageService.start()
     expect(MockReceiver).toHaveBeenCalledWith(config.eventsSubscription, expect.anything())
+    expect(MockReceiver).toHaveBeenCalledWith(config.dataSubscription, expect.anything())
   })
 
   test('subscribes to topic', async () => {
     await messageService.start()
-    expect(mockSubscribe).toHaveBeenCalledTimes(1)
+    expect(mockSubscribe).toHaveBeenCalledTimes(2)
   })
 
   test('closes connection when stopped', async () => {
     await messageService.stop()
-    expect(mockCloseConnection).toHaveBeenCalledTimes(1)
+    expect(mockCloseConnection).toHaveBeenCalledTimes(2)
   })
 })

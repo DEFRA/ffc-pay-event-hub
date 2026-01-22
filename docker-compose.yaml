@@ -7,6 +7,7 @@ services:
     container_name: ffc-pay-event-hub
     depends_on:
       - ffc-pay-event-store-azurite
+      - ffc-pay-event-hub-redis
     environment:
       APPINSIGHTS_CLOUDROLE: ffc-pay-event-hub-local
       APPINSIGHTS_CONNECTIONSTRING: ${APPINSIGHTS_CONNECTIONSTRING}
@@ -18,11 +19,19 @@ services:
       MAX_CONCURRENT_CALLS: ${MAX_CONCURRENT_CALLS:-10}
       ALERT_TOPIC_ADDRESS: ${ALERT_TOPIC_ADDRESS:-ffc-pay-alert}${MESSAGE_QUEUE_SUFFIX}
       AZURE_STORAGE_USE_CONNECTION_STRING: "true"
-      AZURE_STORAGE_CONNECTION_STRING: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;TableEndpoint=http://ffc-pay-event-store-azurite:10002/devstoreaccount1;
+      AZURE_STORAGE_CONNECTION_STRING: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://ffc-pay-event-store-azurite:10000/devstoreaccount1;TableEndpoint=http://ffc-pay-event-store-azurite:10002/devstoreaccount1;
       AZURE_STORAGE_ACCOUNT_NAME: devstoreaccount1
+      AZURE_STORAGE_CREATE_ENTITIES: "true"
+      DATA_TOPIC_ADDRESS: ${DATA_TOPIC_ADDRESS:-ffc-pay-data-request}${MESSAGE_QUEUE_SUFFIX}
+      DATA_SUBSCRIPTION_ADDRESS: ${DATA_SUBSCRIPTION_ADDRESS:-ffc-pay-data-hub}${MESSAGE_QUEUE_SUFFIX}
+      DATARESPONSE_QUEUE_ADDRESS: ${DATARESPONSE_QUEUE_ADDRESS:-ffc-pay-data-request-response}${MESSAGE_QUEUE_SUFFIX}
+      REDIS_HOSTNAME: ffc-pay-event-hub-redis
 
   ffc-pay-event-store-azurite:
-    image: mcr.microsoft.com/azure-storage/azurite:3.23.0
+    image: mcr.microsoft.com/azure-storage/azurite:3.35.0
     command: "azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --loose"
     labels:
       com.docker.compose.pay.role: ffc-pay-event-store-azurite
+
+  ffc-pay-event-hub-redis:
+    image: redis:4.0.14

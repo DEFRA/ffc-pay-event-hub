@@ -1,18 +1,26 @@
 jest.mock('../../app/messaging')
-const mockMessaging = require('../../app/messaging')
+const { start: mockStartMessaging } = require('../../app/messaging')
+
 jest.mock('../../app/storage')
-const mockStorage = require('../../app/storage')
+const { initialise: mockInitialise } = require('../../app/storage')
+
+jest.mock('../../app/cache')
+const { start: mockStartCache } = require('../../app/cache')
 
 describe('app', () => {
   beforeEach(() => {
     require('../../app')
   })
 
-  test('starts messaging', async () => {
-    expect(mockMessaging.start).toHaveBeenCalled()
+  test('starts messaging once', async () => {
+    expect(mockStartMessaging).toHaveBeenCalledTimes(1)
   })
 
-  test('initialises tables', async () => {
-    expect(mockStorage.initialiseTables).toHaveBeenCalled()
+  test('initialises storage once', async () => {
+    expect(mockInitialise).toHaveBeenCalledTimes(1)
+  })
+
+  test('starts cache once', async () => {
+    expect(mockStartCache).toHaveBeenCalledTimes(1)
   })
 })
