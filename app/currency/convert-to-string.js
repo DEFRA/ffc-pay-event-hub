@@ -1,5 +1,7 @@
 const convertToString = (valueInPence) => {
-  if (!valueInPence) return '£0.00'
+  if (!valueInPence) {
+    return '£0.00'
+  }
 
   const pounds = valueInPence / 100
   const isNegative = pounds < 0
