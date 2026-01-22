@@ -1,17 +1,17 @@
 const groupEventsByScheme = (events) => {
-  return [...events.reduce((x, y) => {
-    const key = y.partitionKey
+  return [
+    ...events.reduce((map, event) => {
+      const key = event.partitionKey
 
-    const item = x.get(key) || {
-      ...{
-        schemeId: y.partitionKey,
+      const item = map.get(key) || {
+        schemeId: key,
         events: []
       }
-    }
-    item.events.push(y)
 
-    return x.set(key, item)
-  }, new Map()).values()]
+      item.events.push(event)
+      return map.set(key, item)
+    }, new Map()).values()
+  ]
 }
 
 module.exports = {

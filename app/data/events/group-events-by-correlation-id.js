@@ -1,22 +1,22 @@
 const groupEventsByCorrelationId = (events) => {
-  return [...events.reduce((x, y) => {
-    const key = y.correlationId
+  return [
+    ...events.reduce((map, event) => {
+      const key = event.correlationId
 
-    const item = x.get(key) || {
-      ...{
-        frn: y.data.frn,
-        correlationId: y.partitionKey,
-        schemeId: y.data.schemeId,
-        paymentRequestNumber: y.data.paymentRequestNumber,
-        agreementNumber: y.data.agreementNumber,
-        marketingYear: y.data.marketingYear,
+      const item = map.get(key) || {
+        frn: event.data.frn,
+        correlationId: key,
+        schemeId: event.data.schemeId,
+        paymentRequestNumber: event.data.paymentRequestNumber,
+        agreementNumber: event.data.agreementNumber,
+        marketingYear: event.data.marketingYear,
         events: []
       }
-    }
-    item.events.push(y)
 
-    return x.set(key, item)
-  }, new Map()).values()]
+      item.events.push(event)
+      return map.set(key, item)
+    }, new Map()).values()
+  ]
 }
 
 module.exports = {
