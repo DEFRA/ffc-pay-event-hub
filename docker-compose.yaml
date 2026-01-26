@@ -7,6 +7,7 @@ services:
     container_name: ffc-pay-event-hub
     depends_on:
       - ffc-pay-event-store-azurite
+      - ffc-pay-event-hub-postgres
       - ffc-pay-event-hub-redis
     environment:
       APPINSIGHTS_CLOUDROLE: ffc-pay-event-hub-local
@@ -26,6 +27,14 @@ services:
       DATA_SUBSCRIPTION_ADDRESS: ${DATA_SUBSCRIPTION_ADDRESS:-ffc-pay-data-hub}${MESSAGE_QUEUE_SUFFIX}
       DATARESPONSE_QUEUE_ADDRESS: ${DATARESPONSE_QUEUE_ADDRESS:-ffc-pay-data-request-response}${MESSAGE_QUEUE_SUFFIX}
       REDIS_HOSTNAME: ffc-pay-event-hub-redis
+      POSTGRES_HOST: ${POSTGRES_HOST:-ffc-pay-event-hub-postgres}
+
+  ffc-pay-event-hub-postgres:
+    image: postgres:11.4-alpine
+    environment:
+      POSTGRES_DB: ffc_pay_event_hub
+      POSTGRES_PASSWORD: ppp
+      POSTGRES_USERNAME: postgres
 
   ffc-pay-event-store-azurite:
     image: mcr.microsoft.com/azure-storage/azurite:3.35.0

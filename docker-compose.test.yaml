@@ -15,6 +15,14 @@ services:
       - ./jest.config.js:/home/node/jest.config.js
       - ./package.json:/home/node/package.json
 
+  ffc-pay-event-hub-postgres:
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   ffc-pay-event-store-azurite:
     labels:
       com.docker.compose.pay.role: test
+
+volumes:
+  postgres_data:
+  

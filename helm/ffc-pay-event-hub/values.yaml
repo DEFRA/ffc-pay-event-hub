@@ -22,7 +22,7 @@ deployment:
   minReplicas: 1
   maxReplicas: 4
   cpuThreshold: 80
-  memoryThreshold: 80 
+  memoryThreshold: 80
 
 container:
   requestMemory: 100Mi
@@ -44,6 +44,13 @@ container:
   azureStorageConnectionString: dummy
   azureStorageUseConnectionString: false
   azureStorageAccountName: ffcpay
+
+postgresService:
+  postgresDb: ffc_pay_event_hub
+  postgresqlHost: ffc-pay-event-hub-postgres
+  postgresPort: 5432
+  postgresSchema: public
+  postgresUser: postgres
 
 workloadIdentity: true
 

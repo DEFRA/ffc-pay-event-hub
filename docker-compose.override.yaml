@@ -13,6 +13,12 @@ services:
       - ./app:/home/node/app
       - ./package.json:/home/node/package.json
 
+  ffc-pay-event-hub-postgres:
+    ports:
+      - "5443:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   ffc-pay-event-store-azurite:
     volumes:
       - azurite_data:/data
@@ -31,3 +37,4 @@ services:
 volumes:
   azurite_data:
   redis_data:
+  postgres_data:

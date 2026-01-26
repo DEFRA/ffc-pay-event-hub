@@ -1,0 +1,28 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="Oliver Lewington" id="1">
+    <tagDatabase tag="v1.2.0"/>
+  </changeSet>
+
+  <changeSet author="Oliver Lewington" id="2">
+    <createTable tableName="payments">
+      <column name="event_id" type="UUID">
+        <constraints
+          nullable="false"
+          primaryKey="true"
+          primaryKeyName="payments_pkey"/>
+      </column>
+      <column name="partition_key" type="TEXT"/>
+      <column name="row_key" type="TEXT"/>
+      <column name="azure_timestamp" type="TIMESTAMPTZ"/>
+      <column name="event_type" type="TEXT"/>
+      <column name="source" type="TEXT"/>
+      <column name="subject" type="TEXT"/>
+      <column name="spec_version" type="TEXT"/>
+      <column name="event_time" type="TIMESTAMPTZ"/>
+      <column name="category" type="TEXT"/>
+      <column name="data_content_type" type="TEXT"/>
+      <column name="data" type="JSONB"/>
+    </createTable>
+  </changeSet>
+</databaseChangeLog>
