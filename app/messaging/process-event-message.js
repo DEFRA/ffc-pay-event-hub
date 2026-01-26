@@ -28,7 +28,7 @@ const processEventMessage = async (message, receiver) => {
         source: source.SOURCE,
         id: message.id ?? uuidv4(),
         time: new Date().toISOString(),
-        data: { ...event?.data },
+        data: { ...event?.data }
       }
       alert.data.message = `Error processing event: ${err.message}`
       alert.data.context = err.category
@@ -43,5 +43,5 @@ const processEventMessage = async (message, receiver) => {
 }
 
 module.exports = {
-  processEventMessage,
+  processEventMessage
 }
