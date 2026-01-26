@@ -1,11 +1,12 @@
 const { ALERT } = require('../constants/message-types')
 const { SOURCE } = require('../constants/source')
 
-const createMessage = (body) => {
+const createMessage = (body, type = null, options = null) => {
   return {
     body,
-    type: ALERT,
-    source: SOURCE
+    type: type ?? ALERT,
+    source: SOURCE,
+    ...options
   }
 }
 

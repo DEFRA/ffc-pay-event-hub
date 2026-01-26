@@ -16,6 +16,14 @@ const schema = Joi.object({
     type: Joi.string().default('subscription'),
     maxConcurrentCalls: Joi.number().integer().min(1).default(10)
   },
+  dataSubscription: {
+    address: Joi.string(),
+    topic: Joi.string(),
+    type: Joi.string().default('subscription')
+  },
+  dataQueue: {
+    address: Joi.string()
+  },
   alertTopic: {
     address: Joi.string()
   }
@@ -36,6 +44,14 @@ const config = {
     type: 'subscription',
     maxConcurrentCalls: parseInt(process.env.MAX_CONCURRENT_CALLS, 10) || 10
   },
+  dataSubscription: {
+    address: process.env.DATA_SUBSCRIPTION_ADDRESS,
+    topic: process.env.DATA_TOPIC_ADDRESS,
+    type: 'subscription'
+  },
+  dataQueue: {
+    address: process.env.DATARESPONSE_QUEUE_ADDRESS
+  },
   alertTopic: {
     address: process.env.ALERT_TOPIC_ADDRESS
   }
@@ -51,8 +67,12 @@ if (result.error) {
 
 const eventsSubscription = { ...result.value.messageQueue, ...result.value.eventsSubscription }
 const alertTopic = { ...result.value.messageQueue, ...result.value.alertTopic }
+const dataSubscription = { ...result.value.messageQueue, ...result.value.dataSubscription }
+const dataQueue = { ...result.value.messageQueue, ...result.value.dataQueue }
 
 module.exports = {
   eventsSubscription,
-  alertTopic
+  alertTopic,
+  dataSubscription,
+  dataQueue
 }

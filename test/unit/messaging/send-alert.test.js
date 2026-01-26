@@ -14,7 +14,7 @@ jest.mock('../../../app/messaging/create-message')
 const { createMessage: mockCreateMessage } = require('../../../app/messaging/create-message')
 
 const { warningEvent } = require('../../mocks/events/warning')
-const { MESSAGE } = require('../../mocks/messaging/message')
+const { RESPONSE_MESSAGE } = require('../../mocks/messaging/message')
 
 const { messageConfig } = require('../../../app/config')
 const { sendAlert } = require('../../../app/messaging/send-alert')
@@ -22,7 +22,7 @@ const { sendAlert } = require('../../../app/messaging/send-alert')
 describe('send alert', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockCreateMessage.mockReturnValue(MESSAGE)
+    mockCreateMessage.mockReturnValue(RESPONSE_MESSAGE)
   })
 
   test('creates message from event', async () => {
@@ -37,7 +37,7 @@ describe('send alert', () => {
 
   test('sends message', async () => {
     await sendAlert(warningEvent)
-    expect(mockSendMessage).toHaveBeenCalledWith(MESSAGE)
+    expect(mockSendMessage).toHaveBeenCalledWith(RESPONSE_MESSAGE)
   })
 
   test('closes connection', async () => {

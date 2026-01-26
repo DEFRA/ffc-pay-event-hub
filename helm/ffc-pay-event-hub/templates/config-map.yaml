@@ -4,16 +4,36 @@ data:
   NODE_ENV: {{ quote .Values.environment }}
   APPINSIGHTS_CLOUDROLE: {{ quote .Values.name }}
   MESSAGE_QUEUE_HOST: {{ quote .Values.container.messageQueueHost }}
+
   {{- if and (.Values.environmentCode) (not .Values.pr) }}
   EVENTS_TOPIC_ADDRESS: {{ .Values.container.eventsTopicAddress }}-{{ .Values.environmentCode }}
   ALERT_TOPIC_ADDRESS: {{ .Values.container.alertTopicAddress }}-{{ .Values.environmentCode }}
-  {{ else }}
+  DATA_TOPIC_ADDRESS: {{ .Values.container.dataTopicAddress }}-{{ .Values.environmentCode }}
+  DATARESPONSE_QUEUE_ADDRESS: {{ .Values.container.dataResponseQueueAddress }}-{{ .Values.environmentCode }}
+  {{- else }}
   EVENTS_TOPIC_ADDRESS: {{ quote .Values.container.eventsTopicAddress }}
   ALERT_TOPIC_ADDRESS: {{ quote .Values.container.alertTopicAddress }}
+  DATA_TOPIC_ADDRESS: {{ quote .Values.container.dataTopicAddress }}
+  DATARESPONSE_QUEUE_ADDRESS: {{ quote .Values.container.dataResponseQueueAddress }}
   {{- end }}
+
+  DATA_SUBSCRIPTION_ADDRESS: {{ quote .Values.container.dataSubscriptionAddress }}
   EVENTS_SUBSCRIPTION_ADDRESS: {{ quote .Values.container.eventsSubscriptionAddress }}
-  MAX_CONCURRENT_CALLS: {{ quote .Values.container.maxConcurrentCalls }}
+
   AZURE_STORAGE_CONNECTION_STRING: {{ quote .Values.container.azureStorageConnectionString }}
   AZURE_STORAGE_USE_CONNECTION_STRING: {{ quote .Values.container.azureStorageUseConnectionString }}
   AZURE_STORAGE_ACCOUNT_NAME: {{ quote .Values.container.azureStorageAccountName }}
+
+  {{- if .Values.container.redisHostname }}
+  REDIS_HOSTNAME: {{ quote .Values.container.redisHostname }}
+  {{- end }}
+  REDIS_PORT: {{ quote .Values.container.redisPort }}
+
+  {{- if .Values.pr }}
+  REDIS_PARTITION: {{ .Values.container.redisPartition }}-{{ .Values.pr }}
+  {{- else }}
+  REDIS_PARTITION: {{ quote .Values.container.redisPartition }}
+  {{- end }}
+
+  MAX_CONCURRENT_CALLS: {{ quote .Values.container.maxConcurrentCalls }}
 {{- end -}}

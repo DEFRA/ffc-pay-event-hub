@@ -1,0 +1,3 @@
+module.exports = {
+  AGREEMENT_NUMBER: 'SIP0000000000001'
+}

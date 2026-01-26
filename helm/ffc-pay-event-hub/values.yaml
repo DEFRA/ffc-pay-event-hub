@@ -34,6 +34,13 @@ container:
   eventsSubscriptionAddress: ffc-pay-event-hub
   maxConcurrentCalls: 10
   alertTopicAddress: ffc-pay-alert
+  dataTopicAddress: ffc-pay-data-request
+  dataSubscriptionAddress: ffc-pay-data-hub
+  dataResponseQueueAddress: ffc-pay-data-request-response
+  redisHostname: redis-redis-ha.default
+  redisPassword: redis
+  redisPort: 6379
+  redisPartition: ffc-pay-event-hub
   azureStorageConnectionString: dummy
   azureStorageUseConnectionString: false
   azureStorageAccountName: ffcpay

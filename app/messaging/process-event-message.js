@@ -1,4 +1,4 @@
-const util = require('util')
+const util = require('node:util')
 const { v4: uuidv4 } = require('uuid')
 const { VALIDATION } = require('../constants/errors')
 const { processEvent } = require('../inbound')
@@ -19,7 +19,10 @@ const processEventMessage = async (message, receiver) => {
     await receiver.completeMessage(message)
   } catch (err) {
     console.error('Unable to process event:', err)
-    if (!lastAlertTriggered || lastAlertTriggered + oneHourInSeconds < Date.now()) {
+    if (
+      !lastAlertTriggered ||
+      lastAlertTriggered + oneHourInSeconds < Date.now()
+    ) {
       const alert = {
         type: alertTypes.EVENT_SAVE_ALERT,
         source: source.SOURCE,

@@ -17,9 +17,17 @@ services:
     volumes:
       - azurite_data:/data
     ports:
-      - "10080:10000"
-      - "10081:10001"
-      - "10082:10002"
+      - "10070:10000"
+      - "10071:10001"
+      - "10072:10002"
+
+  ffc-pay-event-hub-redis:
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6391:6379"
+    command: redis-server --dir /data --save 5 1
 
 volumes:
   azurite_data:
+  redis_data:
