@@ -1,20 +1,22 @@
+const { db } = require('../../data')
 const { BATCH } = require('../../constants/categories')
-const { BATCH_EVENT } = require('../../constants/event-types')
-const { getClient } = require('../../storage')
 const { getTimestamp } = require('./get-timestamp')
 
 const saveBatchEvent = async (event) => {
   const timestamp = getTimestamp(event.time)
-  const batchEntity = {
+
+  const batchRecord = {
     partitionKey: event.data.filename,
     rowKey: timestamp.toString(),
     category: BATCH,
-    ...event,
+    source: event.source,
+    subject: event.subject,
+    time: event.time,
+    type: event.type,
     data: JSON.stringify(event.data)
   }
 
-  const client = getClient(BATCH_EVENT)
-  await client.upsertEntity(batchEntity, 'Merge')
+  await db.batchEvent.create(batchRecord)
 }
 
 module.exports = {

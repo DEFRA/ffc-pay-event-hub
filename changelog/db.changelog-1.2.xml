@@ -6,22 +6,20 @@
 
   <changeSet author="Oliver Lewington" id="2">
     <createTable tableName="payments">
-      <column name="event_id" type="UUID">
+      <column name="id" type="UUID">
         <constraints
           nullable="false"
           primaryKey="true"
           primaryKeyName="payments_pkey"/>
       </column>
-      <column name="partition_key" type="TEXT"/>
-      <column name="row_key" type="TEXT"/>
-      <column name="azure_timestamp" type="TIMESTAMPTZ"/>
-      <column name="event_type" type="TEXT"/>
+      <column name="PartitionKey" type="TEXT"/>
+      <column name="RowKey" type="TEXT"/>
+      <column name="Timestamp" type="TIMESTAMPTZ"/>
+      <column name="type" type="TEXT"/>
       <column name="source" type="TEXT"/>
       <column name="subject" type="TEXT"/>
-      <column name="spec_version" type="TEXT"/>
-      <column name="event_time" type="TIMESTAMPTZ"/>
+      <column name="time" type="TIMESTAMPTZ"/>
       <column name="category" type="TEXT"/>
-      <column name="data_content_type" type="TEXT"/>
       <column name="data" type="JSONB"/>
     </createTable>
   </changeSet>

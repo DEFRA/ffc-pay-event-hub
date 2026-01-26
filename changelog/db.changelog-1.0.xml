@@ -14,16 +14,16 @@
           primaryKey="true"
           primaryKeyName="batches_pkey"/>
       </column>
-      <column name="partition_key" type="TEXT">
+      <column name="PartitionKey" type="TEXT">
         <constraints nullable="false"/>
       </column>
-      <column name="row_key" type="TEXT">
+      <column name="RowKey" type="TEXT">
         <constraints nullable="false"/>
       </column>
-      <column name="azure_timestamp" type="TIMESTAMPTZ">
+      <column name="Timestamp" type="TIMESTAMPTZ">
         <constraints nullable="false"/>
       </column>
-      <column name="event_type" type="TEXT">
+      <column name="type" type="TEXT">
         <constraints nullable="false"/>
       </column>
       <column name="source" type="TEXT">
@@ -33,7 +33,7 @@
       <column name="spec_version" type="TEXT">
         <constraints nullable="false"/>
       </column>
-      <column name="event_time" type="TIMESTAMPTZ">
+      <column name="time" type="TIMESTAMPTZ">
         <constraints nullable="false"/>
       </column>
       <column name="category" type="TEXT"/>
@@ -43,19 +43,19 @@
 
     <addUniqueConstraint
       tableName="batches"
-      columnNames="partition_key, row_key"
+      columnNames="PartitionKey, RowKey"
       constraintName="batches_partition_row_uk"/>
 
-    <createIndex indexName="batches_event_time_idx" tableName="batches">
-      <column name="event_time"/>
+    <createIndex indexName="batches_time_idx" tableName="batches">
+      <column name="time"/>
     </createIndex>
 
     <createIndex indexName="batches_category_idx" tableName="batches">
       <column name="category"/>
     </createIndex>
 
-    <createIndex indexName="batches_event_type_idx" tableName="batches">
-      <column name="event_type"/>
+    <createIndex indexName="batches_type_idx" tableName="batches">
+      <column name="type"/>
     </createIndex>
   </changeSet>
 
