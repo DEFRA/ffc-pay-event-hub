@@ -4,18 +4,32 @@ jest.mock('../../../../../app/data/events/order-grouped-events')
 jest.mock('../../../../../app/data/events/sanitise-events')
 jest.mock('../../../../../app/data/events/add-values')
 
-const { getEvents: mockGetEvents } = require('../../../../../app/data/events/get-events')
-const { groupEventsByFrn: mockGroupEventsByFrn } = require('../../../../../app/data/events/batch/group-events-by-frn')
-const { orderGroupedEvents: mockOrderGroupedEvents } = require('../../../../../app/data/events/order-grouped-events')
-const { sanitiseEvents: mockSanitiseEvents } = require('../../../../../app/data/events/sanitise-events')
-const { addValues: mockAddValues } = require('../../../../../app/data/events/add-values')
+const {
+  getEvents: mockGetEvents,
+} = require('../../../../../app/outbound/events/get-events')
+const {
+  groupEventsByFrn: mockGroupEventsByFrn,
+} = require('../../../../../app/outbound/events/batch/group-events-by-frn')
+const {
+  orderGroupedEvents: mockOrderGroupedEvents,
+} = require('../../../../../app/outbound/events/order-grouped-events')
+const {
+  sanitiseEvents: mockSanitiseEvents,
+} = require('../../../../../app/outbound/events/sanitise-events')
+const {
+  addValues: mockAddValues,
+} = require('../../../../../app/outbound/events/add-values')
 
 const enriched = require('../../../../mocks/events/enriched')
 const groupedEvent = require('../../../../mocks/events/grouped-event')
 const { BATCH: BATCH_VALUE } = require('../../../../mocks/values/batch')
-const { BATCH: BATCH_CATEGORY } = require('../../../../../app/constants/categories')
+const {
+  BATCH: BATCH_CATEGORY,
+} = require('../../../../../app/constants/categories')
 
-const { getEventsByBatch } = require('../../../../../app/data/events/batch/get-events-by-batch')
+const {
+  getEventsByBatch,
+} = require('../../../../../app/outbound/events/batch/get-events-by-batch')
 
 describe('getEventsByBatch', () => {
   beforeEach(() => {

@@ -1,4 +1,6 @@
-const { sanitiseEvents } = require('../../../../app/data/events/sanitise-events')
+const {
+  sanitiseEvents,
+} = require('../../../../app/outbound/events/sanitise-events')
 
 const enriched = require('../../../mocks/events/enriched')
 const extracted = require('../../../mocks/events/extracted')
@@ -9,11 +11,11 @@ const acknowledged = require('../../../mocks/events/acknowledged')
 const { 1: SFI } = require('../../../../app/constants/scheme-names')
 const {
   PAYMENT_ACKNOWLEDGED_STATUS,
-  PAYMENT_ENRICHED_STATUS
+  PAYMENT_ENRICHED_STATUS,
 } = require('../../../../app/constants/statuses')
 const {
   PAYMENT_ACKNOWLEDGED_NAME,
-  PAYMENT_ENRICHED_NAME
+  PAYMENT_ENRICHED_NAME,
 } = require('../../../../app/constants/names')
 const { COMPLETED, IN_PROGRESS } = require('../../../../app/constants/states')
 
@@ -26,12 +28,7 @@ describe('sanitise events', () => {
       require('../../../mocks/events/grouped-event')
     )
 
-    groupedEvent.events = [
-      enriched,
-      processed,
-      submitted,
-      acknowledged
-    ]
+    groupedEvent.events = [enriched, processed, submitted, acknowledged]
 
     result = sanitiseEvents([groupedEvent])[0]
   })
@@ -55,14 +52,12 @@ describe('sanitise events', () => {
       name: PAYMENT_ACKNOWLEDGED_NAME,
       detail: PAYMENT_ACKNOWLEDGED_STATUS,
       state: COMPLETED,
-      default: true
+      default: true,
     })
   })
 
   test('should add lastUpdated as London formatted string', () => {
-    expect(result.lastUpdated).toMatch(
-      /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/
-    )
+    expect(result.lastUpdated).toMatch(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/)
   })
 
   test('should include all events in group', () => {
@@ -78,12 +73,10 @@ describe('sanitise events', () => {
       name: PAYMENT_ENRICHED_NAME,
       detail: PAYMENT_ENRICHED_STATUS,
       state: IN_PROGRESS,
-      default: true
+      default: true,
     })
 
-    expect(event.timestamp).toMatch(
-      /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/
-    )
+    expect(event.timestamp).toMatch(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/)
   })
 
   test('should convert extracted event value to pence but not others', () => {

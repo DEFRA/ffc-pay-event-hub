@@ -4,7 +4,9 @@ const processed = require('../../../../mocks/events/processed')
 const submitted = require('../../../../mocks/events/submitted')
 const acknowledged = require('../../../../mocks/events/acknowledged')
 
-const { groupEventsByCorrelationId } = require('../../../../../app/data/events/group-events-by-correlation-id')
+const {
+  groupEventsByCorrelationId,
+} = require('../../../../../app/outbound/events/group-events-by-correlation-id')
 
 describe('group events by correlation id', () => {
   let events
@@ -21,7 +23,7 @@ describe('group events by correlation id', () => {
     ['schemeId', enriched.data.schemeId],
     ['paymentRequestNumber', enriched.data.paymentRequestNumber],
     ['agreementNumber', enriched.data.agreementNumber],
-    ['marketingYear', enriched.data.marketingYear]
+    ['marketingYear', enriched.data.marketingYear],
   ]
 
   test.each(testCases)(
@@ -32,8 +34,8 @@ describe('group events by correlation id', () => {
   )
 
   test('should include events in group with correct value', () => {
-    const groupedEventIds = groupedEvents[0].events.map(e => e.id)
-    const originalEventIds = events.map(e => e.id)
+    const groupedEventIds = groupedEvents[0].events.map((e) => e.id)
+    const originalEventIds = events.map((e) => e.id)
     expect(groupedEventIds).toEqual(originalEventIds)
   })
 })

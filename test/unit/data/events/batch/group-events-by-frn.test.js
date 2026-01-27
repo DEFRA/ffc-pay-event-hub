@@ -5,7 +5,9 @@ const processed = require('../../../../mocks/events/processed')
 const submitted = require('../../../../mocks/events/submitted')
 const acknowledged = require('../../../../mocks/events/acknowledged')
 
-const { groupEventsByFrn } = require('../../../../../app/data/events/batch/group-events-by-frn')
+const {
+  groupEventsByFrn,
+} = require('../../../../../app/outbound/events/batch/group-events-by-frn')
 
 let events
 let groupedEvents
@@ -29,7 +31,7 @@ describe('groupEventsByFrn', () => {
     ['schemeId', enriched.data.schemeId],
     ['paymentRequestNumber', enriched.data.paymentRequestNumber],
     ['agreementNumber', enriched.data.agreementNumber],
-    ['marketingYear', enriched.data.marketingYear]
+    ['marketingYear', enriched.data.marketingYear],
   ])('should include %s in group', (field, expected) => {
     expect(groupedEvents[0][field]).toBe(expected)
   })

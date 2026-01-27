@@ -1,20 +1,48 @@
 const { FRN } = require('../../../../../mocks/values/frn')
-const { INVOICE_NUMBER } = require('../../../../../mocks/values/invoice-number')
+const {
+  INVOICE_NUMBER,
+} = require('../../../../../mocks/values/invoice-number')
 
 const {
-  BPS, CS, SFI, SFI23, DELINKED, SFI_EXPANDED, COHT_REVENUE, COHT_CAPITAL
+  BPS,
+  CS,
+  SFI,
+  SFI23,
+  DELINKED,
+  SFI_EXPANDED,
+  COHT_REVENUE,
+  COHT_CAPITAL,
 } = require('../../../../../../app/constants/schemes')
 
-const { PAYMENT_EVENT, HOLD_EVENT, BATCH_EVENT, WARNING_EVENT } = require('../../../../../../app/constants/event-types')
+const {
+  PAYMENT_EVENT,
+  HOLD_EVENT,
+  BATCH_EVENT,
+  WARNING_EVENT,
+} = require('../../../../../../app/constants/event-types')
 const schemeNames = require('../../../../../../app/constants/scheme-names')
-const { getEventsByScheme } = require('../../../../../../app/data/events/scheme-id/get-events-by-scheme')
-const { initialise: initialiseTables, getClient } = require('../../../../../../app/storage')
+const {
+  getEventsByScheme,
+} = require('../../../../../../app/outbound/events/scheme-id/get-events-by-scheme')
+const {
+  initialise: initialiseTables,
+  getClient,
+} = require('../../../../../../app/storage')
 
 let clients = {}
 let events = {}
 let nextEventId
 
-const SCHEMES = [SFI, CS, BPS, SFI23, DELINKED, SFI_EXPANDED, COHT_REVENUE, COHT_CAPITAL]
+const SCHEMES = [
+  SFI,
+  CS,
+  BPS,
+  SFI23,
+  DELINKED,
+  SFI_EXPANDED,
+  COHT_REVENUE,
+  COHT_CAPITAL,
+]
 const EVENT_TYPES = [PAYMENT_EVENT, HOLD_EVENT, BATCH_EVENT, WARNING_EVENT]
 
 const formatAndAddEvent = async (tableClient, event, schemeId) => {
@@ -23,7 +51,7 @@ const formatAndAddEvent = async (tableClient, event, schemeId) => {
     partitionKey: schemeId.toString(),
     rowKey: `${FRN}|${INVOICE_NUMBER}|157070221${nextEventId++}`,
     data: JSON.stringify(event.data),
-    category: 'schemeId'
+    category: 'schemeId',
   }
   await tableClient.createEntity(formattedEvent)
 }
@@ -45,10 +73,16 @@ beforeEach(async () => {
   }
 
   events = {
-    submitted: structuredClone(require('../../../../../mocks/events/submitted')),
-    processed: structuredClone(require('../../../../../mocks/events/processed')),
+    submitted: structuredClone(
+      require('../../../../../mocks/events/submitted')
+    ),
+    processed: structuredClone(
+      require('../../../../../mocks/events/processed')
+    ),
     enriched: structuredClone(require('../../../../../mocks/events/enriched')),
-    extracted: structuredClone(require('../../../../../mocks/events/extracted'))
+    extracted: structuredClone(
+      require('../../../../../mocks/events/extracted')
+    ),
   }
 
   for (const scheme of SCHEMES) {
@@ -67,7 +101,7 @@ describe('get events by scheme', () => {
     'should return correct data for scheme %s',
     async (_, scheme) => {
       const result = await getEventsByScheme()
-      const schemeData = result.find(r => r.scheme === schemeNames[scheme])
+      const schemeData = result.find((r) => r.scheme === schemeNames[scheme])
       expect(schemeData.scheme).toBe(schemeNames[scheme])
       expect(schemeData.paymentRequests).toBe(2)
       expect(schemeData.value).toBe('£2,000.00')

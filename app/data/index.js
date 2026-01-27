@@ -1,5 +1,3 @@
-const { getData } = require('./get-data')
-
 const path = require('node:path')
 const config = require('../config')
 const dbConfig = config.dbConfig[config.env]
@@ -11,5 +9,4 @@ const db = database.connect()
 
 module.exports = {
   db,
-  getData
 }

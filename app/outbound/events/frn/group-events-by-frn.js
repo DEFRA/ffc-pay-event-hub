@@ -2,27 +2,26 @@ const groupEventsByFrn = (events) => {
   return [
     ...events
       .reduce((map, event) => {
-        const frn = event.rowKey.split('|')[0]
-        const key = `${event.partitionKey}-${frn}`
+        const correlationId = event.RowKey.split('|')[0]
+        const key = `${event.PartitionKey}-${correlationId}`
 
         const item = map.get(key) || {
-          batch: event.partitionKey,
-          frn,
+          frn: event.PartitionKey,
+          correlationId,
           schemeId: event.data.schemeId,
           paymentRequestNumber: event.data.paymentRequestNumber,
           agreementNumber: event.data.agreementNumber,
           marketingYear: event.data.marketingYear,
-          currency: event.data.currency,
-          events: []
+          events: [],
         }
 
         item.events.push(event)
         return map.set(key, item)
       }, new Map())
-      .values()
+      .values(),
   ]
 }
 
 module.exports = {
-  groupEventsByFrn
+  groupEventsByFrn,
 }

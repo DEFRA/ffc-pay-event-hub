@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
   return sequelize.define('warnings', {
-    event_id: {
+    id: {
       type: DataTypes.UUID,
       primaryKey: true
     },

@@ -1,14 +1,24 @@
 const submitted = require('../../../../mocks/events/submitted')
 const {
-  BPS, CS, SFI, SFI23, DELINKED, SFI_EXPANDED, COHT_REVENUE, COHT_CAPITAL
+  BPS,
+  CS,
+  SFI,
+  SFI23,
+  DELINKED,
+  SFI_EXPANDED,
+  COHT_REVENUE,
+  COHT_CAPITAL,
 } = require('../../../../../app/constants/schemes')
-const { groupEventsByScheme } = require('../../../../../app/data/events/scheme-id/group-events-by-scheme')
+const {
+  groupEventsByScheme,
+} = require('../../../../../app/outbound/events/scheme-id/group-events-by-scheme')
 
 let mixedSchemeEvents
 
 describe('group events by scheme', () => {
   beforeEach(() => {
-    const createEventsForScheme = (scheme) => [submitted, submitted].map(e => ({ ...e, partitionKey: scheme }))
+    const createEventsForScheme = (scheme) =>
+      [submitted, submitted].map((e) => ({ ...e, partitionKey: scheme }))
 
     mixedSchemeEvents = [
       ...createEventsForScheme(BPS),
@@ -18,14 +28,16 @@ describe('group events by scheme', () => {
       ...createEventsForScheme(DELINKED),
       ...createEventsForScheme(SFI_EXPANDED),
       ...createEventsForScheme(COHT_REVENUE),
-      ...createEventsForScheme(COHT_CAPITAL)
+      ...createEventsForScheme(COHT_CAPITAL),
     ]
   })
 
   test('all events in each group have schemeId equal to partitionKey', () => {
     const groupedEvents = groupEventsByScheme(mixedSchemeEvents)
-    groupedEvents.forEach(group =>
-      group.events.forEach(event => expect(group.schemeId).toBe(event.partitionKey))
+    groupedEvents.forEach((group) =>
+      group.events.forEach((event) =>
+        expect(group.schemeId).toBe(event.partitionKey)
+      )
     )
   })
 })

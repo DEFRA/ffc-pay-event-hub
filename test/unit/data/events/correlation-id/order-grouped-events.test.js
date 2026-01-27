@@ -3,13 +3,17 @@ const enriched = require('../../../../mocks/events/enriched')
 const processed = require('../../../../mocks/events/processed')
 const submitted = require('../../../../mocks/events/submitted')
 
-const { orderGroupedEvents } = require('../../../../../app/data/events/correlation-id/order-grouped-events')
+const {
+  orderGroupedEvents,
+} = require('../../../../../app/outbound/events/correlation-id/order-grouped-events')
 
 let groupedEvent
 
 describe('order grouped events', () => {
   beforeEach(() => {
-    groupedEvent = structuredClone(require('../../../../mocks/events/grouped-event'))
+    groupedEvent = structuredClone(
+      require('../../../../mocks/events/grouped-event')
+    )
     groupedEvent.events = [acknowledged, processed, enriched, submitted]
   })
 

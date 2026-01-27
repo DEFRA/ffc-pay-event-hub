@@ -1,21 +1,32 @@
 jest.mock('../../../../app/currency')
-const { convertToString: mockConvertToString } = require('../../../../app/currency')
+const {
+  convertToString: mockConvertToString,
+} = require('../../../../app/currency')
 
 const acknowledged = require('../../../mocks/events/acknowledged')
 const enriched = require('../../../mocks/events/enriched')
 const processed = require('../../../mocks/events/processed')
 const submitted = require('../../../mocks/events/submitted')
 
-const { addValues } = require('../../../../app/data/events/add-values')
+const { addValues } = require('../../../../app/outbound/events/add-values')
 const { FC } = require('../../../../app/constants/schemes')
 
 let groupedEvent
 
 describe('add value to events', () => {
   beforeEach(() => {
-    groupedEvent = structuredClone(require('../../../mocks/events/grouped-event'))
-    groupedEvent.events = [structuredClone(enriched), structuredClone(processed), structuredClone(submitted), structuredClone(acknowledged)]
-    mockConvertToString.mockImplementation(value => (value !== undefined && value !== null ? value.toString() : '0'))
+    groupedEvent = structuredClone(
+      require('../../../mocks/events/grouped-event')
+    )
+    groupedEvent.events = [
+      structuredClone(enriched),
+      structuredClone(processed),
+      structuredClone(submitted),
+      structuredClone(acknowledged),
+    ]
+    mockConvertToString.mockImplementation((value) =>
+      value !== undefined && value !== null ? value.toString() : '0'
+    )
   })
 
   test('should return empty array if no events', () => {
@@ -29,15 +40,26 @@ describe('add value to events', () => {
 
   const valueTests = [
     { prop: 'originalValue', eventIndex: 0, expected: enriched.data.value },
-    { prop: 'originalValueText', eventIndex: 0, expected: enriched.data.value.toString() },
+    {
+      prop: 'originalValueText',
+      eventIndex: 0,
+      expected: enriched.data.value.toString(),
+    },
     { prop: 'currentValue', eventIndex: 3, expected: acknowledged.data.value },
-    { prop: 'currentValueText', eventIndex: 3, expected: acknowledged.data.value.toString() }
+    {
+      prop: 'currentValueText',
+      eventIndex: 3,
+      expected: acknowledged.data.value.toString(),
+    },
   ]
 
-  test.each(valueTests)('should add %s from event at index $eventIndex', ({ prop, eventIndex, expected }) => {
-    const result = addValues([groupedEvent])
-    expect(result[0][prop]).toBe(expected)
-  })
+  test.each(valueTests)(
+    'should add %s from event at index $eventIndex',
+    ({ prop, eventIndex, expected }) => {
+      const result = addValues([groupedEvent])
+      expect(result[0][prop]).toBe(expected)
+    }
+  )
 
   test('should add original value from second event if first is absent for FC', () => {
     delete groupedEvent.events[0].data.value

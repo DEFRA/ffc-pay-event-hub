@@ -1,5 +1,8 @@
 jest.mock('../../../../app/storage')
-const { getClient: mockGetClient, odata: mockOdata } = require('../../../../app/storage')
+const {
+  getClient: mockGetClient,
+  odata: mockOdata,
+} = require('../../../../app/storage')
 
 const mockListEntities = jest.fn()
 const mockTableClient = { listEntities: mockListEntities }
@@ -8,7 +11,7 @@ const { PARTITION_KEY } = require('../../../mocks/values/partition-key')
 const { CATEGORY } = require('../../../mocks/values/category')
 const { PAYMENT_EVENT } = require('../../../../app/constants/event-types')
 const { stringifyEventData } = require('../../../helpers/stringify-event-data')
-const { getEvents } = require('../../../../app/data/events/get-events')
+const { getEvents } = require('../../../../app/outbound/events/get-events')
 
 let extractedEvent, enrichedEvent, events
 
@@ -16,7 +19,9 @@ describe('get events', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
-    extractedEvent = structuredClone(require('../../../mocks/events/extracted'))
+    extractedEvent = structuredClone(
+      require('../../../mocks/events/extracted')
+    )
     enrichedEvent = structuredClone(require('../../../mocks/events/enriched'))
 
     stringifyEventData(extractedEvent)
@@ -38,7 +43,7 @@ describe('get events', () => {
     await getEvents(PARTITION_KEY, CATEGORY)
     expect(mockListEntities).toHaveBeenCalledTimes(1)
     expect(mockListEntities).toHaveBeenCalledWith({
-      queryOptions: { filter: mockOdata`category eq '${CATEGORY}'` }
+      queryOptions: { filter: mockOdata`category eq '${CATEGORY}'` },
     })
   })
 

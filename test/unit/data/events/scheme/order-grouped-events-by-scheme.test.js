@@ -1,14 +1,28 @@
 const {
-  SFI, SFI_PILOT, LUMP_SUMS, VET_VISITS, CS, BPS, SFI23, DELINKED, SFI_EXPANDED, COHT_REVENUE, COHT_CAPITAL
+  SFI,
+  SFI_PILOT,
+  LUMP_SUMS,
+  VET_VISITS,
+  CS,
+  BPS,
+  SFI23,
+  DELINKED,
+  SFI_EXPANDED,
+  COHT_REVENUE,
+  COHT_CAPITAL,
 } = require('../../../../../app/constants/schemes')
 
-const { orderGroupedEventsByScheme } = require('../../../../../app/data/events/scheme-id/order-grouped-events-by-scheme')
+const {
+  orderGroupedEventsByScheme,
+} = require('../../../../../app/outbound/events/scheme-id/order-grouped-events-by-scheme')
 
 let groupedEvents
 
 describe('order grouped events', () => {
   beforeEach(() => {
-    const groupedEvent = structuredClone(require('../../../../mocks/events/grouped-event'))
+    const groupedEvent = structuredClone(
+      require('../../../../mocks/events/grouped-event')
+    )
     const createEvent = (schemeId) => ({ ...groupedEvent, schemeId })
 
     groupedEvents = [
@@ -22,14 +36,24 @@ describe('order grouped events', () => {
       createEvent(DELINKED),
       createEvent(SFI_EXPANDED),
       createEvent(COHT_REVENUE),
-      createEvent(COHT_CAPITAL)
+      createEvent(COHT_CAPITAL),
     ]
   })
 
   test('should sort grouped events into ascending order by schemeId when all schemes present', () => {
     const orderedGroupedEvents = orderGroupedEventsByScheme(groupedEvents)
     const expectedOrder = [
-      SFI, SFI_PILOT, LUMP_SUMS, VET_VISITS, CS, BPS, SFI23, DELINKED, SFI_EXPANDED, COHT_REVENUE, COHT_CAPITAL
+      SFI,
+      SFI_PILOT,
+      LUMP_SUMS,
+      VET_VISITS,
+      CS,
+      BPS,
+      SFI23,
+      DELINKED,
+      SFI_EXPANDED,
+      COHT_REVENUE,
+      COHT_CAPITAL,
     ]
 
     orderedGroupedEvents.forEach((group, index) => {
@@ -39,8 +63,8 @@ describe('order grouped events', () => {
 
   test('should sort grouped events into ascending order by schemeId when only two schemes present', () => {
     const groupedTwo = [
-      { ...groupedEvents.find(e => e.schemeId === SFI_EXPANDED) },
-      { ...groupedEvents.find(e => e.schemeId === LUMP_SUMS) }
+      { ...groupedEvents.find((e) => e.schemeId === SFI_EXPANDED) },
+      { ...groupedEvents.find((e) => e.schemeId === LUMP_SUMS) },
     ]
 
     const orderedGroupedTwo = orderGroupedEventsByScheme(groupedTwo)

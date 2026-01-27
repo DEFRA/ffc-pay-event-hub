@@ -7,6 +7,7 @@ const { PAYMENT_EXTRACTED } = require('../../constants/events')
 const { convertToPence } = require('../../currency')
 
 const sanitiseEvents = (events) => {
+  console.log('Hi Dude', events[0])
   return events.map(group => ({
     ...group,
     scheme: schemeNames[group.schemeId],

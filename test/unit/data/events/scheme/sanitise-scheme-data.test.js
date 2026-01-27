@@ -5,7 +5,9 @@ const totalSchemeValues = require('../../../../mocks/total-scheme-values')
 
 const schemeNames = require('../../../../../app/constants/scheme-names')
 
-const { sanitiseSchemeData } = require('../../../../../app/data/events/scheme-id/sanitise-scheme-data')
+const {
+  sanitiseSchemeData,
+} = require('../../../../../app/outbound/events/scheme-id/sanitise-scheme-data')
 
 describe('get events by frn', () => {
   test('should map schemeId value to scheme name', async () => {
