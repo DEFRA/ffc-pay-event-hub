@@ -1,12 +1,12 @@
 module.exports = (sequelize, DataTypes) => {
-  return sequelize.define('batch', {
+  return sequelize.define('batches', {
     id: {
       type: DataTypes.UUID,
       primaryKey: true
     },
     PartitionKey: DataTypes.TEXT,
     RowKey: DataTypes.TEXT,
-    TimeStamp: DataTypes.DATE,
+    Timestamp: DataTypes.DATE,
     type: DataTypes.TEXT,
     source: DataTypes.TEXT,
     subject: DataTypes.TEXT,

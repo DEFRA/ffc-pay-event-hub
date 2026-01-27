@@ -1,12 +1,12 @@
 module.exports = (sequelize, DataTypes) => {
-  return sequelize.define('hold', {
+  return sequelize.define('holds', {
     id: {
       type: DataTypes.UUID,
       primaryKey: true
     },
     PartitionKey: DataTypes.TEXT,
     RowKey: DataTypes.TEXT,
-    TimeStamp: DataTypes.DATE,
+    Timestamp: DataTypes.DATE,
     type: DataTypes.TEXT,
     source: DataTypes.TEXT,
     time: DataTypes.DATE,

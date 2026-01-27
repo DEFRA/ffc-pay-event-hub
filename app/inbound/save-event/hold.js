@@ -1,17 +1,32 @@
+const { db } = require('../../data')
+const { v4: uuidv4 } = require('uuid')
 const { FRN, SCHEME_ID } = require('../../constants/categories')
-const { HOLD_EVENT } = require('../../constants/event-types')
-const { getClient } = require('../../storage')
 const { createRow } = require('./create-row')
+const { getTimestamp } = require('./get-timestamp')
 
 const saveHoldEvent = async (event) => {
-  const frnBasedEntity = createRow(event.data.frn, event.data.schemeId, FRN, event)
-  const schemeIdBasedEntity = createRow(event.data.schemeId, event.data.frn, SCHEME_ID, event)
-  const holdCategoryIdBasedEntity = createRow(event.data.holdCategoryId, event.data.frn, SCHEME_ID, event)
+  const timestamp = getTimestamp(event.time)
 
-  const client = getClient(HOLD_EVENT)
-  await client.upsertEntity(frnBasedEntity, 'Merge')
-  await client.upsertEntity(schemeIdBasedEntity, 'Merge')
-  await client.upsertEntity(holdCategoryIdBasedEntity, 'Merge')
+  const rows = [
+    createRow(event.data.frn, event.data.schemeId, FRN, event),
+    createRow(event.data.schemeId, event.data.frn, SCHEME_ID, event),
+    createRow(event.data.holdCategoryId, event.data.frn, SCHEME_ID, event)
+  ]
+
+  const records = rows.map(row => ({
+    id: uuidv4(),
+    PartitionKey: row.partitionKey,
+    RowKey: row.rowKey,
+    Timestamp: timestamp,
+    category: row.category,
+    source: row.source,
+    subject: row.subject,
+    time: row.time,
+    type: row.type,
+    data: row.data
+  }))
+
+  await db.holds.bulkCreate(records)
 }
 
 module.exports = {

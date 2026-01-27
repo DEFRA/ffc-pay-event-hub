@@ -27,7 +27,12 @@ services:
       DATA_SUBSCRIPTION_ADDRESS: ${DATA_SUBSCRIPTION_ADDRESS:-ffc-pay-data-hub}${MESSAGE_QUEUE_SUFFIX}
       DATARESPONSE_QUEUE_ADDRESS: ${DATARESPONSE_QUEUE_ADDRESS:-ffc-pay-data-request-response}${MESSAGE_QUEUE_SUFFIX}
       REDIS_HOSTNAME: ffc-pay-event-hub-redis
+      POSTGRES_DB: ffc_pay_event_hub
       POSTGRES_HOST: ${POSTGRES_HOST:-ffc-pay-event-hub-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_SCHEMA_PASSWORD:-ppp}
+      POSTGRES_PORT: 5432
+      POSTGRES_SCHEMA_NAME: ${POSTGRES_SCHEMA_NAME:-public}
+      POSTGRES_USERNAME: ${POSTGRES_SCHEMA_USERNAME:-postgres}
 
   ffc-pay-event-hub-postgres:
     image: postgres:11.4-alpine

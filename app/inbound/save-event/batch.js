@@ -1,4 +1,5 @@
 const { db } = require('../../data')
+const { v4: uuidv4 } = require('uuid')
 const { BATCH } = require('../../constants/categories')
 const { getTimestamp } = require('./get-timestamp')
 
@@ -6,8 +7,10 @@ const saveBatchEvent = async (event) => {
   const timestamp = getTimestamp(event.time)
 
   const batchRecord = {
-    partitionKey: event.data.filename,
-    rowKey: timestamp.toString(),
+    id: uuidv4(),
+    PartitionKey: event.data.filename,
+    Timestamp: timestamp,
+    RowKey: timestamp.toString(),
     category: BATCH,
     source: event.source,
     subject: event.subject,
@@ -16,7 +19,7 @@ const saveBatchEvent = async (event) => {
     data: JSON.stringify(event.data)
   }
 
-  await db.batchEvent.create(batchRecord)
+  await db.batches.create(batchRecord)
 }
 
 module.exports = {

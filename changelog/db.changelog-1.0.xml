@@ -8,7 +8,7 @@
   </changeSet>
   <changeSet author="Oliver Lewington" id="3">
     <createTable tableName="batches">
-      <column name="event_id" type="UUID">
+      <column name="id" type="UUID">
         <constraints
           nullable="false"
           primaryKey="true"
@@ -30,14 +30,10 @@
         <constraints nullable="false"/>
       </column>
       <column name="subject" type="TEXT"/>
-      <column name="spec_version" type="TEXT">
-        <constraints nullable="false"/>
-      </column>
       <column name="time" type="TIMESTAMPTZ">
         <constraints nullable="false"/>
       </column>
       <column name="category" type="TEXT"/>
-      <column name="data_content_type" type="TEXT"/>
       <column name="data" type="JSONB"/>
     </createTable>
 
