@@ -4,10 +4,7 @@ const defineHoldsModel = (sequelize, DataTypes) =>
   defineCommonModel(
     sequelize,
     DataTypes,
-    'holds',
-    {
-      subject: DataTypes.TEXT
-    }
+    'holds'
   )
 
 module.exports = defineHoldsModel
