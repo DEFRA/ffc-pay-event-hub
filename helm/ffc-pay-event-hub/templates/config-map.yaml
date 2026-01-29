@@ -36,4 +36,8 @@ data:
   {{- end }}
 
   MAX_CONCURRENT_CALLS: {{ quote .Values.container.maxConcurrentCalls }}
+  POSTGRES_DB: {{ quote .Values.postgresService.postgresDb }}
+  POSTGRES_HOST: {{ quote .Values.postgresService.postgresqlHost }}
+  POSTGRES_PORT: {{ quote .Values.postgresService.postgresPort }}
+  POSTGRES_SCHEMA_NAME: {{ quote .Values.postgresService.postgresSchema }}
 {{- end -}}
