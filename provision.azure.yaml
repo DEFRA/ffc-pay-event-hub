@@ -1,5 +1,7 @@
 resources:
   identity: pay-event-hub
+  postgreSql:
+    name: ffc-pay-event-hub
   topics:
     - name: ffc-pay-events
       role: receiver
