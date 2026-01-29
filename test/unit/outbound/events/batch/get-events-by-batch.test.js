@@ -1,8 +1,8 @@
-jest.mock('../../../../../app/data/events/get-events')
-jest.mock('../../../../../app/data/events/batch/group-events-by-frn')
-jest.mock('../../../../../app/data/events/order-grouped-events')
-jest.mock('../../../../../app/data/events/sanitise-events')
-jest.mock('../../../../../app/data/events/add-values')
+jest.mock('../../../../../app/outbound/events/get-events')
+jest.mock('../../../../../app/outbound/events/batch/group-events-by-frn')
+jest.mock('../../../../../app/outbound/events/order-grouped-events')
+jest.mock('../../../../../app/outbound/events/sanitise-events')
+jest.mock('../../../../../app/outbound/events/add-values')
 
 const {
   getEvents: mockGetEvents,

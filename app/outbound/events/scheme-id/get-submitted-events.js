@@ -15,10 +15,23 @@ const getSubmittedEvents = async (id, category) => {
     order: [['Timestamp', 'ASC']]
   })
 
-  return events.map(event => ({
-    ...event.toJSON(),
-    data: event.data ? JSON.parse(event.data) : undefined
-  }))
+  return events.map(event => {
+    let parsedData
+    try {
+      parsedData = event.data
+        ? typeof event.data === 'string'
+          ? JSON.parse(event.data)
+          : event.data
+        : undefined
+    } catch (err) {
+      parsedData = undefined
+    }
+
+    return {
+      ...event.toJSON(),
+      data: parsedData
+    }
+  })
 }
 
 module.exports = {

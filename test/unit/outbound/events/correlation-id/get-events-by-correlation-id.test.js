@@ -1,8 +1,8 @@
-jest.mock('../../../../../app/data/events/get-events')
-jest.mock('../../../../../app/data/events/group-events-by-correlation-id')
-jest.mock('../../../../../app/data/events/correlation-id/order-grouped-events')
-jest.mock('../../../../../app/data/events/sanitise-events')
-jest.mock('../../../../../app/data/events/add-pending-events')
+jest.mock('../../../../../app/outbound/events/get-events')
+jest.mock('../../../../../app/outbound/events/group-events-by-correlation-id')
+jest.mock('../../../../../app/outbound/events/correlation-id/order-grouped-events')
+jest.mock('../../../../../app/outbound/events/sanitise-events')
+jest.mock('../../../../../app/outbound/events/add-pending-events')
 
 const {
   getEvents: mockGetEvents,

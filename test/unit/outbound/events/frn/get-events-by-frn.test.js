@@ -1,24 +1,24 @@
-jest.mock('../../../../../app/data/events/get-events')
+jest.mock('../../../../../app/outbound/events/get-events')
 const {
   getEvents: mockGetEvents,
 } = require('../../../../../app/outbound/events/get-events')
 
-jest.mock('../../../../../app/data/events/frn/group-events-by-frn')
+jest.mock('../../../../../app/outbound/events/frn/group-events-by-frn')
 const {
   groupEventsByFrn: mockGroupEventsByFrn,
 } = require('../../../../../app/outbound/events/frn/group-events-by-frn')
 
-jest.mock('../../../../../app/data/events/order-grouped-events')
+jest.mock('../../../../../app/outbound/events/order-grouped-events')
 const {
   orderGroupedEvents: mockOrderGroupedEvents,
 } = require('../../../../../app/outbound/events/order-grouped-events')
 
-jest.mock('../../../../../app/data/events/sanitise-events')
+jest.mock('../../../../../app/outbound/events/sanitise-events')
 const {
   sanitiseEvents: mockSanitiseEvents,
 } = require('../../../../../app/outbound/events/sanitise-events')
 
-jest.mock('../../../../../app/data/events/add-values')
+jest.mock('../../../../../app/outbound/events/add-values')
 const {
   addValues: mockAddValues,
 } = require('../../../../../app/outbound/events/add-values')

@@ -1,4 +1,4 @@
-jest.mock('../../../app/data/events')
+jest.mock('../../../app/outbound/events')
 const {
   getEventsByFrn: mockGetEventsByFrn,
   getEventsByCorrelationId: mockGetEventsByCorrelationId,
@@ -20,7 +20,7 @@ const {
   SCHEME_ID: SCHEME_ID_CATEGORY,
 } = require('../../../app/constants/categories')
 
-const { getData } = require('../../../app/outbound/get-data')
+const { getData } = require('../../../app/outbound/')
 
 describe('get data', () => {
   beforeEach(() => {

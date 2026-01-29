@@ -1,22 +1,23 @@
-const { BATCH_EVENT } = require('../../../../app/constants/event-types')
+const { v4: uuidv4 } = require('uuid')
+const { BATCH } = require('../../../../app/constants/categories')
 
-jest.mock('../../../../app/storage')
-const { getClient: mockGetClient } = require('../../../../app/storage')
+jest.mock('uuid')
+const mockUuid = 'test-uuid-1234'
+uuidv4.mockReturnValue(mockUuid)
 
-const mockUpsertEntity = jest.fn()
-const mockClient = {
-  upsertEntity: mockUpsertEntity
+jest.mock('../../../../app/data')
+const { db } = require('../../../../app/data')
+const mockCreate = jest.fn()
+db.batches = {
+  create: mockCreate
 }
-mockGetClient.mockReturnValue(mockClient)
 
 jest.mock('../../../../app/inbound/save-event/get-timestamp')
 const { getTimestamp: mockGetTimestamp } = require('../../../../app/inbound/save-event/get-timestamp')
-
 const mockTimestamp = 1234567890
 mockGetTimestamp.mockReturnValue(mockTimestamp)
 
 const { saveBatchEvent } = require('../../../../app/inbound/save-event/batch')
-
 const event = require('../../../mocks/events/batch')
 
 describe('save batch event', () => {
@@ -24,24 +25,58 @@ describe('save batch event', () => {
     jest.clearAllMocks()
   })
 
-  test('uses batch client', async () => {
+  test('calls getTimestamp with event time', async () => {
     await saveBatchEvent(event)
-    expect(mockGetClient).toHaveBeenCalledWith(BATCH_EVENT)
+    expect(mockGetTimestamp).toHaveBeenCalledWith(event.time)
   })
 
-  test('creates one entity', async () => {
+  test('generates a UUID for the batch record', async () => {
     await saveBatchEvent(event)
-    expect(mockUpsertEntity).toHaveBeenCalledTimes(1)
+    expect(uuidv4).toHaveBeenCalledTimes(1)
   })
 
-  test('creates entity with filename as partition key', async () => {
+  test('creates one batch record', async () => {
     await saveBatchEvent(event)
-    expect(mockUpsertEntity).toHaveBeenCalledWith({
-      partitionKey: event.data.filename,
-      rowKey: mockTimestamp.toString(),
-      category: BATCH_EVENT,
-      ...event,
+    expect(mockCreate).toHaveBeenCalledTimes(1)
+  })
+
+  test('creates batch record with correct structure', async () => {
+    await saveBatchEvent(event)
+    expect(mockCreate).toHaveBeenCalledWith({
+      id: mockUuid,
+      PartitionKey: event.data.filename,
+      Timestamp: mockTimestamp,
+      RowKey: mockTimestamp.toString(),
+      category: BATCH,
+      source: event.source,
+      subject: event.subject,
+      time: event.time,
+      type: event.type,
       data: JSON.stringify(event.data)
-    }, 'Merge')
+    })
+  })
+
+  test('uses filename as partition key', async () => {
+    await saveBatchEvent(event)
+    const callArg = mockCreate.mock.calls[0][0]
+    expect(callArg.PartitionKey).toBe(event.data.filename)
+  })
+
+  test('uses timestamp as RowKey', async () => {
+    await saveBatchEvent(event)
+    const callArg = mockCreate.mock.calls[0][0]
+    expect(callArg.RowKey).toBe(mockTimestamp.toString())
+  })
+
+  test('stringifies event data', async () => {
+    await saveBatchEvent(event)
+    const callArg = mockCreate.mock.calls[0][0]
+    expect(callArg.data).toBe(JSON.stringify(event.data))
+  })
+
+  test('sets category to BATCH', async () => {
+    await saveBatchEvent(event)
+    const callArg = mockCreate.mock.calls[0][0]
+    expect(callArg.category).toBe(BATCH)
   })
 })

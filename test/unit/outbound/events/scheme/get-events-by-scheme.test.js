@@ -1,26 +1,26 @@
-jest.mock('../../../../../app/data/events/scheme-id/get-submitted-events')
+jest.mock('../../../../../app/outbound/events/scheme-id/get-submitted-events')
 const {
   getSubmittedEvents: mockGetSubmittedEvents,
 } = require('../../../../../app/outbound/events/scheme-id/get-submitted-events')
 
-jest.mock('../../../../../app/data/events/scheme-id/group-events-by-scheme')
+jest.mock('../../../../../app/outbound/events/scheme-id/group-events-by-scheme')
 const {
   groupEventsByScheme: mockGroupEventsByScheme,
 } = require('../../../../../app/outbound/events/scheme-id/group-events-by-scheme')
 
 jest.mock(
-  '../../../../../app/data/events/scheme-id/order-grouped-events-by-scheme'
+  '../../../../../app/outbound/events/scheme-id/order-grouped-events-by-scheme'
 )
 const {
   orderGroupedEventsByScheme: mockOrderGroupedEventsByScheme,
 } = require('../../../../../app/outbound/events/scheme-id/order-grouped-events-by-scheme')
 
-jest.mock('../../../../../app/data/events/scheme-id/get-total-scheme-values')
+jest.mock('../../../../../app/outbound/events/scheme-id/get-total-scheme-values')
 const {
   getTotalSchemeValues: mockGetTotalSchemeValues,
 } = require('../../../../../app/outbound/events/scheme-id/get-total-scheme-values')
 
-jest.mock('../../../../../app/data/events/scheme-id/sanitise-scheme-data')
+jest.mock('../../../../../app/outbound/events/scheme-id/sanitise-scheme-data')
 const {
   sanitiseSchemeData: mockSanitiseSchemeData,
 } = require('../../../../../app/outbound/events/scheme-id/sanitise-scheme-data')

@@ -1,5 +1,7 @@
 jest.mock('../../../../app/inbound/save-event/get-timestamp')
-const { getTimestamp: mockGetTimestamp } = require('../../../../app/inbound/save-event/get-timestamp')
+const {
+  getTimestamp: mockGetTimestamp,
+} = require('../../../../app/inbound/save-event/get-timestamp')
 
 const mockTimestamp = 1234567890
 mockGetTimestamp.mockReturnValue(mockTimestamp)
@@ -21,25 +23,40 @@ describe('create row', () => {
   })
 
   test.each([
-    ['partitionKey', () => mockPartitionKey, pk => pk.toString()],
-    ['rowKey', () => `${mockRowKey}|${mockTimestamp}`, v => v],
-    ['category', () => mockCategory, v => v],
-    ['time', () => mockEvent.time, v => v],
-    ['data', () => JSON.stringify(mockEvent.data), v => v]
+    ['partitionKey', () => mockPartitionKey, (pk) => pk.toString()],
+    ['rowKey', () => `${mockRowKey}|${mockTimestamp}`, (v) => v],
+    ['category', () => mockCategory, (v) => v],
+    ['time', () => mockEvent.time, (v) => v],
+    ['data', () => JSON.stringify(mockEvent.data), (v) => v],
   ])('creates entity with %s', async (_, valueFn, expectedFn) => {
-    const entity = await createRow(mockPartitionKey, mockRowKey, mockCategory, mockEvent)
+    const entity = await createRow(
+      mockPartitionKey,
+      mockRowKey,
+      mockCategory,
+      mockEvent
+    )
     expect(entity[_]).toBe(expectedFn(valueFn()))
   })
 
-  test('partitionKey is string if number', async () => {
+  test('PartitionKey is string if number', async () => {
     mockPartitionKey = 123
-    const entity = await createRow(mockPartitionKey, mockRowKey, mockCategory, mockEvent)
+    const entity = await createRow(
+      mockPartitionKey,
+      mockRowKey,
+      mockCategory,
+      mockEvent
+    )
     expect(entity.partitionKey).toBe('123')
   })
 
   test('data is undefined if event data is null', async () => {
     mockEvent.data = null
-    const entity = await createRow(mockPartitionKey, mockRowKey, mockCategory, mockEvent)
+    const entity = await createRow(
+      mockPartitionKey,
+      mockRowKey,
+      mockCategory,
+      mockEvent
+    )
     expect(entity.data).toBeUndefined()
   })
 })

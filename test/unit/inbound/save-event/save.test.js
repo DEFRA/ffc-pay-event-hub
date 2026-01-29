@@ -10,7 +10,7 @@ const { savePaymentEvent: mockSavePaymentEvent } = require('../../../../app/inbo
 jest.mock('../../../../app/inbound/save-event/batch')
 const { saveBatchEvent: mockSaveBatchEvent } = require('../../../../app/inbound/save-event/batch')
 
-const { saveEvent } = require('../../../../app/inbound/save-event/save')
+const { saveEvent } = require('../../../../app/inbound/save-event')
 const event = require('../../../mocks/events/event')
 const { HOLD_EVENT, WARNING_EVENT, PAYMENT_EVENT, BATCH_EVENT } = require('../../../../app/constants/event-types')
 
