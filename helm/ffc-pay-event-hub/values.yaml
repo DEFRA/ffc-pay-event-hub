@@ -29,6 +29,7 @@ container:
   requestCpu: 100m
   limitMemory: 200Mi
   limitCpu: 200m
+  processingActive: true
   messageQueueHost: namespace.servicebus.windows.net
   eventsTopicAddress: ffc-pay-events
   eventsSubscriptionAddress: ffc-pay-event-hub

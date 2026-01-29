@@ -18,11 +18,12 @@ const getSubmittedEvents = async (id, category) => {
   return events.map(event => {
     let parsedData
     try {
-      parsedData = event.data
-        ? typeof event.data === 'string'
-          ? JSON.parse(event.data)
-          : event.data
-        : undefined
+      const rawData = event.data
+      if (rawData) {
+        parsedData = typeof rawData === 'string' ? JSON.parse(rawData) : rawData
+      } else {
+        parsedData = undefined
+      }
     } catch (err) {
       parsedData = undefined
     }
