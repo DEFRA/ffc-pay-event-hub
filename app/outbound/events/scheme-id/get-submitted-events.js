@@ -22,10 +22,10 @@ const getSubmittedEvents = async (id, category) => {
       if (rawData) {
         parsedData = typeof rawData === 'string' ? JSON.parse(rawData) : rawData
       } else {
-        parsedData = undefined
+        parsedData = null
       }
-    } catch (err) {
-      parsedData = undefined
+    } catch {
+      parsedData = null
     }
 
     return {
