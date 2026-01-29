@@ -3,7 +3,7 @@ const { db } = require('../../../../../app/data')
 
 const mockFindAll = jest.fn()
 db.payments = {
-  findAll: mockFindAll
+  findAll: mockFindAll,
 }
 
 const { PARTITION_KEY } = require('../../../../mocks/values/partition-key')
@@ -49,9 +49,9 @@ describe('getSubmittedEvents', () => {
             source: this.source,
             subject: this.subject,
             time: this.time,
-            data: this.data
+            data: this.data,
           }
-        }
+        },
       },
       {
         id: 'uuid-2',
@@ -73,10 +73,10 @@ describe('getSubmittedEvents', () => {
             source: this.source,
             subject: this.subject,
             time: this.time,
-            data: this.data
+            data: this.data,
           }
-        }
-      }
+        },
+      },
     ]
 
     mockFindAll.mockResolvedValue(mockDbEvents)
@@ -88,9 +88,9 @@ describe('getSubmittedEvents', () => {
     expect(mockFindAll).toHaveBeenCalledWith({
       where: {
         category,
-        type: PAYMENT_SUBMITTED
+        type: PAYMENT_SUBMITTED,
       },
-      order: [['Timestamp', 'ASC']]
+      order: [['Timestamp', 'ASC']],
     })
   })
 
@@ -101,9 +101,9 @@ describe('getSubmittedEvents', () => {
       where: {
         PartitionKey: PARTITION_KEY,
         category,
-        type: PAYMENT_SUBMITTED
+        type: PAYMENT_SUBMITTED,
       },
-      order: [['Timestamp', 'ASC']]
+      order: [['Timestamp', 'ASC']],
     })
   })
 
@@ -157,14 +157,14 @@ describe('getSubmittedEvents', () => {
           source: this.source,
           subject: this.subject,
           time: this.time,
-          data: this.data
+          data: this.data,
         }
-      }
+      },
     }
 
     mockFindAll.mockResolvedValue([eventWithNoData])
     const result = await getSubmittedEvents(PARTITION_KEY, category)
-    expect(result[0].data).toBeUndefined()
+    expect(result[0].data).toBeNull()
   })
 
   test('should handle events with empty string data', async () => {
@@ -188,14 +188,14 @@ describe('getSubmittedEvents', () => {
           source: this.source,
           subject: this.subject,
           time: this.time,
-          data: this.data
+          data: this.data,
         }
-      }
+      },
     }
 
     mockFindAll.mockResolvedValue([eventWithEmptyData])
     const result = await getSubmittedEvents(PARTITION_KEY, category)
-    expect(result[0].data).toBeUndefined()
+    expect(result[0].data).toBeNull()
   })
 
   test('should preserve all event properties', async () => {
@@ -209,7 +209,7 @@ describe('getSubmittedEvents', () => {
       Timestamp: mockDbEvents[0].Timestamp,
       source: mockDbEvents[0].source,
       subject: mockDbEvents[0].subject,
-      time: mockDbEvents[0].time
+      time: mockDbEvents[0].time,
     })
 
     expect(result[1]).toMatchObject({
@@ -220,7 +220,7 @@ describe('getSubmittedEvents', () => {
       Timestamp: mockDbEvents[1].Timestamp,
       source: mockDbEvents[1].source,
       subject: mockDbEvents[1].subject,
-      time: mockDbEvents[1].time
+      time: mockDbEvents[1].time,
     })
   })
 

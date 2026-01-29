@@ -1,7 +1,13 @@
 const defineCommonModel = require('./commonModel')
-module.exports = (sequelize, DataTypes) =>
-  defineCommonModel(sequelize,
+
+const definePaymentsModel = (sequelize, DataTypes) =>
+  defineCommonModel(
+    sequelize,
     DataTypes,
-    'payments', {
+    'payments',
+    {
       subject: DataTypes.TEXT
-    })
+    }
+  )
+
+module.exports = definePaymentsModel

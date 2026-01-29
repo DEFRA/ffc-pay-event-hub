@@ -1,7 +1,13 @@
 const defineCommonModel = require('./commonModel')
-module.exports = (sequelize, DataTypes) =>
-  defineCommonModel(sequelize,
+
+const defineBatchesModel = (sequelize, DataTypes) =>
+  defineCommonModel(
+    sequelize,
     DataTypes,
-    'batches', {
+    'batches',
+    {
       subject: DataTypes.TEXT
-    })
+    }
+  )
+
+module.exports = defineBatchesModel
