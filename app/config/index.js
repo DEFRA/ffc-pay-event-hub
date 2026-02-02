@@ -1,5 +1,4 @@
 const storageConfig = require('./storage')
-const reportsConfig = require('./reports')
 const cacheConfig = require('./cache')
 const messageConfig = require('./message')
 const databaseConfig = require('./database')
@@ -37,7 +36,6 @@ value.eventsTopic = messageConfig.eventsTopic
 value.storageConfig = storageConfig
 value.dbConfig = databaseConfig
 value.storageConfig = storageConfig
-value.reportsConfig = reportsConfig
 value.cacheConfig = cacheConfig
 value.messageConfig = messageConfig
 
