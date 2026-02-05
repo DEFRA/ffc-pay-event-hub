@@ -8,6 +8,7 @@ services:
     image: ffc-pay-event-hub-development
     container_name: ffc-pay-event-hub-development
     ports:
+      - "3011:3011"
       - "9980:9229"
     volumes:
       - ./app:/home/node/app

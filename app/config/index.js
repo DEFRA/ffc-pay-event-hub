@@ -2,6 +2,7 @@ const storageConfig = require('./storage')
 const cacheConfig = require('./cache')
 const messageConfig = require('./message')
 const databaseConfig = require('./database')
+const serverConfig = require('./server')
 
 const Joi = require('joi')
 const { DEVELOPMENT, TEST, PRODUCTION } = require('../constants/environments')
@@ -38,5 +39,6 @@ value.dbConfig = databaseConfig
 value.storageConfig = storageConfig
 value.cacheConfig = cacheConfig
 value.messageConfig = messageConfig
+value.serverConfig = serverConfig
 
 module.exports = value

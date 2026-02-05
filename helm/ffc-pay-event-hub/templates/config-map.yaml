@@ -1,6 +1,7 @@
 {{- include "ffc-helm-library.container-config-map" (list . "ffc-pay-event-hub.config-map") -}}
 {{- define "ffc-pay-event-hub.config-map" -}}
 data:
+  PORT: {{ quote .Values.container.port }}
   NODE_ENV: {{ quote .Values.environment }}
   APPINSIGHTS_CLOUDROLE: {{ quote .Values.name }}
   MESSAGE_QUEUE_HOST: {{ quote .Values.container.messageQueueHost }}

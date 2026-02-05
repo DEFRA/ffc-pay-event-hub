@@ -3,7 +3,10 @@ const { BlobServiceClient } = require('@azure/storage-blob')
 
 const { storageConfig } = require('./config')
 
-let blobServiceClient, container, dataRequestContainer
+let blobServiceClient, container, dataRequestContainer, containersInitialised
+
+const BUFFER_SIZE = 4 * 1024 * 1024 // 4 MB
+const MAX_CONCURRENCY = 5
 
 const getCredential = () => new DefaultAzureCredential({ managedIdentityClientId: storageConfig.managedIdentityClientId })
 
@@ -15,7 +18,7 @@ const createBlobServiceClient = () => {
   return new BlobServiceClient(`https://${storageConfig.account}.blob.core.windows.net`, getCredential())
 }
 
-const initialise = async () => {
+const initialiseContainers = async () => {
   console.log(
     storageConfig.useConnectionString
       ? 'Using connection string for Table & Storage Clients'
@@ -34,7 +37,7 @@ const initialise = async () => {
       dataRequestContainer.createIfNotExists()
     ])
 
-    console.log('Storage ready')
+    containersInitialised = true
   }
 }
 
@@ -49,8 +52,29 @@ const writeDataRequestFile = async (filename, content) => {
   return blob
 }
 
+const writeReportFile = async (filename, readableStream) => {
+  try {
+    console.debug('[STORAGE] Starting report file save:', filename)
+    containersInitialised ?? await initialiseContainers()
+
+    const client = container.getBlockBlobClient(`${filename}`)
+    const options = {
+      blobHTTPHeaders: {
+        blobContentType: 'text/json'
+      }
+    }
+
+    await client.uploadStream(readableStream, BUFFER_SIZE, MAX_CONCURRENCY, options)
+    console.debug('[STORAGE] Upload completed')
+  } catch (error) {
+    console.error('[STORAGE] Error saving report file:', error)
+    throw error
+  }
+}
+
 module.exports = {
-  initialise,
+  initialiseContainers,
   writeFile,
   writeDataRequestFile,
+  writeReportFile
 }

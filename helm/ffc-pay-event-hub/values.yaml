@@ -29,6 +29,7 @@ container:
   requestCpu: 100m
   limitMemory: 200Mi
   limitCpu: 200m
+  port: 3011
   processingActive: true
   messageQueueHost: namespace.servicebus.windows.net
   eventsTopicAddress: ffc-pay-events
@@ -52,6 +53,22 @@ postgresService:
   postgresPort: 5432
   postgresSchema: public
   postgresUser: postgres
+
+livenessProbe:
+  path: /healthz
+  port: 3011
+  initialDelaySeconds: 20
+  periodSeconds: 10
+  failureThreshold: 3
+  timeoutSeconds: 5
+
+readinessProbe:
+  path: /healthy
+  port: 3011
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  failureThreshold: 3
+  timeoutSeconds: 5
 
 workloadIdentity: true
 

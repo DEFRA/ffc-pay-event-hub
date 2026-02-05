@@ -2,21 +2,31 @@ require('./insights').setup()
 require('log-timestamp')
 
 const config = require('./config')
-const { initialise } = require('./storage')
-const { start, stop } = require('./messaging')
-const { start: startCache, stop: stopCache } = require('./cache')
+const storage = require('./storage')
+const server = require('./server/server')
+const messaging = require('./messaging')
+const cache = require('./cache')
 
-process.on(['SIGTERM', 'SIGINT'], async () => {
-  await stopCache()
-  await stop()
+const shutdown = async () => {
+  await cache.stopCache()
+  await messaging.stop()
   process.exit(0)
-})
+}
 
-module.exports = (async () => {
-  await startCache()
+process.on(['SIGTERM', 'SIGINT'], shutdown)
 
-  if (config.processingActive) {
-    await initialise()
-    await start()
+const startApp = async () => {
+  await server.start()
+
+  if (!config.processingActive) {
+    console.info('Processing capabilities are currently not enabled in this environment')
+    return
   }
-})()
+
+  await cache.start()
+  await storage.initialiseContainers()
+}
+
+startApp()
+
+module.exports = startApp
