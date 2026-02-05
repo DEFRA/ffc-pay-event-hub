@@ -1,8 +1,8 @@
 ---
 environment: production
-environmentCode: snd
+environmentCode: snd2
+pr: true
 container:
-  applyQueueAddress: ffc-demo-apply
-  messageQueueHost: SNDFFCINFSB2001.servicebus.windows.net
   azureStorageAccountName: snd2ffcpayst2001
+  messageQueueHost: SNDFFCINFSB2001.servicebus.windows.net
   redisHostname: SNDFFCINFRD2001.redis.cache.windows.net
