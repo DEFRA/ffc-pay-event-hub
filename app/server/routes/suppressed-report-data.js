@@ -3,7 +3,7 @@ const { getSuppressedReportData } = require('../../report-data/get-suppressed-re
 
 module.exports = {
   method: GET,
-  path: '/shared-report-data',
+  path: '/suppressed-report-data',
   options: {
     handler: async (request, h) => {
       const reportLocation = await getSuppressedReportData()

@@ -38,6 +38,7 @@ const initialiseContainers = async () => {
     ])
 
     containersInitialised = true
+    console.log('Blob containers exist')
   }
 }
 
@@ -57,14 +58,14 @@ const writeReportFile = async (filename, readableStream) => {
     console.debug('[STORAGE] Starting report file save:', filename)
     containersInitialised ?? await initialiseContainers()
 
-    const client = container.getBlockBlobClient(`${filename}`)
+    const blob = dataRequestContainer.getBlockBlobClient(filename)
     const options = {
       blobHTTPHeaders: {
         blobContentType: 'text/json'
       }
     }
 
-    await client.uploadStream(readableStream, BUFFER_SIZE, MAX_CONCURRENCY, options)
+    await blob.uploadStream(readableStream, BUFFER_SIZE, MAX_CONCURRENCY, options)
     console.debug('[STORAGE] Upload completed')
   } catch (error) {
     console.error('[STORAGE] Error saving report file:', error)
