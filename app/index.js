@@ -27,8 +27,6 @@ const startApp = async () => {
   await storage.initialiseContainers()
 }
 
-(async () => {
-  await startApp()
-})()
+await startApp()
 
 module.exports = startApp

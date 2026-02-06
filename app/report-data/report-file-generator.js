@@ -57,8 +57,7 @@ const exportQueryToJsonFile = async (sql, fileIdentifier = undefined, batchSize 
   }
 }
 
-const generateSqlQuery = (whereClause = null, tableName) => {
-  console.log('Available models:', Object.keys(db)) // Debug line
+const generateSqlQuery = (whereClause, tableName) => {
   const model = db[tableName]
 
   if (!model) {

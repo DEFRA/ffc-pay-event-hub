@@ -5,7 +5,7 @@ module.exports = {
   method: GET,
   path: '/suppressed-report-data',
   options: {
-    handler: async (request, h) => {
+    handler: async (_request, h) => {
       const reportLocation = await getSuppressedReportData()
 
       return h.response({ file: reportLocation })
