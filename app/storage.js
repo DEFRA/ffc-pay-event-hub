@@ -8,37 +8,46 @@ let blobServiceClient, container, dataRequestContainer, containersInitialised
 const BUFFER_SIZE = 4 * 1024 * 1024 // 4 MB
 const MAX_CONCURRENCY = 5
 
-const getCredential = () => new DefaultAzureCredential({ managedIdentityClientId: storageConfig.managedIdentityClientId })
+const getCredential = () =>
+  new DefaultAzureCredential({
+    managedIdentityClientId: storageConfig.managedIdentityClientId,
+  })
 
 const createBlobServiceClient = () => {
   if (storageConfig.useConnectionString) {
-    return BlobServiceClient.fromConnectionString(storageConfig.connectionString)
+    return BlobServiceClient.fromConnectionString(
+      storageConfig.connectionString
+    )
   }
 
-  return new BlobServiceClient(`https://${storageConfig.account}.blob.core.windows.net`, getCredential())
+  return new BlobServiceClient(
+    `https://${storageConfig.account}.blob.core.windows.net`,
+    getCredential()
+  )
 }
 
 const initialiseContainers = async () => {
   console.log(
     storageConfig.useConnectionString
-      ? 'Using connection string for Table & Storage Clients'
-      : 'Using DefaultAzureCredential for Table & Storage Clients'
+      ? 'Using connection string for Storage Clients'
+      : 'Using DefaultAzureCredential for Storage Clients'
   )
 
   blobServiceClient = createBlobServiceClient()
   container = blobServiceClient.getContainerClient(storageConfig.container)
-  dataRequestContainer = blobServiceClient.getContainerClient(storageConfig.dataRequestContainer)
+  dataRequestContainer = blobServiceClient.getContainerClient(
+    storageConfig.dataRequestContainer
+  )
 
   if (storageConfig.createEntities) {
     console.log('Making sure blob containers exist')
 
     await Promise.all([
       container.createIfNotExists(),
-      dataRequestContainer.createIfNotExists()
+      dataRequestContainer.createIfNotExists(),
     ])
 
     containersInitialised = true
-    console.log('Blob containers exist')
   }
 }
 
@@ -56,16 +65,21 @@ const writeDataRequestFile = async (filename, content) => {
 const writeReportFile = async (filename, readableStream) => {
   try {
     console.debug('[STORAGE] Starting report file save:', filename)
-    containersInitialised ?? await initialiseContainers()
+    containersInitialised ?? (await initialiseContainers())
 
     const blob = dataRequestContainer.getBlockBlobClient(filename)
     const options = {
       blobHTTPHeaders: {
-        blobContentType: 'text/json'
-      }
+        blobContentType: 'text/json',
+      },
     }
 
-    await blob.uploadStream(readableStream, BUFFER_SIZE, MAX_CONCURRENCY, options)
+    await blob.uploadStream(
+      readableStream,
+      BUFFER_SIZE,
+      MAX_CONCURRENCY,
+      options
+    )
     console.debug('[STORAGE] Upload completed')
   } catch (error) {
     console.error('[STORAGE] Error saving report file:', error)
@@ -77,5 +91,5 @@ module.exports = {
   initialiseContainers,
   writeFile,
   writeDataRequestFile,
-  writeReportFile
+  writeReportFile,
 }

@@ -1,26 +1,55 @@
-jest.mock("../../app/messaging");
-const { start: mockStartMessaging } = require("../../app/messaging");
+jest.mock('../../app/server/server', () => ({
+  start: jest.fn()
+}))
 
-jest.mock("../../app/storage");
-const { initialiseContainers: mockInitialise } = require("../../app/storage");
+jest.mock('../../app/messaging', () => ({
+  start: jest.fn(),
+  stop: jest.fn()
+}))
 
-jest.mock("../../app/cache");
-const { start: mockStartCache } = require("../../app/cache");
+jest.mock('../../app/storage', () => ({
+  initialiseContainers: jest.fn()
+}))
 
-describe("app", () => {
-  beforeEach(() => {
-    require("../../app");
-  });
+jest.mock('../../app/cache', () => ({
+  start: jest.fn(),
+  stopCache: jest.fn()
+}))
 
-  test("starts messaging once", async () => {
-    expect(mockStartMessaging).toHaveBeenCalledTimes(1);
-  });
+jest.mock('../../app/config', () => ({
+  processingActive: true
+}))
 
-  test("initialises storage once", async () => {
-    expect(mockInitialise).toHaveBeenCalledTimes(1);
-  });
+describe('app startup', () => {
+  let server
+  let messaging
+  let storage
+  let cache
 
-  test("starts cache once", async () => {
-    expect(mockStartCache).toHaveBeenCalledTimes(1);
-  });
-});
+  beforeEach(async () => {
+    jest.resetModules()
+    jest.clearAllMocks()
+
+    require('../../app')
+    server = require('../../app/server/server')
+    messaging = require('../../app/messaging')
+    storage = require('../../app/storage')
+    cache = require('../../app/cache')
+  })
+
+  test('starts server once', () => {
+    expect(server.start).toHaveBeenCalledTimes(1)
+  })
+
+  test('starts cache once', () => {
+    expect(cache.start).toHaveBeenCalledTimes(1)
+  })
+
+  test('initialises storage once', () => {
+    expect(storage.initialiseContainers).toHaveBeenCalledTimes(1)
+  })
+
+  test('does not start messaging (not implemented)', () => {
+    expect(messaging.start).not.toHaveBeenCalled()
+  })
+})

@@ -13,7 +13,7 @@ const generateSuppressedReportSql = async (tableName = 'payments') => {
 
 const getSuppressedReportData = async (tableName = 'payments') => {
   const sql = await generateSuppressedReportSql(tableName)
-  return exportQueryToJsonFile(sql)
+  return exportQueryToJsonFile(sql, 'suppressed-report')
 }
 
 module.exports = {
