@@ -1,0 +1,21 @@
+---
+environment: production
+environmentCode: pre
+container:
+  messageQueueHost: PREFFCINFSB1001.servicebus.windows.net
+  azureStorageAccountName: preffcpayst1001
+  endpointEnabled: true
+  redisHostname: PREFFCINFRD1001.redis.cache.windows.nete
+secretProviderClass:
+  azure:
+    keyvaultName: PREFFCINFKV1001
+    objects:
+      - objectName: pre-ffcahwr-appinsights-connectionString
+        objectType: secret
+
+  secretObjects:
+    - secretName: ffc-pay-event-hub
+      type: Opaque
+      data:
+        - objectName: pre-ffcahwr-appinsights-connectionString
+          key: APPINSIGHTS_CONNECTIONSTRING
