@@ -1,3 +1,4 @@
 module.exports = {
-  OK: 200,
+  SUCCESS: 200,
+  INTERNAL_SERVER_ERROR: 500
 }
