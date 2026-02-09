@@ -1,4 +1,4 @@
-const { db } = require('../../data')
+const db = require('../../data')
 const { v4: uuidv4 } = require('uuid')
 const { FRN, SCHEME_ID } = require('../../constants/categories')
 const { createRow } = require('./create-row')

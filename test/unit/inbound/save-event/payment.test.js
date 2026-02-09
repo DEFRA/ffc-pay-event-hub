@@ -1,5 +1,10 @@
 const { v4: uuidv4 } = require('uuid')
-const { FRN, CORRELATION_ID, SCHEME_ID, BATCH } = require('../../../../app/constants/categories')
+const {
+  FRN,
+  CORRELATION_ID,
+  SCHEME_ID,
+  BATCH,
+} = require('../../../../app/constants/categories')
 
 jest.mock('uuid')
 const mockUuids = ['uuid-1', 'uuid-2', 'uuid-3', 'uuid-4']
@@ -11,21 +16,27 @@ uuidv4.mockImplementation(() => {
 })
 
 jest.mock('../../../../app/data')
-const { db } = require('../../../../app/data')
+const db = require('../../../../app/data')
 const mockBulkCreate = jest.fn()
 db.payments = {
-  bulkCreate: mockBulkCreate
+  bulkCreate: mockBulkCreate,
 }
 
 jest.mock('../../../../app/inbound/save-event/create-row')
-const { createRow: mockCreateRow } = require('../../../../app/inbound/save-event/create-row')
+const {
+  createRow: mockCreateRow,
+} = require('../../../../app/inbound/save-event/create-row')
 
 jest.mock('../../../../app/inbound/save-event/get-timestamp')
-const { getTimestamp: mockGetTimestamp } = require('../../../../app/inbound/save-event/get-timestamp')
+const {
+  getTimestamp: mockGetTimestamp,
+} = require('../../../../app/inbound/save-event/get-timestamp')
 const mockTimestamp = 1122334455
 mockGetTimestamp.mockReturnValue(mockTimestamp)
 
-const { savePaymentEvent } = require('../../../../app/inbound/save-event/payment')
+const {
+  savePaymentEvent,
+} = require('../../../../app/inbound/save-event/payment')
 const event = require('../../../mocks/events/payment')
 
 describe('save payment event', () => {
@@ -34,16 +45,18 @@ describe('save payment event', () => {
     uuidCallCount = 0
 
     // Reset the mock implementation for each test
-    mockCreateRow.mockImplementation((partitionKey, rowKey, category, event) => ({
-      partitionKey,
-      rowKey,
-      category,
-      source: event.source,
-      subject: event.subject,
-      time: event.time,
-      type: event.type,
-      data: JSON.stringify(event.data)
-    }))
+    mockCreateRow.mockImplementation(
+      (partitionKey, rowKey, category, event) => ({
+        partitionKey,
+        rowKey,
+        category,
+        source: event.source,
+        subject: event.subject,
+        time: event.time,
+        type: event.type,
+        data: JSON.stringify(event.data),
+      })
+    )
   })
 
   test('calls getTimestamp with event time', async () => {
@@ -86,8 +99,8 @@ describe('save payment event', () => {
       ...event,
       data: {
         ...event.data,
-        batch: undefined
-      }
+        batch: undefined,
+      },
     }
     await savePaymentEvent(eventWithoutBatch)
     expect(mockCreateRow).toHaveBeenCalledTimes(3)
@@ -98,8 +111,8 @@ describe('save payment event', () => {
       ...event,
       data: {
         ...event.data,
-        batch: 'batch-123'
-      }
+        batch: 'batch-123',
+      },
     }
     await savePaymentEvent(eventWithBatch)
     expect(mockCreateRow).toHaveBeenCalledTimes(4)
@@ -110,8 +123,8 @@ describe('save payment event', () => {
       ...event,
       data: {
         ...event.data,
-        batch: 'batch-456'
-      }
+        batch: 'batch-456',
+      },
     }
     await savePaymentEvent(eventWithBatch)
     expect(mockCreateRow).toHaveBeenCalledWith(
@@ -127,11 +140,13 @@ describe('save payment event', () => {
       ...event,
       data: {
         ...event.data,
-        batch: null
-      }
+        batch: null,
+      },
     }
     await savePaymentEvent(eventWithoutBatch)
-    const batchCalls = mockCreateRow.mock.calls.filter(call => call[2] === BATCH)
+    const batchCalls = mockCreateRow.mock.calls.filter(
+      (call) => call[2] === BATCH
+    )
     expect(batchCalls).toHaveLength(0)
   })
 
@@ -140,8 +155,8 @@ describe('save payment event', () => {
       ...event,
       data: {
         ...event.data,
-        batch: 'batch-789'
-      }
+        batch: 'batch-789',
+      },
     }
     await savePaymentEvent(eventWithBatch)
     expect(uuidv4).toHaveBeenCalledTimes(4)
@@ -160,8 +175,8 @@ describe('save payment event', () => {
         correlationId: 'corr-123',
         invoiceNumber: 'INV-001',
         schemeId: 'scheme-456',
-        batch: undefined
-      }
+        batch: undefined,
+      },
     }
     await savePaymentEvent(eventWithoutBatch)
 
@@ -178,7 +193,7 @@ describe('save payment event', () => {
       subject: event.subject,
       time: event.time,
       type: event.type,
-      data: JSON.stringify(eventWithoutBatch.data)
+      data: JSON.stringify(eventWithoutBatch.data),
     })
 
     expect(records[1]).toEqual({
@@ -191,7 +206,7 @@ describe('save payment event', () => {
       subject: event.subject,
       time: event.time,
       type: event.type,
-      data: JSON.stringify(eventWithoutBatch.data)
+      data: JSON.stringify(eventWithoutBatch.data),
     })
 
     expect(records[2]).toEqual({
@@ -204,7 +219,7 @@ describe('save payment event', () => {
       subject: event.subject,
       time: event.time,
       type: event.type,
-      data: JSON.stringify(eventWithoutBatch.data)
+      data: JSON.stringify(eventWithoutBatch.data),
     })
   })
 
@@ -216,8 +231,8 @@ describe('save payment event', () => {
         correlationId: 'corr-123',
         invoiceNumber: 'INV-001',
         schemeId: 'scheme-456',
-        batch: 'batch-999'
-      }
+        batch: 'batch-999',
+      },
     }
     await savePaymentEvent(eventWithBatch)
 
@@ -234,7 +249,7 @@ describe('save payment event', () => {
       subject: event.subject,
       time: event.time,
       type: event.type,
-      data: JSON.stringify(eventWithBatch.data)
+      data: JSON.stringify(eventWithBatch.data),
     })
   })
 
@@ -243,13 +258,13 @@ describe('save payment event', () => {
       ...event,
       data: {
         ...event.data,
-        batch: 'batch-111'
-      }
+        batch: 'batch-111',
+      },
     }
     await savePaymentEvent(eventWithBatch)
 
     const records = mockBulkCreate.mock.calls[0][0]
-    records.forEach(record => {
+    records.forEach((record) => {
       expect(record.Timestamp).toBe(mockTimestamp)
     })
   })
@@ -259,13 +274,13 @@ describe('save payment event', () => {
       ...event,
       data: {
         ...event.data,
-        batch: 'batch-222'
-      }
+        batch: 'batch-222',
+      },
     }
     await savePaymentEvent(eventWithBatch)
 
     const records = mockBulkCreate.mock.calls[0][0]
-    const ids = records.map(r => r.id)
+    const ids = records.map((r) => r.id)
     const uniqueIds = [...new Set(ids)]
     expect(uniqueIds).toHaveLength(records.length)
   })

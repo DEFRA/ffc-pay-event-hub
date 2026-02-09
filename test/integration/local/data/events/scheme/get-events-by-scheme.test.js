@@ -1,20 +1,38 @@
 const { FRN } = require('../../../../../mocks/values/frn')
-const { INVOICE_NUMBER } = require('../../../../../mocks/values/invoice-number')
 const {
-  BPS, CS, SFI, SFI23, DELINKED, SFI_EXPANDED, COHT_REVENUE, COHT_CAPITAL,
+  INVOICE_NUMBER,
+} = require('../../../../../mocks/values/invoice-number')
+const {
+  BPS,
+  CS,
+  SFI,
+  SFI23,
+  DELINKED,
+  SFI_EXPANDED,
+  COHT_REVENUE,
+  COHT_CAPITAL,
 } = require('../../../../../../app/constants/schemes')
 const { SCHEME_ID } = require('../../../../../../app/constants/categories')
 const { PAYMENT_SUBMITTED } = require('../../../../../../app/constants/events')
 const schemeNames = require('../../../../../../app/constants/scheme-names')
-const { getEventsByScheme } = require('../../../../../../app/outbound/events/scheme-id/get-events-by-scheme')
-const { db } = require('../../../../../../app/data')
+const {
+  getEventsByScheme,
+} = require('../../../../../../app/outbound/events/scheme-id/get-events-by-scheme')
+const db = require('../../../../../../app/data')
 const { v4: uuidv4 } = require('uuid')
 
 let events = {}
 let nextEventId
 
 const SCHEMES = [
-  SFI, CS, BPS, SFI23, DELINKED, SFI_EXPANDED, COHT_REVENUE, COHT_CAPITAL,
+  SFI,
+  CS,
+  BPS,
+  SFI23,
+  DELINKED,
+  SFI_EXPANDED,
+  COHT_REVENUE,
+  COHT_CAPITAL,
 ]
 
 // --- FIX: stringify data, match type and category exactly ---
@@ -25,8 +43,8 @@ const formatAndAddEvent = async (dbModel, event, schemeId) => {
     RowKey: `${FRN}|${INVOICE_NUMBER}|157070221${nextEventId++}`,
     Timestamp: Date.now() + nextEventId,
     data: JSON.stringify(event.data), // stringified
-    category: SCHEME_ID,               // ensure matches filter
-    type: PAYMENT_SUBMITTED,           // ensure matches filter
+    category: SCHEME_ID, // ensure matches filter
+    type: PAYMENT_SUBMITTED, // ensure matches filter
     source: event.source,
     subject: event.subject,
     time: event.time,
@@ -46,10 +64,16 @@ beforeEach(async () => {
   await db.warnings.destroy({ where: {}, truncate: true })
 
   events = {
-    submitted: structuredClone(require('../../../../../mocks/events/submitted')),
-    processed: structuredClone(require('../../../../../mocks/events/processed')),
+    submitted: structuredClone(
+      require('../../../../../mocks/events/submitted')
+    ),
+    processed: structuredClone(
+      require('../../../../../mocks/events/processed')
+    ),
     enriched: structuredClone(require('../../../../../mocks/events/enriched')),
-    extracted: structuredClone(require('../../../../../mocks/events/extracted')),
+    extracted: structuredClone(
+      require('../../../../../mocks/events/extracted')
+    ),
   }
 
   // ensure submitted type and category match filter
@@ -59,7 +83,7 @@ beforeEach(async () => {
   if (!events.submitted.data) {
     events.submitted.data = {}
   }
-  events.submitted.data.value = 100000  // in pence: 100,000p = £1,000.00
+  events.submitted.data.value = 100000 // in pence: 100,000p = £1,000.00
   events.submitted.data.frn = FRN
   events.submitted.data.invoiceNumber = INVOICE_NUMBER
 
@@ -96,7 +120,7 @@ describe('get events by scheme', () => {
     'should return correct data for scheme %s',
     async (_, scheme) => {
       const result = await getEventsByScheme()
-      const schemeData = result.find(r => r.scheme === schemeNames[scheme])
+      const schemeData = result.find((r) => r.scheme === schemeNames[scheme])
       expect(schemeData).toBeDefined()
       expect(schemeData.scheme).toBe(schemeNames[scheme])
       expect(schemeData.paymentRequests).toBe(2)
@@ -106,7 +130,7 @@ describe('get events by scheme', () => {
 
   test('should have 2 submitted events per scheme', async () => {
     const result = await getEventsByScheme()
-    result.forEach(schemeData => {
+    result.forEach((schemeData) => {
       // The events are aggregated, not returned as an array
       expect(schemeData.paymentRequests).toBe(2)
     })
@@ -114,7 +138,7 @@ describe('get events by scheme', () => {
 
   test('should sanitise scheme data', async () => {
     const result = await getEventsByScheme()
-    result.forEach(schemeData => {
+    result.forEach((schemeData) => {
       expect(schemeData.scheme).toBeDefined()
       expect(schemeData.paymentRequests).toBeDefined()
       expect(schemeData.value).toBeDefined()
@@ -138,7 +162,7 @@ describe('get events by scheme', () => {
     await formatAndAddEvent(db.warnings, extraEvent, testScheme)
 
     const result = await getEventsByScheme()
-    const schemeData = result.find(r => r.scheme === schemeNames[testScheme])
+    const schemeData = result.find((r) => r.scheme === schemeNames[testScheme])
     expect(schemeData.paymentRequests).toBe(2)
   })
 })

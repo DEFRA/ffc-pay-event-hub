@@ -11,14 +11,16 @@ uuidv4.mockImplementation(() => {
 })
 
 jest.mock('../../../../app/data')
-const { db } = require('../../../../app/data')
+const db = require('../../../../app/data')
 const mockBulkCreate = jest.fn()
 db.holds = {
-  bulkCreate: mockBulkCreate
+  bulkCreate: mockBulkCreate,
 }
 
 jest.mock('../../../../app/inbound/save-event/create-row')
-const { createRow: mockCreateRow } = require('../../../../app/inbound/save-event/create-row')
+const {
+  createRow: mockCreateRow,
+} = require('../../../../app/inbound/save-event/create-row')
 mockCreateRow.mockImplementation((partitionKey, rowKey, category, event) => ({
   partitionKey,
   rowKey,
@@ -27,11 +29,13 @@ mockCreateRow.mockImplementation((partitionKey, rowKey, category, event) => ({
   subject: event.subject,
   time: event.time,
   type: event.type,
-  data: JSON.stringify(event.data)
+  data: JSON.stringify(event.data),
 }))
 
 jest.mock('../../../../app/inbound/save-event/get-timestamp')
-const { getTimestamp: mockGetTimestamp } = require('../../../../app/inbound/save-event/get-timestamp')
+const {
+  getTimestamp: mockGetTimestamp,
+} = require('../../../../app/inbound/save-event/get-timestamp')
 const mockTimestamp = 9988776655
 mockGetTimestamp.mockReturnValue(mockTimestamp)
 
@@ -101,8 +105,8 @@ describe('save hold event', () => {
         ...event.data,
         frn: '9876543210',
         schemeId: 'scheme-789',
-        holdCategoryId: 'hold-cat-123'
-      }
+        holdCategoryId: 'hold-cat-123',
+      },
     }
     await saveHoldEvent(holdEvent)
 
@@ -119,7 +123,7 @@ describe('save hold event', () => {
       subject: event.subject,
       time: event.time,
       type: event.type,
-      data: JSON.stringify(holdEvent.data)
+      data: JSON.stringify(holdEvent.data),
     })
 
     expect(records[1]).toEqual({
@@ -132,7 +136,7 @@ describe('save hold event', () => {
       subject: event.subject,
       time: event.time,
       type: event.type,
-      data: JSON.stringify(holdEvent.data)
+      data: JSON.stringify(holdEvent.data),
     })
 
     expect(records[2]).toEqual({
@@ -145,7 +149,7 @@ describe('save hold event', () => {
       subject: event.subject,
       time: event.time,
       type: event.type,
-      data: JSON.stringify(holdEvent.data)
+      data: JSON.stringify(holdEvent.data),
     })
   })
 
@@ -153,7 +157,7 @@ describe('save hold event', () => {
     await saveHoldEvent(event)
 
     const records = mockBulkCreate.mock.calls[0][0]
-    records.forEach(record => {
+    records.forEach((record) => {
       expect(record.Timestamp).toBe(mockTimestamp)
     })
   })
@@ -162,7 +166,7 @@ describe('save hold event', () => {
     await saveHoldEvent(event)
 
     const records = mockBulkCreate.mock.calls[0][0]
-    const ids = records.map(r => r.id)
+    const ids = records.map((r) => r.id)
     const uniqueIds = [...new Set(ids)]
     expect(uniqueIds).toHaveLength(records.length)
   })
@@ -170,7 +174,7 @@ describe('save hold event', () => {
   test('passes event object to all createRow calls', async () => {
     await saveHoldEvent(event)
 
-    mockCreateRow.mock.calls.forEach(call => {
+    mockCreateRow.mock.calls.forEach((call) => {
       expect(call[3]).toBe(event)
     })
   })
@@ -188,7 +192,7 @@ describe('save hold event', () => {
     await saveHoldEvent(event)
 
     const records = mockBulkCreate.mock.calls[0][0]
-    records.forEach(record => {
+    records.forEach((record) => {
       expect(record.source).toBe(event.source)
       expect(record.subject).toBe(event.subject)
       expect(record.time).toBe(event.time)

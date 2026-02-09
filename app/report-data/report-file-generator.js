@@ -1,6 +1,6 @@
 const { PassThrough } = require('node:stream')
 const QueryStream = require('pg-query-stream')
-const { db } = require('../data')
+const db = require('../data')
 const { writeReportFile } = require('../storage')
 
 const generateUniqueFilename = (prefix = 'default', ext = 'json') => {
@@ -8,36 +8,41 @@ const generateUniqueFilename = (prefix = 'default', ext = 'json') => {
   return `${prefix}-${timestamp}.${ext}`
 }
 
-const streamRowsAsJsonArray = (pgStream, outputStream) => new Promise((resolve, reject) => {
-  let isFirstRow = true
-  outputStream.write('[\n')
+const streamRowsAsJsonArray = (pgStream, outputStream) =>
+  new Promise((resolve, reject) => {
+    let isFirstRow = true
+    outputStream.write('[\n')
 
-  pgStream.on('data', (row) => {
-    const json = JSON.stringify(row)
-    if (!isFirstRow) {
-      outputStream.write(',\n')
-    }
-    outputStream.write(json)
-    isFirstRow = false
+    pgStream.on('data', (row) => {
+      const json = JSON.stringify(row)
+      if (!isFirstRow) {
+        outputStream.write(',\n')
+      }
+      outputStream.write(json)
+      isFirstRow = false
+    })
+
+    pgStream.on('end', () => {
+      outputStream.end('\n]\n')
+      resolve()
+    })
+
+    pgStream.on('error', reject)
   })
 
-  pgStream.on('end', () => {
-    outputStream.end('\n]\n')
-    resolve()
-  })
+const createStreamingQuery = (sql, client, batchSize = 5000) =>
+  client.query(new QueryStream(sql, [], { batchSize }))
 
-  pgStream.on('error', reject)
-})
-
-const createStreamingQuery = (sql, client, batchSize = 5000) => client.query(new QueryStream(sql, [], { batchSize }))
-
-const getDbClient = async () =>
-  db.sequelize.connectionManager.getConnection()
+const getDbClient = async () => db.sequelize.connectionManager.getConnection()
 
 const releaseDbClient = async (client) =>
   db.sequelize.connectionManager.releaseConnection(client)
 
-const exportQueryToJsonFile = async (sql, fileIdentifier = undefined, batchSize = 5000) => {
+const exportQueryToJsonFile = async (
+  sql,
+  fileIdentifier = undefined,
+  batchSize = 5000
+) => {
   const client = await getDbClient()
   const passThrough = new PassThrough()
 
@@ -72,7 +77,10 @@ const generateSqlQuery = (whereClause, tableName) => {
   }
 
   const queryGenerator = db.sequelize.getQueryInterface().queryGenerator
-  const whereSql = queryGenerator.getWhereConditions(whereClause, actualTableName)
+  const whereSql = queryGenerator.getWhereConditions(
+    whereClause,
+    actualTableName
+  )
   return `${baseQuery} WHERE ${whereSql}`
 }
 

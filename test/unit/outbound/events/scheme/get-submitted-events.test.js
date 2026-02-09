@@ -1,5 +1,5 @@
 jest.mock('../../../../../app/data')
-const { db } = require('../../../../../app/data')
+const db = require('../../../../../app/data')
 
 const mockFindAll = jest.fn()
 db.payments = {

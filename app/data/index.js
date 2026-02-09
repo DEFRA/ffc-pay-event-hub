@@ -7,6 +7,4 @@ const { Database } = require('ffc-database')
 const database = new Database({ ...dbConfig, modelPath })
 const db = database.connect()
 
-module.exports = {
-  db,
-}
+module.exports = db

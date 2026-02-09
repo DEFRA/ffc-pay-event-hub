@@ -3,8 +3,8 @@ const mockSendMessage = jest.fn()
 jest.mock('ffc-messaging', () => ({
   MessageSender: jest.fn().mockImplementation(() => ({
     sendMessage: mockSendMessage,
-    closeConnection: jest.fn()
-  }))
+    closeConnection: jest.fn(),
+  })),
 }))
 
 const {
@@ -12,11 +12,13 @@ const {
   CORRELATION_ID,
   SCHEME_ID,
   BATCH,
-  WARNING
+  WARNING,
 } = require('../../../app/constants/categories')
 
-const { processEventMessage } = require('../../../app/messaging/process-event-message')
-const { db } = require('../../../app/data')
+const {
+  processEventMessage,
+} = require('../../../app/messaging/process-event-message')
+const db = require('../../../app/data')
 
 const receiver = { completeMessage: jest.fn() }
 
@@ -38,7 +40,7 @@ beforeEach(async () => {
     payment: JSON.parse(JSON.stringify(require('../../mocks/events/payment'))),
     hold: JSON.parse(JSON.stringify(require('../../mocks/events/hold'))),
     batch: JSON.parse(JSON.stringify(require('../../mocks/events/batch'))),
-    warning: JSON.parse(JSON.stringify(require('../../mocks/events/warning')))
+    warning: JSON.parse(JSON.stringify(require('../../mocks/events/warning'))),
   }
 })
 
@@ -54,21 +56,35 @@ describe('processEventMessage', () => {
 
       await processEventMessage({ body: event }, receiver)
 
-      expect(await db.payments.findAll({
-        where: { PartitionKey: event.data.frn.toString(), category: FRN }
-      })).toHaveLength(1)
+      expect(
+        await db.payments.findAll({
+          where: { PartitionKey: event.data.frn.toString(), category: FRN },
+        })
+      ).toHaveLength(1)
 
-      expect(await db.payments.findAll({
-        where: { PartitionKey: event.data.correlationId, category: CORRELATION_ID }
-      })).toHaveLength(1)
+      expect(
+        await db.payments.findAll({
+          where: {
+            PartitionKey: event.data.correlationId,
+            category: CORRELATION_ID,
+          },
+        })
+      ).toHaveLength(1)
 
-      expect(await db.payments.findAll({
-        where: { PartitionKey: event.data.schemeId.toString(), category: SCHEME_ID }
-      })).toHaveLength(1)
+      expect(
+        await db.payments.findAll({
+          where: {
+            PartitionKey: event.data.schemeId.toString(),
+            category: SCHEME_ID,
+          },
+        })
+      ).toHaveLength(1)
 
-      expect(await db.payments.findAll({
-        where: { PartitionKey: event.data.batch, category: BATCH }
-      })).toHaveLength(1)
+      expect(
+        await db.payments.findAll({
+          where: { PartitionKey: event.data.batch, category: BATCH },
+        })
+      ).toHaveLength(1)
     })
 
     test('saves payment event without batch', async () => {
@@ -78,14 +94,16 @@ describe('processEventMessage', () => {
       await processEventMessage({ body: event }, receiver)
 
       expect(await db.payments.findAll()).toHaveLength(3)
-      expect(await db.payments.findAll({ where: { category: BATCH } })).toHaveLength(0)
+      expect(
+        await db.payments.findAll({ where: { category: BATCH } })
+      ).toHaveLength(0)
     })
 
     test('saves payment event data as JSON string', async () => {
       await processEventMessage({ body: events.payment }, receiver)
 
       const records = await db.payments.findAll()
-      records.forEach(r => {
+      records.forEach((r) => {
         expect(typeof r.data).toBe('string')
         expect(JSON.parse(r.data)).toEqual(events.payment.data)
       })
@@ -99,17 +117,22 @@ describe('processEventMessage', () => {
       await processEventMessage({ body: event }, receiver)
 
       // FRN
-      expect(await db.holds.findAll({
-        where: { PartitionKey: event.data.frn.toString(), category: FRN }
-      })).toHaveLength(1)
+      expect(
+        await db.holds.findAll({
+          where: { PartitionKey: event.data.frn.toString(), category: FRN },
+        })
+      ).toHaveLength(1)
 
       const schemeRecords = await db.holds.findAll({
-        where: { PartitionKey: event.data.schemeId.toString(), category: SCHEME_ID }
+        where: {
+          PartitionKey: event.data.schemeId.toString(),
+          category: SCHEME_ID,
+        },
       })
       expect(schemeRecords.length).toBeGreaterThanOrEqual(1)
 
       const holdCatRecords = await db.holds.findAll({
-        where: { PartitionKey: event.data.holdCategoryId.toString() }
+        where: { PartitionKey: event.data.holdCategoryId.toString() },
       })
       expect(holdCatRecords.length).toBeGreaterThanOrEqual(1)
     })
@@ -124,9 +147,11 @@ describe('processEventMessage', () => {
     test('saves batch event with filename as partition key', async () => {
       await processEventMessage({ body: events.batch }, receiver)
 
-      expect(await db.batches.findAll({
-        where: { PartitionKey: events.batch.data.filename, category: BATCH }
-      })).toHaveLength(1)
+      expect(
+        await db.batches.findAll({
+          where: { PartitionKey: events.batch.data.filename, category: BATCH },
+        })
+      ).toHaveLength(1)
     })
   })
 
@@ -134,9 +159,11 @@ describe('processEventMessage', () => {
     test('saves warning event and sends alert', async () => {
       await processEventMessage({ body: events.warning }, receiver)
 
-      expect(await db.warnings.findAll({
-        where: { category: WARNING }
-      })).toHaveLength(1)
+      expect(
+        await db.warnings.findAll({
+          where: { category: WARNING },
+        })
+      ).toHaveLength(1)
 
       expect(mockSendMessage).toHaveBeenCalled()
     })
@@ -157,7 +184,7 @@ describe('processEventMessage', () => {
       await processEventMessage({ body: events.payment }, receiver)
 
       const records = await db.payments.findAll()
-      records.forEach(r => {
+      records.forEach((r) => {
         expect(r.Timestamp).toBeInstanceOf(Date)
       })
     })

@@ -6,14 +6,16 @@ const mockUuid = 'test-uuid-5678'
 uuidv4.mockReturnValue(mockUuid)
 
 jest.mock('../../../../app/data')
-const { db } = require('../../../../app/data')
+const db = require('../../../../app/data')
 const mockCreate = jest.fn()
 db.warnings = {
-  create: mockCreate
+  create: mockCreate,
 }
 
 jest.mock('../../../../app/inbound/save-event/create-row')
-const { createRow: mockCreateRow } = require('../../../../app/inbound/save-event/create-row')
+const {
+  createRow: mockCreateRow,
+} = require('../../../../app/inbound/save-event/create-row')
 const mockRow = {
   partitionKey: 'test-partition-key',
   rowKey: 'test-row-key',
@@ -22,21 +24,27 @@ const mockRow = {
   subject: 'test-subject',
   time: 'test-time',
   type: 'test-type',
-  data: 'test-data'
+  data: 'test-data',
 }
 mockCreateRow.mockReturnValue(mockRow)
 
 jest.mock('../../../../app/inbound/save-event/get-warning-type')
-const { getWarningType: mockGetWarningType } = require('../../../../app/inbound/save-event/get-warning-type')
+const {
+  getWarningType: mockGetWarningType,
+} = require('../../../../app/inbound/save-event/get-warning-type')
 const mockWarningType = 'warning-type-123'
 mockGetWarningType.mockReturnValue(mockWarningType)
 
 jest.mock('../../../../app/inbound/save-event/get-timestamp')
-const { getTimestamp: mockGetTimestamp } = require('../../../../app/inbound/save-event/get-timestamp')
+const {
+  getTimestamp: mockGetTimestamp,
+} = require('../../../../app/inbound/save-event/get-timestamp')
 const mockTimestamp = 9876543210
 mockGetTimestamp.mockReturnValue(mockTimestamp)
 
-const { saveWarningEvent } = require('../../../../app/inbound/save-event/warning')
+const {
+  saveWarningEvent,
+} = require('../../../../app/inbound/save-event/warning')
 const event = require('../../../mocks/events/warning')
 
 describe('save warning event', () => {
@@ -86,7 +94,7 @@ describe('save warning event', () => {
       subject: mockRow.subject,
       time: mockRow.time,
       type: mockRow.type,
-      data: mockRow.data
+      data: mockRow.data,
     })
   })
 

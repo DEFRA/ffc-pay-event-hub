@@ -1,4 +1,4 @@
-const { db } = require('../../data')
+const db = require('../../data')
 const { v4: uuidv4 } = require('uuid')
 const { WARNING } = require('../../constants/categories')
 const { createRow } = require('./create-row')
@@ -20,12 +20,12 @@ const saveWarningEvent = async (event) => {
     subject: row.subject,
     time: row.time,
     type: row.type,
-    data: row.data
+    data: row.data,
   }
 
   await db.warnings.create(record)
 }
 
 module.exports = {
-  saveWarningEvent
+  saveWarningEvent,
 }

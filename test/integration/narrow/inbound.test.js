@@ -12,10 +12,10 @@ const {
   CORRELATION_ID,
   SCHEME_ID,
   BATCH,
-  WARNING
+  WARNING,
 } = require('../../../app/constants/categories')
 
-const { db } = require('../../../app/data')
+const db = require('../../../app/data')
 const { processEvent } = require('../../../app/inbound/process-event')
 
 let events = {}
@@ -48,8 +48,8 @@ const expectRecordCreated = async (dbModel, partitionKey, category) => {
   const records = await dbModel.findAll({
     where: {
       PartitionKey: partitionKey,
-      category
-    }
+      category,
+    },
   })
   expect(records.length).toBeGreaterThan(0)
 }
@@ -86,7 +86,7 @@ describe('inbound payment event', () => {
   test('saves payment data as JSON string', async () => {
     await processEvent(events.payment)
     const records = await db.payments.findAll()
-    records.forEach(record => {
+    records.forEach((record) => {
       expect(typeof record.data).toBe('string')
       expect(JSON.parse(record.data)).toEqual(events.payment.data)
     })
@@ -127,8 +127,8 @@ describe('inbound hold event', () => {
 
     const records = await db.holds.findAll({
       where: {
-        PartitionKey: events.hold.data.holdCategoryId.toString()
-      }
+        PartitionKey: events.hold.data.holdCategoryId.toString(),
+      },
     })
 
     expect(records.length).toBeGreaterThan(0)
@@ -137,7 +137,7 @@ describe('inbound hold event', () => {
   test('saves hold data as JSON string', async () => {
     await processEvent(events.hold)
     const records = await db.holds.findAll()
-    records.forEach(record => {
+    records.forEach((record) => {
       expect(typeof record.data).toBe('string')
       expect(JSON.parse(record.data)).toEqual(events.hold.data)
     })
@@ -210,7 +210,7 @@ describe('common event properties', () => {
     await processEvent(events.payment)
 
     const records = await db.payments.findAll()
-    const ids = records.map(r => r.id)
+    const ids = records.map((r) => r.id)
     const uniqueIds = [...new Set(ids)]
     expect(uniqueIds).toHaveLength(records.length)
   })
@@ -219,7 +219,7 @@ describe('common event properties', () => {
     await processEvent(events.payment)
 
     const records = await db.payments.findAll()
-    records.forEach(record => {
+    records.forEach((record) => {
       expect(record.Timestamp).toBeDefined()
       expect(record.Timestamp).toBeInstanceOf(Date)
       expect(record.Timestamp.getTime()).not.toBeNaN()
@@ -230,7 +230,7 @@ describe('common event properties', () => {
     await processEvent(events.payment)
 
     const records = await db.payments.findAll()
-    records.forEach(record => {
+    records.forEach((record) => {
       expect(record.type).toBe(events.payment.type)
     })
   })
