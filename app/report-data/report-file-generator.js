@@ -1,10 +1,10 @@
-const { PassThrough } = require('stream')
+const { PassThrough } = require('node:stream')
 const QueryStream = require('pg-query-stream')
 const { db } = require('../data')
 const { writeReportFile } = require('../storage')
 
 const generateUniqueFilename = (prefix = 'default', ext = 'json') => {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+  const timestamp = new Date().toISOString().replaceAll(/[:.]/g, '-')
   return `${prefix}-${timestamp}.${ext}`
 }
 
