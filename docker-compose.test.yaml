@@ -5,16 +5,48 @@ services:
   ffc-pay-event-hub:
     build:
       target: development
+    depends_on:
+      - servicebus-emulator
     image: ffc-pay-event-hub-development
     container_name: ffc-pay-event-hub-test
     command: npm run test
+    environment:
+      MESSAGE_QUEUE_HOST: servicebus-emulator
+      MESSAGE_QUEUE_USER: RootManageSharedAccessKey
+      MESSAGE_QUEUE_PASSWORD: SAS_KEY_VALUE
     volumes:
       - ./app:/home/node/app
       - ./test:/home/node/test
       - ./test-output:/home/node/test-output
       - ./jest.config.js:/home/node/jest.config.js
       - ./package.json:/home/node/package.json
+  sqledge:
+    container_name: "sqledge"
+    image: "mcr.microsoft.com/azure-sql-edge:latest"
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "DummyStrongPa$$w0rd" # To be filled by user as per policy : https://learn.microsoft.com/en-us/sql/relational-databases/security/strong-passwords?view=sql-server-linux-ver16
 
+  servicebus-emulator:
+    container_name: "servicebus-emulator"
+    image: mcr.microsoft.com/azure-messaging/servicebus-emulator:latest
+    pull_policy: always
+    volumes:
+      - "./BusConfig.json:/ServiceBus_Emulator/ConfigFiles/Config.json"
+    ports:
+      - "5672:5672"
+    environment:
+      SQL_SERVER: sqledge
+      MSSQL_SA_PASSWORD: "DummyStrongPa$$w0rd" # Password should be same as what is set for SQL Edge
+      ACCEPT_EULA: "Y"
+    depends_on:
+      - sqledge
+
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 5672"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
   ffc-pay-event-store-azurite:
     labels:
       com.docker.compose.pay.role: test
