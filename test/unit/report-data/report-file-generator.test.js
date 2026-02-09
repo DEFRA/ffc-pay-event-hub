@@ -1,10 +1,9 @@
-const { PassThrough } = require('stream')
+const { PassThrough } = require('node:stream')
 const QueryStream = require('pg-query-stream')
 
 jest.mock('pg-query-stream')
 jest.mock('../../../app/storage')
 
-// Mock the database module fully
 const mockPaymentsModel = { getTableName: () => 'mock_table' }
 const mockGetWhereConditions = jest.fn((where, tableName) => (where ? 'id = 1' : ''))
 
@@ -21,16 +20,10 @@ jest.mock('../../../app/data', () => ({
   payments: mockPaymentsModel
 }))
 
-// ----------------------
-// IMPORT AFTER MOCKS
-// ----------------------
 const db = require('../../../app/data')
 const storage = require('../../../app/storage')
 const { generateSqlQuery, exportQueryToJsonFile } = require('../../../app/report-data/report-file-generator')
 
-// =======================
-// TESTS
-// =======================
 describe('report-file-generator', () => {
   beforeEach(() => {
     jest.clearAllMocks()
