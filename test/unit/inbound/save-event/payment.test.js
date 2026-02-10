@@ -185,9 +185,9 @@ describe('save payment event', () => {
 
     expect(records[0]).toEqual({
       id: mockUuids[0],
-      PartitionKey: '1234567890',
-      RowKey: 'corr-123|INV-001',
-      Timestamp: mockTimestamp,
+      partitionKey: '1234567890',
+      rowKey: 'corr-123|INV-001',
+      timestamp: mockTimestamp,
       category: FRN,
       source: event.source,
       subject: event.subject,
@@ -198,9 +198,9 @@ describe('save payment event', () => {
 
     expect(records[1]).toEqual({
       id: mockUuids[1],
-      PartitionKey: 'corr-123',
-      RowKey: '1234567890|INV-001',
-      Timestamp: mockTimestamp,
+      partitionKey: 'corr-123',
+      rowKey: '1234567890|INV-001',
+      timestamp: mockTimestamp,
       category: CORRELATION_ID,
       source: event.source,
       subject: event.subject,
@@ -211,9 +211,9 @@ describe('save payment event', () => {
 
     expect(records[2]).toEqual({
       id: mockUuids[2],
-      PartitionKey: 'scheme-456',
-      RowKey: '1234567890|INV-001',
-      Timestamp: mockTimestamp,
+      partitionKey: 'scheme-456',
+      rowKey: '1234567890|INV-001',
+      timestamp: mockTimestamp,
       category: SCHEME_ID,
       source: event.source,
       subject: event.subject,
@@ -241,9 +241,9 @@ describe('save payment event', () => {
 
     expect(records[3]).toEqual({
       id: mockUuids[3],
-      PartitionKey: 'batch-999',
-      RowKey: '1234567890|INV-001',
-      Timestamp: mockTimestamp,
+      partitionKey: 'batch-999',
+      rowKey: '1234567890|INV-001',
+      timestamp: mockTimestamp,
       category: BATCH,
       source: event.source,
       subject: event.subject,
@@ -253,7 +253,7 @@ describe('save payment event', () => {
     })
   })
 
-  test('all records have same Timestamp', async () => {
+  test('all records have same timestamp', async () => {
     const eventWithBatch = {
       ...event,
       data: {
@@ -265,7 +265,7 @@ describe('save payment event', () => {
 
     const records = mockBulkCreate.mock.calls[0][0]
     records.forEach((record) => {
-      expect(record.Timestamp).toBe(mockTimestamp)
+      expect(record.timestamp).toBe(mockTimestamp)
     })
   })
 

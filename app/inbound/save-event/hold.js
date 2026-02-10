@@ -10,25 +10,25 @@ const saveHoldEvent = async (event) => {
   const rows = [
     createRow(event.data.frn, event.data.schemeId, FRN, event),
     createRow(event.data.schemeId, event.data.frn, SCHEME_ID, event),
-    createRow(event.data.holdCategoryId, event.data.frn, SCHEME_ID, event)
+    createRow(event.data.holdCategoryId, event.data.frn, SCHEME_ID, event),
   ]
 
-  const records = rows.map(row => ({
+  const records = rows.map((row) => ({
     id: uuidv4(),
-    PartitionKey: row.partitionKey,
-    RowKey: row.rowKey,
-    Timestamp: timestamp,
+    partitionKey: row.partitionKey,
+    rowKey: row.rowKey,
+    timestamp,
     category: row.category,
     source: row.source,
     subject: row.subject,
     time: row.time,
     type: row.type,
-    data: row.data
+    data: row.data,
   }))
 
   await db.holds.bulkCreate(records)
 }
 
 module.exports = {
-  saveHoldEvent
+  saveHoldEvent,
 }

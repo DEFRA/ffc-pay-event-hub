@@ -71,7 +71,7 @@ describe('Storage initialization and functionality', () => {
       'Using DefaultAzureCredential for Storage Clients'
     )
     expect(DefaultAzureCredential).toHaveBeenCalledWith({
-      managedIdentityClientId: storageConfig.managedIdentityClientId,
+      managedIdentityClientId: storageConfig.managedIdentityClientId
     })
     expect(BlobServiceClient).toHaveBeenCalledWith(
       expectedBlobUri,

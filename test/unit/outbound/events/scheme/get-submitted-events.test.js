@@ -31,10 +31,10 @@ describe('getSubmittedEvents', () => {
     mockDbEvents = [
       {
         id: 'uuid-1',
-        PartitionKey: PARTITION_KEY,
+        partitionKey: PARTITION_KEY,
         category,
         type: PAYMENT_SUBMITTED,
-        Timestamp: 1234567890,
+        timestamp: 1234567890,
         source: extractedEvent.source,
         subject: extractedEvent.subject,
         time: extractedEvent.time,
@@ -42,10 +42,10 @@ describe('getSubmittedEvents', () => {
         toJSON: function () {
           return {
             id: this.id,
-            PartitionKey: this.PartitionKey,
+            partitionKey: this.partitionKey,
             category: this.category,
             type: this.type,
-            Timestamp: this.Timestamp,
+            timestamp: this.timestamp,
             source: this.source,
             subject: this.subject,
             time: this.time,
@@ -55,10 +55,10 @@ describe('getSubmittedEvents', () => {
       },
       {
         id: 'uuid-2',
-        PartitionKey: PARTITION_KEY,
+        partitionKey: PARTITION_KEY,
         category,
         type: PAYMENT_SUBMITTED,
-        Timestamp: 1234567891,
+        timestamp: 1234567891,
         source: enrichedEvent.source,
         subject: enrichedEvent.subject,
         time: enrichedEvent.time,
@@ -66,10 +66,10 @@ describe('getSubmittedEvents', () => {
         toJSON: function () {
           return {
             id: this.id,
-            PartitionKey: this.PartitionKey,
+            partitionKey: this.partitionKey,
             category: this.category,
             type: this.type,
-            Timestamp: this.Timestamp,
+            timestamp: this.timestamp,
             source: this.source,
             subject: this.subject,
             time: this.time,
@@ -90,27 +90,27 @@ describe('getSubmittedEvents', () => {
         category,
         type: PAYMENT_SUBMITTED,
       },
-      order: [['Timestamp', 'ASC']],
+      order: [['timestamp', 'ASC']],
     })
   })
 
-  test('should query database with PartitionKey, category and type filters when id provided', async () => {
+  test('should query database with partitionKey, category and type filters when id provided', async () => {
     await getSubmittedEvents(PARTITION_KEY, category)
     expect(mockFindAll).toHaveBeenCalledTimes(1)
     expect(mockFindAll).toHaveBeenCalledWith({
       where: {
-        PartitionKey: PARTITION_KEY,
+        partitionKey: PARTITION_KEY,
         category,
         type: PAYMENT_SUBMITTED,
       },
-      order: [['Timestamp', 'ASC']],
+      order: [['timestamp', 'ASC']],
     })
   })
 
-  test('should order results by Timestamp ascending', async () => {
+  test('should order results by timestamp ascending', async () => {
     await getSubmittedEvents(PARTITION_KEY, category)
     const callArgs = mockFindAll.mock.calls[0][0]
-    expect(callArgs.order).toEqual([['Timestamp', 'ASC']])
+    expect(callArgs.order).toEqual([['timestamp', 'ASC']])
   })
 
   test('should return all events with data parsed as JSON', async () => {
@@ -139,10 +139,10 @@ describe('getSubmittedEvents', () => {
   test('should handle events with undefined data', async () => {
     const eventWithNoData = {
       id: 'uuid-3',
-      PartitionKey: PARTITION_KEY,
+      partitionKey: PARTITION_KEY,
       category,
       type: PAYMENT_SUBMITTED,
-      Timestamp: 1234567892,
+      timestamp: 1234567892,
       source: 'test-source',
       subject: 'test-subject',
       time: 'test-time',
@@ -150,10 +150,10 @@ describe('getSubmittedEvents', () => {
       toJSON: function () {
         return {
           id: this.id,
-          PartitionKey: this.PartitionKey,
+          partitionKey: this.partitionKey,
           category: this.category,
           type: this.type,
-          Timestamp: this.Timestamp,
+          timestamp: this.timestamp,
           source: this.source,
           subject: this.subject,
           time: this.time,
@@ -170,10 +170,10 @@ describe('getSubmittedEvents', () => {
   test('should handle events with empty string data', async () => {
     const eventWithEmptyData = {
       id: 'uuid-4',
-      PartitionKey: PARTITION_KEY,
+      partitionKey: PARTITION_KEY,
       category,
       type: PAYMENT_SUBMITTED,
-      Timestamp: 1234567893,
+      timestamp: 1234567893,
       source: 'test-source',
       subject: 'test-subject',
       time: 'test-time',
@@ -181,10 +181,10 @@ describe('getSubmittedEvents', () => {
       toJSON: function () {
         return {
           id: this.id,
-          PartitionKey: this.PartitionKey,
+          partitionKey: this.partitionKey,
           category: this.category,
           type: this.type,
-          Timestamp: this.Timestamp,
+          timestamp: this.timestamp,
           source: this.source,
           subject: this.subject,
           time: this.time,
@@ -203,10 +203,10 @@ describe('getSubmittedEvents', () => {
 
     expect(result[0]).toMatchObject({
       id: mockDbEvents[0].id,
-      PartitionKey: mockDbEvents[0].PartitionKey,
+      partitionKey: mockDbEvents[0].partitionKey,
       category: mockDbEvents[0].category,
       type: mockDbEvents[0].type,
-      Timestamp: mockDbEvents[0].Timestamp,
+      timestamp: mockDbEvents[0].timestamp,
       source: mockDbEvents[0].source,
       subject: mockDbEvents[0].subject,
       time: mockDbEvents[0].time,
@@ -214,10 +214,10 @@ describe('getSubmittedEvents', () => {
 
     expect(result[1]).toMatchObject({
       id: mockDbEvents[1].id,
-      PartitionKey: mockDbEvents[1].PartitionKey,
+      partitionKey: mockDbEvents[1].partitionKey,
       category: mockDbEvents[1].category,
       type: mockDbEvents[1].type,
-      Timestamp: mockDbEvents[1].Timestamp,
+      timestamp: mockDbEvents[1].timestamp,
       source: mockDbEvents[1].source,
       subject: mockDbEvents[1].subject,
       time: mockDbEvents[1].time,

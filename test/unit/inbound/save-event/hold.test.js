@@ -115,9 +115,9 @@ describe('save hold event', () => {
 
     expect(records[0]).toEqual({
       id: mockUuids[0],
-      PartitionKey: '9876543210',
-      RowKey: 'scheme-789',
-      Timestamp: mockTimestamp,
+      partitionKey: '9876543210',
+      rowKey: 'scheme-789',
+      timestamp: mockTimestamp,
       category: FRN,
       source: event.source,
       subject: event.subject,
@@ -128,9 +128,9 @@ describe('save hold event', () => {
 
     expect(records[1]).toEqual({
       id: mockUuids[1],
-      PartitionKey: 'scheme-789',
-      RowKey: '9876543210',
-      Timestamp: mockTimestamp,
+      partitionKey: 'scheme-789',
+      rowKey: '9876543210',
+      timestamp: mockTimestamp,
       category: SCHEME_ID,
       source: event.source,
       subject: event.subject,
@@ -141,9 +141,9 @@ describe('save hold event', () => {
 
     expect(records[2]).toEqual({
       id: mockUuids[2],
-      PartitionKey: 'hold-cat-123',
-      RowKey: '9876543210',
-      Timestamp: mockTimestamp,
+      partitionKey: 'hold-cat-123',
+      rowKey: '9876543210',
+      timestamp: mockTimestamp,
       category: SCHEME_ID,
       source: event.source,
       subject: event.subject,
@@ -153,12 +153,12 @@ describe('save hold event', () => {
     })
   })
 
-  test('all records have same Timestamp', async () => {
+  test('all records have same timestamp', async () => {
     await saveHoldEvent(event)
 
     const records = mockBulkCreate.mock.calls[0][0]
     records.forEach((record) => {
-      expect(record.Timestamp).toBe(mockTimestamp)
+      expect(record.timestamp).toBe(mockTimestamp)
     })
   })
 

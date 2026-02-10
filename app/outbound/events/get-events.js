@@ -3,10 +3,10 @@ const db = require('../../data')
 const getEvents = async (id, category) => {
   const events = await db.payments.findAll({
     where: {
-      PartitionKey: id,
+      partitionKey: id,
       category,
     },
-    order: [['Timestamp', 'ASC']],
+    order: [['timestamp', 'ASC']],
   })
 
   return events.map((event) => ({

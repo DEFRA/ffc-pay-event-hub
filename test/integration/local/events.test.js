@@ -58,14 +58,14 @@ describe('processEventMessage', () => {
 
       expect(
         await db.payments.findAll({
-          where: { PartitionKey: event.data.frn.toString(), category: FRN },
+          where: { partitionKey: event.data.frn.toString(), category: FRN },
         })
       ).toHaveLength(1)
 
       expect(
         await db.payments.findAll({
           where: {
-            PartitionKey: event.data.correlationId,
+            partitionKey: event.data.correlationId,
             category: CORRELATION_ID,
           },
         })
@@ -74,7 +74,7 @@ describe('processEventMessage', () => {
       expect(
         await db.payments.findAll({
           where: {
-            PartitionKey: event.data.schemeId.toString(),
+            partitionKey: event.data.schemeId.toString(),
             category: SCHEME_ID,
           },
         })
@@ -82,7 +82,7 @@ describe('processEventMessage', () => {
 
       expect(
         await db.payments.findAll({
-          where: { PartitionKey: event.data.batch, category: BATCH },
+          where: { partitionKey: event.data.batch, category: BATCH },
         })
       ).toHaveLength(1)
     })
@@ -119,20 +119,20 @@ describe('processEventMessage', () => {
       // FRN
       expect(
         await db.holds.findAll({
-          where: { PartitionKey: event.data.frn.toString(), category: FRN },
+          where: { partitionKey: event.data.frn.toString(), category: FRN },
         })
       ).toHaveLength(1)
 
       const schemeRecords = await db.holds.findAll({
         where: {
-          PartitionKey: event.data.schemeId.toString(),
+          partitionKey: event.data.schemeId.toString(),
           category: SCHEME_ID,
         },
       })
       expect(schemeRecords.length).toBeGreaterThanOrEqual(1)
 
       const holdCatRecords = await db.holds.findAll({
-        where: { PartitionKey: event.data.holdCategoryId.toString() },
+        where: { partitionKey: event.data.holdCategoryId.toString() },
       })
       expect(holdCatRecords.length).toBeGreaterThanOrEqual(1)
     })
@@ -149,7 +149,7 @@ describe('processEventMessage', () => {
 
       expect(
         await db.batches.findAll({
-          where: { PartitionKey: events.batch.data.filename, category: BATCH },
+          where: { partitionKey: events.batch.data.filename, category: BATCH },
         })
       ).toHaveLength(1)
     })
@@ -185,7 +185,7 @@ describe('processEventMessage', () => {
 
       const records = await db.payments.findAll()
       records.forEach((r) => {
-        expect(r.Timestamp).toBeInstanceOf(Date)
+        expect(r.timestamp).toBeInstanceOf(Date)
       })
     })
   })

@@ -46,9 +46,9 @@ describe('save batch event', () => {
     await saveBatchEvent(event)
     expect(mockCreate).toHaveBeenCalledWith({
       id: mockUuid,
-      PartitionKey: event.data.filename,
-      Timestamp: mockTimestamp,
-      RowKey: mockTimestamp.toString(),
+      partitionKey: event.data.filename,
+      timestamp: mockTimestamp,
+      rowKey: mockTimestamp.toString(),
       category: BATCH,
       source: event.source,
       subject: event.subject,
@@ -61,13 +61,13 @@ describe('save batch event', () => {
   test('uses filename as partition key', async () => {
     await saveBatchEvent(event)
     const callArg = mockCreate.mock.calls[0][0]
-    expect(callArg.PartitionKey).toBe(event.data.filename)
+    expect(callArg.partitionKey).toBe(event.data.filename)
   })
 
-  test('uses timestamp as RowKey', async () => {
+  test('uses timestamp as rowKey', async () => {
     await saveBatchEvent(event)
     const callArg = mockCreate.mock.calls[0][0]
-    expect(callArg.RowKey).toBe(mockTimestamp.toString())
+    expect(callArg.rowKey).toBe(mockTimestamp.toString())
   })
 
   test('stringifies event data', async () => {

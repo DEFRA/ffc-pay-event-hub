@@ -7,12 +7,12 @@ const getSubmittedEvents = async (id, category) => {
     type: PAYMENT_SUBMITTED,
   }
   if (id) {
-    where.PartitionKey = id
+    where.partitionKey = id
   }
 
   const events = await db.payments.findAll({
     where,
-    order: [['Timestamp', 'ASC']],
+    order: [['timestamp', 'ASC']],
   })
 
   return events.map((event) => {

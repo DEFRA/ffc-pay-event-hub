@@ -86,9 +86,9 @@ describe('save warning event', () => {
     await saveWarningEvent(event)
     expect(mockCreate).toHaveBeenCalledWith({
       id: mockUuid,
-      PartitionKey: mockRow.partitionKey,
-      RowKey: mockRow.rowKey,
-      Timestamp: mockTimestamp,
+      partitionKey: mockRow.partitionKey,
+      rowKey: mockRow.rowKey,
+      timestamp: mockTimestamp,
       category: mockRow.category,
       source: mockRow.source,
       subject: mockRow.subject,
@@ -101,19 +101,19 @@ describe('save warning event', () => {
   test('uses row partition key from createRow', async () => {
     await saveWarningEvent(event)
     const callArg = mockCreate.mock.calls[0][0]
-    expect(callArg.PartitionKey).toBe(mockRow.partitionKey)
+    expect(callArg.partitionKey).toBe(mockRow.partitionKey)
   })
 
   test('uses row key from createRow', async () => {
     await saveWarningEvent(event)
     const callArg = mockCreate.mock.calls[0][0]
-    expect(callArg.RowKey).toBe(mockRow.rowKey)
+    expect(callArg.rowKey).toBe(mockRow.rowKey)
   })
 
-  test('uses timestamp for Timestamp field', async () => {
+  test('uses timestamp for timestamp field', async () => {
     await saveWarningEvent(event)
     const callArg = mockCreate.mock.calls[0][0]
-    expect(callArg.Timestamp).toBe(mockTimestamp)
+    expect(callArg.timestamp).toBe(mockTimestamp)
   })
 
   test('uses category from createRow', async () => {

@@ -47,7 +47,7 @@ afterAll(async () => {
 const expectRecordCreated = async (dbModel, partitionKey, category) => {
   const records = await dbModel.findAll({
     where: {
-      PartitionKey: partitionKey,
+      partitionKey,
       category,
     },
   })
@@ -127,7 +127,7 @@ describe('inbound hold event', () => {
 
     const records = await db.holds.findAll({
       where: {
-        PartitionKey: events.hold.data.holdCategoryId.toString(),
+        partitionKey: events.hold.data.holdCategoryId.toString(),
       },
     })
 
@@ -157,10 +157,10 @@ describe('inbound batch event', () => {
     await expectRecordCreated(db.batches, events.batch.data.filename, BATCH)
   })
 
-  test('saves batch with filename as PartitionKey', async () => {
+  test('saves batch with filename as partitionKey', async () => {
     await processEvent(events.batch)
     const record = await db.batches.findOne()
-    expect(record.PartitionKey).toBe(events.batch.data.filename)
+    expect(record.partitionKey).toBe(events.batch.data.filename)
   })
 
   test('saves batch data as JSON string', async () => {
@@ -220,9 +220,9 @@ describe('common event properties', () => {
 
     const records = await db.payments.findAll()
     records.forEach((record) => {
-      expect(record.Timestamp).toBeDefined()
-      expect(record.Timestamp).toBeInstanceOf(Date)
-      expect(record.Timestamp.getTime()).not.toBeNaN()
+      expect(record.timestamp).toBeDefined()
+      expect(record.timestamp).toBeInstanceOf(Date)
+      expect(record.timestamp.getTime()).not.toBeNaN()
     })
   })
 

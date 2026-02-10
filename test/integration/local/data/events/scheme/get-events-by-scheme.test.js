@@ -39,9 +39,9 @@ const SCHEMES = [
 const formatAndAddEvent = async (dbModel, event, schemeId) => {
   const formattedEvent = {
     id: uuidv4(),
-    PartitionKey: schemeId.toString(),
-    RowKey: `${FRN}|${INVOICE_NUMBER}|157070221${nextEventId++}`,
-    Timestamp: Date.now() + nextEventId,
+    partitionKey: schemeId.toString(),
+    rowKey: `${FRN}|${INVOICE_NUMBER}|157070221${nextEventId++}`,
+    timestamp: Date.now() + nextEventId,
     data: JSON.stringify(event.data), // stringified
     category: SCHEME_ID, // ensure matches filter
     type: PAYMENT_SUBMITTED, // ensure matches filter
@@ -97,9 +97,9 @@ beforeEach(async () => {
     for (const evt of ignored) {
       await db.payments.create({
         id: uuidv4(),
-        PartitionKey: scheme.toString(),
-        RowKey: `${FRN}|${INVOICE_NUMBER}|ignored-${uuidv4()}`,
-        Timestamp: Date.now() + nextEventId++,
+        partitionKey: scheme.toString(),
+        rowKey: `${FRN}|${INVOICE_NUMBER}|ignored-${uuidv4()}`,
+        timestamp: Date.now() + nextEventId++,
         data: JSON.stringify(evt.data),
         category: 'OTHER_CATEGORY',
         type: 'OTHER_TYPE',

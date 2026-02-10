@@ -11,8 +11,8 @@ let groupedEvents
 describe('getTotalSchemeValues', () => {
   beforeEach(() => {
     submitted = require('../../../../mocks/events/submitted')
-    bpsEvent = { ...submitted, PartitionKey: BPS }
-    csEvent = { ...submitted, PartitionKey: CS }
+    bpsEvent = { ...submitted, partitionKey: BPS }
+    csEvent = { ...submitted, partitionKey: CS }
 
     groupedEvents = [
       { schemeId: CS.toString(), events: [csEvent, csEvent, csEvent] },

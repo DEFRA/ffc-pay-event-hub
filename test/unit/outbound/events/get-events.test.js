@@ -25,9 +25,9 @@ describe('get events', () => {
     mockDbEvents = [
       {
         id: 'uuid-1',
-        PartitionKey: PARTITION_KEY,
+        partitionKey: PARTITION_KEY,
         category: CATEGORY,
-        Timestamp: 1234567890,
+        timestamp: 1234567890,
         source: extractedEvent.source,
         subject: extractedEvent.subject,
         time: extractedEvent.time,
@@ -36,9 +36,9 @@ describe('get events', () => {
         toJSON: function () {
           return {
             id: this.id,
-            PartitionKey: this.PartitionKey,
+            partitionKey: this.partitionKey,
             category: this.category,
-            Timestamp: this.Timestamp,
+            timestamp: this.timestamp,
             source: this.source,
             subject: this.subject,
             time: this.time,
@@ -49,9 +49,9 @@ describe('get events', () => {
       },
       {
         id: 'uuid-2',
-        PartitionKey: PARTITION_KEY,
+        partitionKey: PARTITION_KEY,
         category: CATEGORY,
-        Timestamp: 1234567891,
+        timestamp: 1234567891,
         source: enrichedEvent.source,
         subject: enrichedEvent.subject,
         time: enrichedEvent.time,
@@ -60,9 +60,9 @@ describe('get events', () => {
         toJSON: function () {
           return {
             id: this.id,
-            PartitionKey: this.PartitionKey,
+            partitionKey: this.partitionKey,
             category: this.category,
-            Timestamp: this.Timestamp,
+            timestamp: this.timestamp,
             source: this.source,
             subject: this.subject,
             time: this.time,
@@ -81,17 +81,17 @@ describe('get events', () => {
     expect(mockFindAll).toHaveBeenCalledTimes(1)
     expect(mockFindAll).toHaveBeenCalledWith({
       where: {
-        PartitionKey: PARTITION_KEY,
+        partitionKey: PARTITION_KEY,
         category: CATEGORY,
       },
-      order: [['Timestamp', 'ASC']],
+      order: [['timestamp', 'ASC']],
     })
   })
 
-  test('should order results by Timestamp ascending', async () => {
+  test('should order results by timestamp ascending', async () => {
     await getEvents(PARTITION_KEY, CATEGORY)
     const callArgs = mockFindAll.mock.calls[0][0]
-    expect(callArgs.order).toEqual([['Timestamp', 'ASC']])
+    expect(callArgs.order).toEqual([['timestamp', 'ASC']])
   })
 
   test('should return all events and parse data from JSON', async () => {
@@ -120,9 +120,9 @@ describe('get events', () => {
   test('should handle events with undefined data', async () => {
     const eventWithNoData = {
       id: 'uuid-3',
-      PartitionKey: PARTITION_KEY,
+      partitionKey: PARTITION_KEY,
       category: CATEGORY,
-      Timestamp: 1234567892,
+      timestamp: 1234567892,
       source: 'test-source',
       subject: 'test-subject',
       time: 'test-time',
@@ -131,9 +131,9 @@ describe('get events', () => {
       toJSON: function () {
         return {
           id: this.id,
-          PartitionKey: this.PartitionKey,
+          partitionKey: this.partitionKey,
           category: this.category,
-          Timestamp: this.Timestamp,
+          timestamp: this.timestamp,
           source: this.source,
           subject: this.subject,
           time: this.time,
@@ -151,9 +151,9 @@ describe('get events', () => {
   test('should handle events with empty string data', async () => {
     const eventWithEmptyData = {
       id: 'uuid-4',
-      PartitionKey: PARTITION_KEY,
+      partitionKey: PARTITION_KEY,
       category: CATEGORY,
-      Timestamp: 1234567893,
+      timestamp: 1234567893,
       source: 'test-source',
       subject: 'test-subject',
       time: 'test-time',
@@ -162,9 +162,9 @@ describe('get events', () => {
       toJSON: function () {
         return {
           id: this.id,
-          PartitionKey: this.PartitionKey,
+          partitionKey: this.partitionKey,
           category: this.category,
-          Timestamp: this.Timestamp,
+          timestamp: this.timestamp,
           source: this.source,
           subject: this.subject,
           time: this.time,
@@ -184,9 +184,9 @@ describe('get events', () => {
 
     expect(result[0]).toMatchObject({
       id: mockDbEvents[0].id,
-      PartitionKey: mockDbEvents[0].PartitionKey,
+      partitionKey: mockDbEvents[0].partitionKey,
       category: mockDbEvents[0].category,
-      Timestamp: mockDbEvents[0].Timestamp,
+      timestamp: mockDbEvents[0].timestamp,
       source: mockDbEvents[0].source,
       subject: mockDbEvents[0].subject,
       time: mockDbEvents[0].time,
@@ -195,9 +195,9 @@ describe('get events', () => {
 
     expect(result[1]).toMatchObject({
       id: mockDbEvents[1].id,
-      PartitionKey: mockDbEvents[1].PartitionKey,
+      partitionKey: mockDbEvents[1].partitionKey,
       category: mockDbEvents[1].category,
-      Timestamp: mockDbEvents[1].Timestamp,
+      timestamp: mockDbEvents[1].timestamp,
       source: mockDbEvents[1].source,
       subject: mockDbEvents[1].subject,
       time: mockDbEvents[1].time,
@@ -215,9 +215,9 @@ describe('get events', () => {
 
     const eventWithComplexData = {
       id: 'uuid-5',
-      PartitionKey: PARTITION_KEY,
+      partitionKey: PARTITION_KEY,
       category: CATEGORY,
-      Timestamp: 1234567894,
+      timestamp: 1234567894,
       source: 'test-source',
       subject: 'test-subject',
       time: 'test-time',
@@ -226,9 +226,9 @@ describe('get events', () => {
       toJSON: function () {
         return {
           id: this.id,
-          PartitionKey: this.PartitionKey,
+          partitionKey: this.partitionKey,
           category: this.category,
-          Timestamp: this.Timestamp,
+          timestamp: this.timestamp,
           source: this.source,
           subject: this.subject,
           time: this.time,

@@ -2,7 +2,7 @@ const groupEventsByScheme = (events) => {
   return [
     ...events
       .reduce((map, event) => {
-        const key = event.PartitionKey
+        const key = event.partitionKey
 
         const item = map.get(key) || {
           schemeId: key,

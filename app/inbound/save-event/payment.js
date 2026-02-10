@@ -46,9 +46,9 @@ const savePaymentEvent = async (event) => {
 
   const records = rows.map((row) => ({
     id: uuidv4(),
-    PartitionKey: row.partitionKey,
-    RowKey: row.rowKey,
-    Timestamp: timestamp,
+    partitionKey: row.partitionKey,
+    rowKey: row.rowKey,
+    timestamp,
     category: row.category,
     source: row.source,
     subject: row.subject,

@@ -10,7 +10,7 @@ const MAX_CONCURRENCY = 5
 
 const getCredential = () =>
   new DefaultAzureCredential({
-    managedIdentityClientId: storageConfig.managedIdentityClientId,
+    managedIdentityClientId: storageConfig.managedIdentityClientId
   })
 
 const createBlobServiceClient = () => {

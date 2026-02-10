@@ -18,7 +18,7 @@ let mixedSchemeEvents
 describe('group events by scheme', () => {
   beforeEach(() => {
     const createEventsForScheme = (scheme) =>
-      [submitted, submitted].map((e) => ({ ...e, PartitionKey: scheme }))
+      [submitted, submitted].map((e) => ({ ...e, partitionKey: scheme }))
 
     mixedSchemeEvents = [
       ...createEventsForScheme(BPS),
@@ -32,11 +32,11 @@ describe('group events by scheme', () => {
     ]
   })
 
-  test('all events in each group have schemeId equal to PartitionKey', () => {
+  test('all events in each group have schemeId equal to partitionKey', () => {
     const groupedEvents = groupEventsByScheme(mixedSchemeEvents)
     groupedEvents.forEach((group) =>
       group.events.forEach((event) =>
-        expect(group.schemeId).toBe(event.PartitionKey)
+        expect(group.schemeId).toBe(event.partitionKey)
       )
     )
   })

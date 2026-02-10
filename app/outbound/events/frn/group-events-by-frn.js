@@ -2,11 +2,11 @@ const groupEventsByFrn = (events) => {
   return [
     ...events
       .reduce((map, event) => {
-        const correlationId = event.RowKey.split('|')[0]
-        const key = `${event.PartitionKey}-${correlationId}`
+        const correlationId = event.rowKey.split('|')[0]
+        const key = `${event.partitionKey}-${correlationId}`
 
         const item = map.get(key) || {
-          frn: event.PartitionKey,
+          frn: event.partitionKey,
           correlationId,
           schemeId: event.data.schemeId,
           paymentRequestNumber: event.data.paymentRequestNumber,

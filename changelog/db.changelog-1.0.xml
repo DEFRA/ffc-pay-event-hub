@@ -14,13 +14,13 @@
           primaryKey="true"
           primaryKeyName="batches_pkey"/>
       </column>
-      <column name="PartitionKey" type="TEXT">
+      <column name="partitionKey" type="TEXT">
         <constraints nullable="false"/>
       </column>
-      <column name="RowKey" type="TEXT">
+      <column name="rowKey" type="TEXT">
         <constraints nullable="false"/>
       </column>
-      <column name="Timestamp" type="TIMESTAMPTZ">
+      <column name="timestamp" type="TIMESTAMPTZ">
         <constraints nullable="false"/>
       </column>
       <column name="type" type="TEXT">
@@ -39,7 +39,7 @@
 
     <addUniqueConstraint
       tableName="batches"
-      columnNames="PartitionKey, RowKey"
+      columnNames="partitionKey, rowKey"
       constraintName="batches_partition_row_uk"/>
 
     <createIndex indexName="batches_time_idx" tableName="batches">

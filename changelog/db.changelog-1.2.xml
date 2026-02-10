@@ -12,9 +12,9 @@
           primaryKey="true"
           primaryKeyName="payments_pkey"/>
       </column>
-      <column name="PartitionKey" type="TEXT"/>
-      <column name="RowKey" type="TEXT"/>
-      <column name="Timestamp" type="TIMESTAMPTZ"/>
+      <column name="partitionKey" type="TEXT"/>
+      <column name="rowKey" type="TEXT"/>
+      <column name="timestamp" type="TIMESTAMPTZ"/>
       <column name="type" type="TEXT"/>
       <column name="source" type="TEXT"/>
       <column name="subject" type="TEXT"/>
@@ -22,5 +22,28 @@
       <column name="category" type="TEXT"/>
       <column name="data" type="JSONB"/>
     </createTable>
+  </changeSet>
+
+  <changeSet author="Oliver Lewington" id="3">
+    <createIndex indexName="idx_payments_partition_category_type" tableName="payments">
+      <column name="partitionKey"/>
+      <column name="category"/>
+      <column name="type"/>
+    </createIndex>
+
+    <createIndex indexName="idx_payments_partition_type" tableName="payments">
+      <column name="partitionKey"/>
+      <column name="type"/>
+    </createIndex>
+
+    <createIndex indexName="idx_payments_partition_timestamp" tableName="payments">
+      <column name="partitionKey"/>
+      <column name="timestamp" descending="true"/>
+    </createIndex>
+
+    <createIndex indexName="idx_payments_partition_rowkey" tableName="payments">
+      <column name="partitionKey"/>
+      <column name="rowKey"/>
+    </createIndex>
   </changeSet>
 </databaseChangeLog>

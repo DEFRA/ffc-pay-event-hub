@@ -38,7 +38,7 @@ describe('create row', () => {
     expect(entity[_]).toBe(expectedFn(valueFn()))
   })
 
-  test('PartitionKey is string if number', async () => {
+  test('partitionKey is string if number', async () => {
     mockPartitionKey = 123
     const entity = await createRow(
       mockPartitionKey,
