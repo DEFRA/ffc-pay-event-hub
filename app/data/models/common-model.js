@@ -16,7 +16,7 @@ const defineCommonModel = (
     source: DataTypes.TEXT,
     time: DataTypes.DATE,
     category: DataTypes.TEXT,
-    data: DataTypes.JSONB,
+    data: DataTypes.JSONB
   }
 
   const fields = { ...baseFields, ...extraFields }
@@ -24,7 +24,7 @@ const defineCommonModel = (
   return sequelize.define(tableName, fields, {
     tableName,
     freezeTableName: true,
-    timestamps: false,
+    timestamps: false
   })
 }
 
