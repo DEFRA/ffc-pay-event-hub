@@ -6,3 +6,4 @@ container:
   azureStorageAccountName: snd2ffcpayst2001
   messageQueueHost: SNDFFCINFSB2001.servicebus.windows.net
   redisHostname: SNDFFCINFRD2001.redis.cache.windows.net
+  redisPort: 6380
