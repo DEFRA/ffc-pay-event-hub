@@ -24,6 +24,7 @@ const startApp = async () => {
   }
 
   await cache.start()
+  await messaging.start()
   await storage.initialiseContainers()
 }
 
