@@ -1,0 +1,58 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">  
+<changeSet author="Oliver Lewington" id="1">
+    <tagDatabase tag="v0.0.0" />
+  </changeSet>
+  <changeSet author="Oliver Lewington" id="2">
+    <tagDatabase tag="v1.0.0" />
+  </changeSet>
+  <changeSet author="Oliver Lewington" id="3">
+    <createTable tableName="batches">
+      <column name="id" type="UUID">
+        <constraints
+          nullable="false"
+          primaryKey="true"
+          primaryKeyName="batches_pkey"/>
+      </column>
+      <column name="partitionKey" type="TEXT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="rowKey" type="TEXT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="timestamp" type="TIMESTAMPTZ">
+        <constraints nullable="false"/>
+      </column>
+      <column name="type" type="TEXT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="source" type="TEXT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="subject" type="TEXT"/>
+      <column name="time" type="TIMESTAMPTZ">
+        <constraints nullable="false"/>
+      </column>
+      <column name="category" type="TEXT"/>
+      <column name="data" type="JSONB"/>
+    </createTable>
+
+    <addUniqueConstraint
+      tableName="batches"
+      columnNames="partitionKey, rowKey"
+      constraintName="batches_partition_row_uk"/>
+
+    <createIndex indexName="batches_time_idx" tableName="batches">
+      <column name="time"/>
+    </createIndex>
+
+    <createIndex indexName="batches_category_idx" tableName="batches">
+      <column name="category"/>
+    </createIndex>
+
+    <createIndex indexName="batches_type_idx" tableName="batches">
+      <column name="type"/>
+    </createIndex>
+  </changeSet>
+
+</databaseChangeLog>

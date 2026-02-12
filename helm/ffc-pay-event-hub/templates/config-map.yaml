@@ -1,9 +1,11 @@
 {{- include "ffc-helm-library.container-config-map" (list . "ffc-pay-event-hub.config-map") -}}
 {{- define "ffc-pay-event-hub.config-map" -}}
 data:
+  PORT: {{ quote .Values.container.port }}
   NODE_ENV: {{ quote .Values.environment }}
   APPINSIGHTS_CLOUDROLE: {{ quote .Values.name }}
   MESSAGE_QUEUE_HOST: {{ quote .Values.container.messageQueueHost }}
+  PROCESSING_ACTIVE: {{ quote .Values.container.processingActive }}
 
   {{- if and (.Values.environmentCode) (not .Values.pr) }}
   EVENTS_TOPIC_ADDRESS: {{ .Values.container.eventsTopicAddress }}-{{ .Values.environmentCode }}
@@ -36,4 +38,8 @@ data:
   {{- end }}
 
   MAX_CONCURRENT_CALLS: {{ quote .Values.container.maxConcurrentCalls }}
+  POSTGRES_DB: {{ quote .Values.postgresService.postgresDb }}
+  POSTGRES_HOST: {{ quote .Values.postgresService.postgresqlHost }}
+  POSTGRES_PORT: {{ quote .Values.postgresService.postgresPort }}
+  POSTGRES_SCHEMA_NAME: {{ quote .Values.postgresService.postgresSchema }}
 {{- end -}}

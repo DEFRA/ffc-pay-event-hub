@@ -38,6 +38,6 @@ module.exports = {
     marketingYear: MARKETING_YEAR,
     sourceSystem: SOURCE_SYSTEM,
     agreementNumber: AGREEMENT_NUMBER,
-    value: VALUE
-  }
+    value: VALUE,
+  },
 }

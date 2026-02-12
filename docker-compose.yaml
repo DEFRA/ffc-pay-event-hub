@@ -7,6 +7,7 @@ services:
     container_name: ffc-pay-event-hub
     depends_on:
       - ffc-pay-event-store-azurite
+      - ffc-pay-event-hub-postgres
       - ffc-pay-event-hub-redis
     environment:
       APPINSIGHTS_CLOUDROLE: ffc-pay-event-hub-local
@@ -19,13 +20,27 @@ services:
       MAX_CONCURRENT_CALLS: ${MAX_CONCURRENT_CALLS:-10}
       ALERT_TOPIC_ADDRESS: ${ALERT_TOPIC_ADDRESS:-ffc-pay-alert}${MESSAGE_QUEUE_SUFFIX}
       AZURE_STORAGE_USE_CONNECTION_STRING: "true"
-      AZURE_STORAGE_CONNECTION_STRING: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://ffc-pay-event-store-azurite:10000/devstoreaccount1;TableEndpoint=http://ffc-pay-event-store-azurite:10002/devstoreaccount1;
+      AZURE_STORAGE_CONNECTION_STRING: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://ffc-pay-event-store-azurite:10000/devstoreaccount1;
       AZURE_STORAGE_ACCOUNT_NAME: devstoreaccount1
       AZURE_STORAGE_CREATE_ENTITIES: "true"
       DATA_TOPIC_ADDRESS: ${DATA_TOPIC_ADDRESS:-ffc-pay-data-request}${MESSAGE_QUEUE_SUFFIX}
       DATA_SUBSCRIPTION_ADDRESS: ${DATA_SUBSCRIPTION_ADDRESS:-ffc-pay-data-hub}${MESSAGE_QUEUE_SUFFIX}
       DATARESPONSE_QUEUE_ADDRESS: ${DATARESPONSE_QUEUE_ADDRESS:-ffc-pay-data-request-response}${MESSAGE_QUEUE_SUFFIX}
       REDIS_HOSTNAME: ffc-pay-event-hub-redis
+      POSTGRES_DB: ffc_pay_event_hub
+      POSTGRES_HOST: ${POSTGRES_HOST:-ffc-pay-event-hub-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_SCHEMA_PASSWORD:-ppp}
+      POSTGRES_PORT: 5432
+      POSTGRES_SCHEMA_NAME: ${POSTGRES_SCHEMA_NAME:-public}
+      POSTGRES_USERNAME: ${POSTGRES_SCHEMA_USERNAME:-postgres}
+      PROCESSING_ACTIVE: ${PROCESSING_ACTIVE:-true}
+
+  ffc-pay-event-hub-postgres:
+    image: postgres:11.4-alpine
+    environment:
+      POSTGRES_DB: ffc_pay_event_hub
+      POSTGRES_PASSWORD: ppp
+      POSTGRES_USERNAME: postgres
 
   ffc-pay-event-store-azurite:
     image: mcr.microsoft.com/azure-storage/azurite:3.35.0

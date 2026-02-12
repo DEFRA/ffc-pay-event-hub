@@ -3,81 +3,190 @@ const mockSendMessage = jest.fn()
 jest.mock('ffc-messaging', () => ({
   MessageSender: jest.fn().mockImplementation(() => ({
     sendMessage: mockSendMessage,
-    closeConnection: jest.fn()
-  }))
+    closeConnection: jest.fn(),
+  })),
 }))
 
-const { odata } = require('@azure/data-tables')
-const { PAYMENT_EVENT, HOLD_EVENT, BATCH_EVENT, WARNING_EVENT } = require('../../../app/constants/event-types')
-const { processEventMessage } = require('../../../app/messaging/process-event-message')
-const { initialiseTables, getClient } = require('../../../app/storage')
+const {
+  FRN,
+  CORRELATION_ID,
+  SCHEME_ID,
+  BATCH,
+  WARNING,
+} = require('../../../app/constants/categories')
+
+const {
+  processEventMessage,
+} = require('../../../app/messaging/process-event-message')
+const db = require('../../../app/data')
 
 const receiver = { completeMessage: jest.fn() }
 
-let clients, events
+let events
 
 beforeAll(async () => {
-  await initialiseTables()
-  clients = {
-    [PAYMENT_EVENT]: getClient(PAYMENT_EVENT),
-    [HOLD_EVENT]: getClient(HOLD_EVENT),
-    [BATCH_EVENT]: getClient(BATCH_EVENT),
-    [WARNING_EVENT]: getClient(WARNING_EVENT)
-  }
+  await db.sequelize.sync({ force: true })
 })
 
 beforeEach(async () => {
-  // Reset tables
-  await Promise.all(Object.values(clients).map(async (c) => {
-    await c.deleteTable()
-    await c.createTable()
-  }))
+  await db.payments.destroy({ where: {}, truncate: true })
+  await db.holds.destroy({ where: {}, truncate: true })
+  await db.batches.destroy({ where: {}, truncate: true })
+  await db.warnings.destroy({ where: {}, truncate: true })
 
-  // Load fresh event mocks
+  jest.clearAllMocks()
+
   events = {
     payment: JSON.parse(JSON.stringify(require('../../mocks/events/payment'))),
     hold: JSON.parse(JSON.stringify(require('../../mocks/events/hold'))),
     batch: JSON.parse(JSON.stringify(require('../../mocks/events/batch'))),
-    warning: JSON.parse(JSON.stringify(require('../../mocks/events/warning')))
+    warning: JSON.parse(JSON.stringify(require('../../mocks/events/warning'))),
   }
 })
 
-const countAsyncIterator = async (iterator) => {
-  let count = 0
-  while (!(await iterator.next()).done) {
-    count++
-  }
-  return count
-}
+afterAll(async () => {
+  await db.sequelize.close()
+})
 
 describe('processEventMessage', () => {
-  const eventTests = [
-    [PAYMENT_EVENT, 'payment', ['frn', 'correlationId', 'schemeId', 'batch']],
-    [HOLD_EVENT, 'hold', ['frn', 'schemeId']],
-    [BATCH_EVENT, 'batch', ['filename']],
-    [WARNING_EVENT, 'warning', ['event']]
-  ]
-
-  test.each(eventTests)(
-    'saves %s event by %p',
-    async (eventType, key, partitions) => {
-      const event = events[key]
-      if (eventType === PAYMENT_EVENT) {
-        event.data.batch = 'mock-batch'
-      }
+  describe('payment events', () => {
+    test('saves payment event with all partition keys', async () => {
+      const event = events.payment
+      event.data.batch = 'mock-batch'
 
       await processEventMessage({ body: event }, receiver)
 
-      for (const p of partitions) {
-        const filterValue = event.data[p]?.toString() || 'event'
-        const results = clients[eventType].listEntities({ queryOptions: { filter: odata`PartitionKey eq ${filterValue}` } })
-        expect(await countAsyncIterator(results)).toBe(1)
-      }
-    }
-  )
+      expect(
+        await db.payments.findAll({
+          where: { partitionKey: event.data.frn.toString(), category: FRN },
+        })
+      ).toHaveLength(1)
 
-  test('sends alert for warning', async () => {
-    await processEventMessage({ body: events.warning }, receiver)
-    expect(mockSendMessage).toHaveBeenCalled()
+      expect(
+        await db.payments.findAll({
+          where: {
+            partitionKey: event.data.correlationId,
+            category: CORRELATION_ID,
+          },
+        })
+      ).toHaveLength(1)
+
+      expect(
+        await db.payments.findAll({
+          where: {
+            partitionKey: event.data.schemeId.toString(),
+            category: SCHEME_ID,
+          },
+        })
+      ).toHaveLength(1)
+
+      expect(
+        await db.payments.findAll({
+          where: { partitionKey: event.data.batch, category: BATCH },
+        })
+      ).toHaveLength(1)
+    })
+
+    test('saves payment event without batch', async () => {
+      const event = events.payment
+      delete event.data.batch
+
+      await processEventMessage({ body: event }, receiver)
+
+      expect(await db.payments.findAll()).toHaveLength(3)
+      expect(
+        await db.payments.findAll({ where: { category: BATCH } })
+      ).toHaveLength(0)
+    })
+
+    test('saves payment event data as JSON string', async () => {
+      await processEventMessage({ body: events.payment }, receiver)
+
+      const records = await db.payments.findAll()
+      records.forEach((r) => {
+        expect(typeof r.data).toBe('string')
+        expect(JSON.parse(r.data)).toEqual(events.payment.data)
+      })
+    })
+  })
+
+  describe('hold events', () => {
+    test('saves hold event with all partition keys', async () => {
+      const event = events.hold
+
+      await processEventMessage({ body: event }, receiver)
+
+      // FRN
+      expect(
+        await db.holds.findAll({
+          where: { partitionKey: event.data.frn.toString(), category: FRN },
+        })
+      ).toHaveLength(1)
+
+      const schemeRecords = await db.holds.findAll({
+        where: {
+          partitionKey: event.data.schemeId.toString(),
+          category: SCHEME_ID,
+        },
+      })
+      expect(schemeRecords.length).toBeGreaterThanOrEqual(1)
+
+      const holdCatRecords = await db.holds.findAll({
+        where: { partitionKey: event.data.holdCategoryId.toString() },
+      })
+      expect(holdCatRecords.length).toBeGreaterThanOrEqual(1)
+    })
+
+    test('saves exactly 3 hold records', async () => {
+      await processEventMessage({ body: events.hold }, receiver)
+      expect(await db.holds.findAll()).toHaveLength(3)
+    })
+  })
+
+  describe('batch events', () => {
+    test('saves batch event with filename as partition key', async () => {
+      await processEventMessage({ body: events.batch }, receiver)
+
+      expect(
+        await db.batches.findAll({
+          where: { partitionKey: events.batch.data.filename, category: BATCH },
+        })
+      ).toHaveLength(1)
+    })
+  })
+
+  describe('warning events', () => {
+    test('saves warning event and sends alert', async () => {
+      await processEventMessage({ body: events.warning }, receiver)
+
+      expect(
+        await db.warnings.findAll({
+          where: { category: WARNING },
+        })
+      ).toHaveLength(1)
+
+      expect(mockSendMessage).toHaveBeenCalled()
+    })
+  })
+
+  describe('event properties', () => {
+    test('saves all event properties correctly', async () => {
+      await processEventMessage({ body: events.payment }, receiver)
+
+      const record = await db.payments.findOne()
+      expect(record.source).toBe(events.payment.source)
+      expect(record.subject).toBe(events.payment.subject)
+      expect(record.time.toISOString()).toBe(events.payment.time)
+      expect(record.type).toBe(events.payment.type)
+    })
+
+    test('sets timestamp for all records', async () => {
+      await processEventMessage({ body: events.payment }, receiver)
+
+      const records = await db.payments.findAll()
+      records.forEach((r) => {
+        expect(r.timestamp).toBeInstanceOf(Date)
+      })
+    })
   })
 })

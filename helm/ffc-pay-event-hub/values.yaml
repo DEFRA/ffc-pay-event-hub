@@ -22,13 +22,15 @@ deployment:
   minReplicas: 1
   maxReplicas: 4
   cpuThreshold: 80
-  memoryThreshold: 80 
+  memoryThreshold: 80
 
 container:
-  requestMemory: 200Mi
-  requestCpu: 200m
-  limitMemory: 500Mi
-  limitCpu: 500m
+  requestMemory: 100Mi
+  requestCpu: 100m
+  limitMemory: 200Mi
+  limitCpu: 200m
+  port: 3011
+  processingActive: true
   messageQueueHost: namespace.servicebus.windows.net
   eventsTopicAddress: ffc-pay-events
   eventsSubscriptionAddress: ffc-pay-event-hub
@@ -44,6 +46,29 @@ container:
   azureStorageConnectionString: dummy
   azureStorageUseConnectionString: false
   azureStorageAccountName: ffcpay
+
+postgresService:
+  postgresDb: ffc_pay_event_hub
+  postgresqlHost: ffc-pay-event-hub-postgres
+  postgresPort: 5432
+  postgresSchema: public
+  postgresUser: postgres
+
+livenessProbe:
+  path: /healthz
+  port: 3011
+  initialDelaySeconds: 20
+  periodSeconds: 10
+  failureThreshold: 3
+  timeoutSeconds: 5
+
+readinessProbe:
+  path: /healthy
+  port: 3011
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  failureThreshold: 3
+  timeoutSeconds: 5
 
 workloadIdentity: true
 
