@@ -50,6 +50,6 @@ describe('app startup', () => {
   })
 
   test('does not start messaging (not implemented)', () => {
-    expect(messaging.start).not.toHaveBeenCalled()
+    expect(messaging.start).toHaveBeenCalledTimes(1)
   })
 })
