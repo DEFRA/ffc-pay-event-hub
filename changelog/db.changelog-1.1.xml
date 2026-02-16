@@ -14,7 +14,7 @@
       </column>
       <column name="partitionKey" type="TEXT"/>
       <column name="rowKey" type="TEXT"/>
-      <column name="Timestamp" type="TIMESTAMPTZ"/>
+      <column name="timestamp" type="TIMESTAMPTZ"/>
       <column name="type" type="TEXT"/>
       <column name="source" type="TEXT"/>
       <column name="time" type="TIMESTAMPTZ"/>
