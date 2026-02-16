@@ -20,7 +20,7 @@
       <column name="rowKey" type="TEXT">
         <constraints nullable="false"/>
       </column>
-      <column name="timestamp" type="TIMESTAMPTZ">
+      <column name="timestamp" type="TIMESTAMP">
         <constraints nullable="false"/>
       </column>
       <column name="type" type="TEXT">
@@ -30,7 +30,7 @@
         <constraints nullable="false"/>
       </column>
       <column name="subject" type="TEXT"/>
-      <column name="time" type="TIMESTAMPTZ">
+      <column name="time" type="TIMESTAMP">
         <constraints nullable="false"/>
       </column>
       <column name="category" type="TEXT"/>
