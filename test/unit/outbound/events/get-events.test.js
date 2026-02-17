@@ -32,7 +32,7 @@ describe('get events', () => {
         subject: extractedEvent.subject,
         time: extractedEvent.time,
         type: extractedEvent.type,
-        data: JSON.stringify(extractedEvent.data),
+        data: extractedEvent.data,
         toJSON: function () {
           return {
             id: this.id,
@@ -56,7 +56,7 @@ describe('get events', () => {
         subject: enrichedEvent.subject,
         time: enrichedEvent.time,
         type: enrichedEvent.type,
-        data: JSON.stringify(enrichedEvent.data),
+        data: enrichedEvent.data,
         toJSON: function () {
           return {
             id: this.id,
@@ -145,7 +145,7 @@ describe('get events', () => {
 
     mockFindAll.mockResolvedValue([eventWithNoData])
     const result = await getEvents(PARTITION_KEY, CATEGORY)
-    expect(result[0].data).toBeUndefined()
+    expect(result[0].data).toBeNull()
   })
 
   test('should handle events with empty string data', async () => {
@@ -176,7 +176,7 @@ describe('get events', () => {
 
     mockFindAll.mockResolvedValue([eventWithEmptyData])
     const result = await getEvents(PARTITION_KEY, CATEGORY)
-    expect(result[0].data).toBeUndefined()
+    expect(result[0].data).toBeNull()
   })
 
   test('should preserve all event properties', async () => {
@@ -222,7 +222,7 @@ describe('get events', () => {
       subject: 'test-subject',
       time: 'test-time',
       type: 'test-type',
-      data: JSON.stringify(complexData),
+      data: complexData,
       toJSON: function () {
         return {
           id: this.id,
@@ -241,5 +241,46 @@ describe('get events', () => {
     mockFindAll.mockResolvedValue([eventWithComplexData])
     const result = await getEvents(PARTITION_KEY, CATEGORY)
     expect(result[0].data).toEqual(complexData)
+  })
+
+  test('should parse stringified JSON data', async () => {
+    const stringifiedData = JSON.stringify({
+      foo: 'bar',
+      nested: { value: 42 },
+    })
+
+    const eventWithStringData = {
+      id: 'uuid-6',
+      partitionKey: PARTITION_KEY,
+      category: CATEGORY,
+      timestamp: 1234567895,
+      source: 'test-source',
+      subject: 'test-subject',
+      time: 'test-time',
+      type: 'test-type',
+      data: stringifiedData,
+      toJSON: function () {
+        return {
+          id: this.id,
+          partitionKey: this.partitionKey,
+          category: this.category,
+          timestamp: this.timestamp,
+          source: this.source,
+          subject: this.subject,
+          time: this.time,
+          type: this.type,
+          data: this.data,
+        }
+      },
+    }
+
+    mockFindAll.mockResolvedValue([eventWithStringData])
+
+    const result = await getEvents(PARTITION_KEY, CATEGORY)
+
+    expect(result[0].data).toEqual({
+      foo: 'bar',
+      nested: { value: 42 },
+    })
   })
 })

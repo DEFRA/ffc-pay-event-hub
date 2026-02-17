@@ -9,10 +9,24 @@ const getEvents = async (id, category) => {
     order: [['timestamp', 'ASC']],
   })
 
-  return events.map((event) => ({
-    ...event.toJSON(),
-    data: event.data ? JSON.parse(event.data) : undefined,
-  }))
+  return events.map((event) => {
+    const raw = event.data
+
+    let parsed
+
+    if (!raw) {
+      parsed = null
+    } else if (typeof raw === 'string') {
+      parsed = JSON.parse(raw)
+    } else {
+      parsed = raw
+    }
+
+    return {
+      ...event.toJSON(),
+      data: parsed,
+    }
+  })
 }
 
 module.exports = {

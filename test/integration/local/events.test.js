@@ -99,13 +99,13 @@ describe('processEventMessage', () => {
       ).toHaveLength(0)
     })
 
-    test('saves payment event data as JSON string', async () => {
+    test('saves payment event data as JSON object', async () => {
       await processEventMessage({ body: events.payment }, receiver)
 
       const records = await db.payments.findAll()
       records.forEach((r) => {
-        expect(typeof r.data).toBe('string')
-        expect(JSON.parse(r.data)).toEqual(events.payment.data)
+        expect(typeof r.data).toBe('object')
+        expect(r.data).toEqual(events.payment.data)
       })
     })
   })

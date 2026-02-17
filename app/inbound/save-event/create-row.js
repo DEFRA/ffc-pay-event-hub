@@ -7,7 +7,7 @@ const createRow = (partitionKey, rowKey, category, event) => {
     rowKey: `${rowKey.toString().replaceAll(/[/\\]/g, '_')}|${timestamp}`,
     category,
     ...event,
-    data: event.data ? JSON.stringify(event.data) : undefined
+    data: event.data ? event.data : undefined
   }
 }
 
