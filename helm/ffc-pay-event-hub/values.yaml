@@ -18,12 +18,17 @@ containerSecret:
   name: ffc-pay-event-hub-container-secret
   type: Opaque
 
-deployment: {}
+deployment:
+  minReplicas: 1
+  maxReplicas: 4
+  cpuThreshold: 80
+  memoryThreshold: 80
 
 container:
-  requestMemory: 800Mi
-  requestCpu: 800m
-  limitMemory: 1000Mi
+  requestMemory: 100Mi
+  requestCpu: 100m
+  limitMemory: 200Mi
+  limitCpu: 200m
   port: 3011
   processingActive: true
   messageQueueHost: namespace.servicebus.windows.net
@@ -48,7 +53,6 @@ postgresService:
   postgresPort: 5432
   postgresSchema: public
   postgresUser: postgres
-  logging: false
 
 livenessProbe:
   path: /healthz
