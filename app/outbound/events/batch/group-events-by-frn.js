@@ -4,7 +4,6 @@ const groupEventsByFrn = (events) => {
       .reduce((map, event) => {
         const frn = event.rowKey.split('|')[0]
         const key = `${event.partitionKey}-${frn}`
-        console.log(key)
 
         const item = map.get(key) || {
           batch: event.partitionKey,
