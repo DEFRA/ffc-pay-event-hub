@@ -27,7 +27,7 @@ describe('create row', () => {
     ['rowKey', () => `${mockRowKey}|${mockTimestamp}`, (v) => v],
     ['category', () => mockCategory, (v) => v],
     ['time', () => mockEvent.time, (v) => v],
-    ['data', () => JSON.stringify(mockEvent.data), (v) => v],
+    ['data', () => mockEvent.data, (v) => v],
   ])('creates entity with %s', async (_, valueFn, expectedFn) => {
     const entity = await createRow(
       mockPartitionKey,

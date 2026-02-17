@@ -32,7 +32,7 @@ describe('get events', () => {
         subject: extractedEvent.subject,
         time: extractedEvent.time,
         type: extractedEvent.type,
-        data: JSON.stringify(extractedEvent.data),
+        data: extractedEvent.data,
         toJSON: function () {
           return {
             id: this.id,
@@ -56,7 +56,7 @@ describe('get events', () => {
         subject: enrichedEvent.subject,
         time: enrichedEvent.time,
         type: enrichedEvent.type,
-        data: JSON.stringify(enrichedEvent.data),
+        data: enrichedEvent.data,
         toJSON: function () {
           return {
             id: this.id,
@@ -222,7 +222,7 @@ describe('get events', () => {
       subject: 'test-subject',
       time: 'test-time',
       type: 'test-type',
-      data: JSON.stringify(complexData),
+      data: complexData,
       toJSON: function () {
         return {
           id: this.id,

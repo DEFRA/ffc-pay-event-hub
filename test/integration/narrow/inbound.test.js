@@ -83,12 +83,12 @@ describe('inbound payment event', () => {
     expect(records).toHaveLength(4)
   })
 
-  test('saves payment data as JSON string', async () => {
+  test('saves payment data as JSON object', async () => {
     await processEvent(events.payment)
     const records = await db.payments.findAll()
     records.forEach((record) => {
-      expect(typeof record.data).toBe('string')
-      expect(JSON.parse(record.data)).toEqual(events.payment.data)
+      expect(typeof record.data).toBe('object')
+      expect(record.data).toEqual(events.payment.data)
     })
   })
 
@@ -134,12 +134,12 @@ describe('inbound hold event', () => {
     expect(records.length).toBeGreaterThan(0)
   })
 
-  test('saves hold data as JSON string', async () => {
+  test('saves hold data as JSON object', async () => {
     await processEvent(events.hold)
     const records = await db.holds.findAll()
     records.forEach((record) => {
-      expect(typeof record.data).toBe('string')
-      expect(JSON.parse(record.data)).toEqual(events.hold.data)
+      expect(typeof record.data).toBe('object')
+      expect(record.data).toEqual(events.hold.data)
     })
   })
 
@@ -190,11 +190,11 @@ describe('inbound warning event', () => {
     expect(record.category).toBe(WARNING)
   })
 
-  test('saves warning data as JSON string', async () => {
+  test('saves warning data as JSON object', async () => {
     await processEvent(events.warning)
     const record = await db.warnings.findOne()
-    expect(typeof record.data).toBe('string')
-    expect(JSON.parse(record.data)).toEqual(events.warning.data)
+    expect(typeof record.data).toBe('object')
+    expect(record.data).toEqual(events.warning.data)
   })
 
   test('sends alert for warning', async () => {
