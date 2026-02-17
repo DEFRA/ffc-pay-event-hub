@@ -145,7 +145,7 @@ describe('get events', () => {
 
     mockFindAll.mockResolvedValue([eventWithNoData])
     const result = await getEvents(PARTITION_KEY, CATEGORY)
-    expect(result[0].data).tobeNull()
+    expect(result[0].data).toBeNull()
   })
 
   test('should handle events with empty string data', async () => {
