@@ -13,7 +13,8 @@ const shutdown = async () => {
   process.exit(0)
 }
 
-process.on(['SIGTERM', 'SIGINT'], shutdown)
+process.on('SIGTERM', shutdown)
+process.on('SIGINT', shutdown)
 
 const startApp = async () => {
   await server.start()
