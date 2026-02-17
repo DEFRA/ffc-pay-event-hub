@@ -242,4 +242,45 @@ describe('get events', () => {
     const result = await getEvents(PARTITION_KEY, CATEGORY)
     expect(result[0].data).toEqual(complexData)
   })
+
+  test('should parse stringified JSON data', async () => {
+    const stringifiedData = JSON.stringify({
+      foo: 'bar',
+      nested: { value: 42 },
+    })
+
+    const eventWithStringData = {
+      id: 'uuid-6',
+      partitionKey: PARTITION_KEY,
+      category: CATEGORY,
+      timestamp: 1234567895,
+      source: 'test-source',
+      subject: 'test-subject',
+      time: 'test-time',
+      type: 'test-type',
+      data: stringifiedData,
+      toJSON: function () {
+        return {
+          id: this.id,
+          partitionKey: this.partitionKey,
+          category: this.category,
+          timestamp: this.timestamp,
+          source: this.source,
+          subject: this.subject,
+          time: this.time,
+          type: this.type,
+          data: this.data,
+        }
+      },
+    }
+
+    mockFindAll.mockResolvedValue([eventWithStringData])
+
+    const result = await getEvents(PARTITION_KEY, CATEGORY)
+
+    expect(result[0].data).toEqual({
+      foo: 'bar',
+      nested: { value: 42 },
+    })
+  })
 })

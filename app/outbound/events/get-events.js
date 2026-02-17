@@ -15,7 +15,7 @@ const getEvents = async (id, category) => {
     let parsed
 
     if (!raw) {
-      parsed = undefined
+      parsed = null
     } else if (typeof raw === 'string') {
       parsed = JSON.parse(raw)
     } else {
