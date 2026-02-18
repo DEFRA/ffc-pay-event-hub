@@ -25,10 +25,9 @@ deployment:
   memoryThreshold: 80
 
 container:
-  requestMemory: 100Mi
-  requestCpu: 100m
-  limitMemory: 200Mi
-  limitCpu: 200m
+  requestMemory: 400Mi
+  requestCpu: 400m
+  limitMemory: 500Mi
   port: 3011
   processingActive: true
   messageQueueHost: namespace.servicebus.windows.net
