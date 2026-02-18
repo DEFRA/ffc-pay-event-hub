@@ -14,12 +14,17 @@ services:
       MESSAGE_QUEUE_HOST: servicebus-emulator
       MESSAGE_QUEUE_USER: RootManageSharedAccessKey
       MESSAGE_QUEUE_PASSWORD: SAS_KEY_VALUE
+      PROCESSING_ACTIVE: true
     volumes:
       - ./app:/home/node/app
       - ./test:/home/node/test
       - ./test-output:/home/node/test-output
       - ./jest.config.js:/home/node/jest.config.js
       - ./package.json:/home/node/package.json
+
+  ffc-pay-event-hub-postgres:
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
   sqledge:
     container_name: "sqledge"
     image: "mcr.microsoft.com/azure-sql-edge:latest"
@@ -50,3 +55,7 @@ services:
   ffc-pay-event-store-azurite:
     labels:
       com.docker.compose.pay.role: test
+
+volumes:
+  postgres_data:
+  

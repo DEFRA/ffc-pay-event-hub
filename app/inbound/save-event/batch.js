@@ -1,22 +1,27 @@
+const db = require('../../data')
+const { v4: uuidv4 } = require('uuid')
 const { BATCH } = require('../../constants/categories')
-const { BATCH_EVENT } = require('../../constants/event-types')
-const { getClient } = require('../../storage')
 const { getTimestamp } = require('./get-timestamp')
 
 const saveBatchEvent = async (event) => {
   const timestamp = getTimestamp(event.time)
-  const batchEntity = {
+
+  const batchRecord = {
+    id: uuidv4(),
     partitionKey: event.data.filename,
+    timestamp,
     rowKey: timestamp.toString(),
     category: BATCH,
-    ...event,
-    data: JSON.stringify(event.data)
+    source: event.source,
+    subject: event.subject,
+    time: event.time,
+    type: event.type,
+    data: JSON.stringify(event.data),
   }
 
-  const client = getClient(BATCH_EVENT)
-  await client.upsertEntity(batchEntity, 'Merge')
+  await db.batches.create(batchRecord)
 }
 
 module.exports = {
-  saveBatchEvent
+  saveBatchEvent,
 }

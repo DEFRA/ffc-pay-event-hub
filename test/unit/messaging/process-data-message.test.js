@@ -1,13 +1,13 @@
 jest.mock('../../../app/messaging/validate-message')
 jest.mock('../../../app/cache')
 jest.mock('../../../app/messaging/send-message')
-jest.mock('../../../app/data')
+jest.mock('../../../app/outbound')
 jest.mock('../../../app/storage')
 
 const { validateMessage: mockValidateMessage } = require('../../../app/messaging/validate-message')
 const { getCachedResponse: mockGetCachedResponse, setCachedResponse: mockSetCachedResponse, getCacheKey: mockGetCacheKey } = require('../../../app/cache')
 const { sendMessage: mockSendMessage } = require('../../../app/messaging/send-message')
-const { getData: mockGetData } = require('../../../app/data')
+const { getData: mockGetData } = require('../../../app/outbound')
 const { writeDataRequestFile: mockWriteDataRequestFile } = require('../../../app/storage')
 
 const { cacheConfig, messageConfig } = require('../../../app/config')

@@ -89,12 +89,12 @@ A debugger can be attached to the running application using port `9980`.
 
 ## How to get an output
 
-The output of this service is an entry or entries added to the Azure Table Storage tables following receipt of a valid
+The output of this service is an entry or entries added to the PostgreSql tables following receipt of a valid
 event received from the Azure Service Bus subscription.
 
 Use the [AsyncAPI specification](docs/asyncapi.yaml) to obtain a test input and submit to the Azure Service Bus topic, `ffc-pay-events`.
 
-You can use the [Azure Storage Explorer](https://azure.microsoft.com/en-gb/features/storage-explorer/) to view the contents of the Azure Table Storage tables.
+You can use the [Azure Data Studio](https://azure.microsoft.com/en-gb/products/data-studio) to view the contents of the PostgreSql tables.
 
 ## How to stop the service
 

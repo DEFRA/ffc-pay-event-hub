@@ -6,7 +6,7 @@ const {
   getCacheKey,
 } = require('../cache')
 const { cacheConfig, messageConfig } = require('../config')
-const { getData } = require('../data')
+const { getData } = require('../outbound')
 const { sendMessage } = require('./send-message')
 const { TYPE } = require('../constants/type')
 const { VALIDATION } = require('../constants/errors')
