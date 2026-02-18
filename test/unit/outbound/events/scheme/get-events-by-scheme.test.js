@@ -1,82 +1,79 @@
-jest.mock('../../../../../app/outbound/events/scheme-id/get-submitted-events')
-const {
-  getSubmittedEvents: mockGetSubmittedEvents,
-} = require('../../../../../app/outbound/events/scheme-id/get-submitted-events')
+const db = require('../../../../../app/data')
+const { getEventsByScheme } = require('../../../../../app/outbound/events/scheme-id/get-events-by-scheme')
+const { sanitiseSchemeData } = require('../../../../../app/outbound/events/scheme-id/sanitise-scheme-data')
 
-jest.mock('../../../../../app/outbound/events/scheme-id/group-events-by-scheme')
-const {
-  groupEventsByScheme: mockGroupEventsByScheme,
-} = require('../../../../../app/outbound/events/scheme-id/group-events-by-scheme')
+jest.mock('../../../../../app/outbound/events/scheme-id/sanitise-scheme-data', () => ({
+  sanitiseSchemeData: jest.fn(data => data)
+}))
 
-jest.mock(
-  '../../../../../app/outbound/events/scheme-id/order-grouped-events-by-scheme'
-)
-const {
-  orderGroupedEventsByScheme: mockOrderGroupedEventsByScheme,
-} = require('../../../../../app/outbound/events/scheme-id/order-grouped-events-by-scheme')
-
-jest.mock('../../../../../app/outbound/events/scheme-id/get-total-scheme-values')
-const {
-  getTotalSchemeValues: mockGetTotalSchemeValues,
-} = require('../../../../../app/outbound/events/scheme-id/get-total-scheme-values')
-
-jest.mock('../../../../../app/outbound/events/scheme-id/sanitise-scheme-data')
-const {
-  sanitiseSchemeData: mockSanitiseSchemeData,
-} = require('../../../../../app/outbound/events/scheme-id/sanitise-scheme-data')
-
-const submitted = require('../../../../mocks/events/submitted')
-const groupedEvent = require('../../../../mocks/events/grouped-event')
-const totalSchemeValues = require('../../../../mocks/total-scheme-values')
-
-const {
-  SCHEME_ID: SCHEME_ID_CATEGORY,
-} = require('../../../../../app/constants/categories')
-
-const {
-  getEventsByScheme,
-} = require('../../../../../app/outbound/events/scheme-id/get-events-by-scheme')
-const { SFI } = require('../../../../../app/constants/schemes')
-
-describe('get events by scheme', () => {
+describe('getEventsByScheme', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockGetSubmittedEvents.mockResolvedValue([submitted])
-    mockGroupEventsByScheme.mockReturnValue([groupedEvent])
-    mockGetTotalSchemeValues.mockReturnValue([totalSchemeValues])
-    mockOrderGroupedEventsByScheme.mockReturnValue([totalSchemeValues])
   })
 
-  const cases = [
-    [
-      'should get events for schemeId',
-      () => mockGetSubmittedEvents,
-      [SFI, SCHEME_ID_CATEGORY],
-    ],
-    [
-      'should group events by scheme',
-      () => mockGroupEventsByScheme,
-      [[submitted]],
-    ],
-    [
-      'should get total values for scheme',
-      () => mockGetTotalSchemeValues,
-      [[groupedEvent]],
-    ],
-    [
-      'should order grouped events',
-      () => mockOrderGroupedEventsByScheme,
-      [[totalSchemeValues]],
-    ],
-    [
-      'should sanitise events',
-      () => mockSanitiseSchemeData,
-      [[totalSchemeValues]],
-    ],
-  ]
+  test('should return sanitized data for all schemes when no schemeId is provided', async () => {
+    db.schemePaymentTotals.findAll = jest.fn().mockResolvedValue([
+      {
+        schemeId: 'SFI1',
+        paymentRequests: '100',
+        value: '£1,000.00'
+      },
+      {
+        schemeId: 'SFI2',
+        paymentRequests: '200',
+        value: '£2,000.00'
+      }
+    ])
 
-  test.each(cases)('%s', async (_, mockFnGetter, expectedArgs) => {
-    await getEventsByScheme(SFI)
-    expect(mockFnGetter()).toHaveBeenCalledWith(...expectedArgs)
+    const result = await getEventsByScheme()
+
+    expect(db.schemePaymentTotals.findAll).toHaveBeenCalledWith({ where: {} })
+    expect(sanitiseSchemeData).toHaveBeenCalledTimes(1)
+    expect(result).toEqual([
+      { schemeId: 'SFI1', paymentRequests: 100, value: '£1,000.00' },
+      { schemeId: 'SFI2', paymentRequests: 200, value: '£2,000.00' }
+    ])
+  })
+
+  test('should filter by schemeId when provided', async () => {
+    const schemeId = 'SFI1'
+
+    db.schemePaymentTotals.findAll = jest.fn().mockResolvedValue([
+      {
+        schemeId: 'SFI1',
+        paymentRequests: '100',
+        value: '£1,000.00'
+      }
+    ])
+
+    const result = await getEventsByScheme(schemeId)
+
+    expect(db.schemePaymentTotals.findAll).toHaveBeenCalledWith({ where: { schemeId } })
+    expect(result).toEqual([
+      { schemeId: 'SFI1', paymentRequests: 100, value: '£1,000.00' }
+    ])
+  })
+
+  test('should convert paymentRequests to a number', async () => {
+    db.schemePaymentTotals.findAll = jest.fn().mockResolvedValue([
+      {
+        schemeId: 'SFI3',
+        paymentRequests: '42',
+        value: '£500.00'
+      }
+    ])
+
+    const result = await getEventsByScheme('SFI3')
+
+    expect(result[0].paymentRequests).toBe(42)
+    expect(typeof result[0].paymentRequests).toBe('number')
+  })
+
+  test('should return an empty array when no data is found', async () => {
+    db.schemePaymentTotals.findAll = jest.fn().mockResolvedValue([])
+
+    const result = await getEventsByScheme('NON_EXISTENT')
+
+    expect(result).toEqual([])
   })
 })
