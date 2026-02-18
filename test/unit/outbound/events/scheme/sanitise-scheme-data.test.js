@@ -1,27 +1,43 @@
-jest.mock('../../../../../app/currency')
-const { convertToString } = require('../../../../../app/currency')
-
-const totalSchemeValues = require('../../../../mocks/total-scheme-values')
-
+const { sanitiseSchemeData } = require('../../../../../app/outbound/events/scheme-id/sanitise-scheme-data')
 const schemeNames = require('../../../../../app/constants/scheme-names')
+const schemes = require('../../../../../app/constants/schemes')
 
-const {
-  sanitiseSchemeData,
-} = require('../../../../../app/outbound/events/scheme-id/sanitise-scheme-data')
+describe('sanitiseSchemeData', () => {
+  test('should map schemeId to scheme name', () => {
+    const input = [
+      { schemeId: schemes.SFI, paymentRequests: 5, value: '£1,000.00' },
+      { schemeId: schemes.BPS, paymentRequests: 2, value: '£500.00' },
+    ]
 
-describe('get events by frn', () => {
-  test('should map schemeId value to scheme name', async () => {
-    const result = sanitiseSchemeData([totalSchemeValues])
-    expect(result[0].scheme).toBe(schemeNames[1])
+    const expected = [
+      { scheme: schemeNames[schemes.SFI], paymentRequests: 5, value: '£1,000.00' },
+      { scheme: schemeNames[schemes.BPS], paymentRequests: 2, value: '£500.00' },
+    ]
+
+    const result = sanitiseSchemeData(input)
+    expect(result).toEqual(expected)
   })
 
-  test('should map paymentRequests to scheme.paymentRequests', async () => {
-    const result = sanitiseSchemeData([totalSchemeValues])
-    expect(result[0].paymentRequests).toBe(totalSchemeValues.paymentRequests)
+  test('should preserve paymentRequests and value', () => {
+    const input = [
+      { schemeId: 1, paymentRequests: 10, value: '£2,000.00' },
+    ]
+
+    const result = sanitiseSchemeData(input)
+    expect(result[0].paymentRequests).toBe(10)
+    expect(result[0].value).toBe('£2,000.00')
   })
 
-  test('should call convertToPounds with totalSchemeValues.value', async () => {
-    sanitiseSchemeData([totalSchemeValues])
-    expect(convertToString).toBeCalledWith(totalSchemeValues.value)
+  test('should handle empty array', () => {
+    const result = sanitiseSchemeData([])
+    expect(result).toEqual([])
+  })
+
+  test('should throw if schemeId is not in schemeNames', () => {
+    const input = [
+      { schemeId: 'UNKNOWN_SCHEME', paymentRequests: 1, value: '£100.00' },
+    ]
+
+    expect(() => sanitiseSchemeData(input)).toThrow()
   })
 })
