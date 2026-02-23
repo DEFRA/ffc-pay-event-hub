@@ -1,12 +1,17 @@
 const schemeNames = require('../../../constants/scheme-names')
-const { convertToString } = require('../../../currency')
 
 const sanitiseSchemeData = (schemeData) => {
-  return schemeData.map(scheme => ({
-    scheme: schemeNames[scheme.schemeId],
-    paymentRequests: scheme.paymentRequests,
-    value: convertToString(scheme.value)
-  }))
+  return schemeData.map(scheme => {
+    const schemeName = schemeNames[scheme.schemeId]
+    if (!schemeName) {
+      throw new Error(`Unknown schemeId: ${scheme.schemeId}`)
+    }
+    return {
+      scheme: schemeName,
+      paymentRequests: scheme.paymentRequests,
+      value: scheme.value
+    }
+  })
 }
 
 module.exports = {
