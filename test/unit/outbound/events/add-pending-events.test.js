@@ -14,7 +14,7 @@ const processedNoFurtherAction = require('../../../mocks/events/processed-no-fut
 
 const {
   addPendingEvents,
-} = require('../../../../app/outbound/events/add-pending-events')
+} = require('../../../../app/data-requests/correlation-id/utils/add-pending-events')
 const {
   PAYMENT_PROCESSED_NO_FURTHER_ACTION_STATUS,
 } = require('../../../../app/constants/statuses')

@@ -6,7 +6,7 @@ const acknowledged = require('../../../../mocks/events/acknowledged')
 
 const {
   groupEventsByCorrelationId,
-} = require('../../../../../app/outbound/events/group-events-by-correlation-id')
+} = require('../../../../../app/data-requests/correlation-id/utils/group-events-by-correlation-id')
 
 describe('group events by correlation id', () => {
   let events

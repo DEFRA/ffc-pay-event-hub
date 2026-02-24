@@ -1,4 +1,4 @@
-const { getEventOrder } = require('../get-event-order')
+const { getEventOrder } = require('./get-event-order')
 
 const orderGroupedEvents = (events) => {
   return events.map(group => {

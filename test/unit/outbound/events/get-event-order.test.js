@@ -19,7 +19,7 @@ const {
 
 const {
   getEventOrder,
-} = require('../../../../app/outbound/events/get-event-order')
+} = require('../../../../app/data-requests/correlation-id/utils/get-event-order')
 
 describe('get event order', () => {
   const events = [

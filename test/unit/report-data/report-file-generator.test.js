@@ -63,7 +63,7 @@ describe('report-file-generator', () => {
       )
       db.sequelize.connectionManager.releaseConnection.mockResolvedValue()
 
-      storage.writeReportFile.mockImplementation((_filename, stream) => {
+      storage.streamDataRequestFile.mockImplementation((_filename, stream) => {
         stream.on('data', () => {})
         return new Promise((resolve, reject) => {
           stream.on('end', resolve)
@@ -89,16 +89,16 @@ describe('report-file-generator', () => {
 
       expect(filename).toMatch(/^test-report-\d{4}-\d{2}-\d{2}T/)
       expect(mockClient.query).toHaveBeenCalledWith(expect.any(QueryStream))
-      expect(storage.writeReportFile).toHaveBeenCalled()
+      expect(storage.streamDataRequestFile).toHaveBeenCalled()
       expect(db.sequelize.connectionManager.getConnection).toHaveBeenCalled()
       expect(
         db.sequelize.connectionManager.releaseConnection
       ).toHaveBeenCalled()
     })
 
-    test('throws error if storage.writeReportFile rejects', async () => {
+    test('throws error if storage.streamDataRequestFile rejects', async () => {
       const error = new Error('Upload failed')
-      storage.writeReportFile.mockRejectedValue(error)
+      storage.streamDataRequestFile.mockRejectedValue(error)
 
       process.nextTick(() => {
         pgStream.emit('data', { id: 1 })

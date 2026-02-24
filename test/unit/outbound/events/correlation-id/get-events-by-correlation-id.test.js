@@ -1,24 +1,26 @@
 jest.mock('../../../../../app/outbound/events/get-events')
 jest.mock('../../../../../app/outbound/events/group-events-by-correlation-id')
-jest.mock('../../../../../app/outbound/events/correlation-id/order-grouped-events')
+jest.mock(
+  '../../../../../app/outbound/events/correlation-id/order-grouped-events'
+)
 jest.mock('../../../../../app/outbound/events/sanitise-events')
 jest.mock('../../../../../app/outbound/events/add-pending-events')
 
 const {
   getEvents: mockGetEvents,
-} = require('../../../../../app/outbound/events/get-events')
+} = require('../../../../../app/data-requests/correlation-id/utils/get-events')
 const {
   groupEventsByCorrelationId: mockGroupEventsByCorrelationId,
-} = require('../../../../../app/outbound/events/group-events-by-correlation-id')
+} = require('../../../../../app/data-requests/correlation-id/utils/group-events-by-correlation-id')
 const {
   orderGroupedEvents: mockOrderGroupedEvents,
 } = require('../../../../../app/outbound/events/correlation-id/order-grouped-events')
 const {
   sanitiseEvents: mockSanitiseEvents,
-} = require('../../../../../app/outbound/events/sanitise-events')
+} = require('../../../../../app/data-requests/correlation-id/utils/sanitise-events')
 const {
   addPendingEvents: mockAddPendingEvents,
-} = require('../../../../../app/outbound/events/add-pending-events')
+} = require('../../../../../app/data-requests/correlation-id/utils/add-pending-events')
 
 const {
   CORRELATION_ID: CORRELATION_ID_VALUE,

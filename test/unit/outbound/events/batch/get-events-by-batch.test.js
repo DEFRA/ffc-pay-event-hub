@@ -6,19 +6,19 @@ jest.mock('../../../../../app/outbound/events/add-values')
 
 const {
   getEvents: mockGetEvents,
-} = require('../../../../../app/outbound/events/get-events')
+} = require('../../../../../app/data-requests/correlation-id/utils/get-events')
 const {
   groupEventsByFrn: mockGroupEventsByFrn,
 } = require('../../../../../app/outbound/events/batch/group-events-by-frn')
 const {
   orderGroupedEvents: mockOrderGroupedEvents,
-} = require('../../../../../app/outbound/events/order-grouped-events')
+} = require('../../../../../app/data-requests/correlation-id/utils/order-grouped-events')
 const {
   sanitiseEvents: mockSanitiseEvents,
-} = require('../../../../../app/outbound/events/sanitise-events')
+} = require('../../../../../app/data-requests/correlation-id/utils/sanitise-events')
 const {
   addValues: mockAddValues,
-} = require('../../../../../app/outbound/events/add-values')
+} = require('../../../../../app/data-requests/correlation-id/utils/add-values')
 
 const enriched = require('../../../../mocks/events/enriched')
 const groupedEvent = require('../../../../mocks/events/grouped-event')

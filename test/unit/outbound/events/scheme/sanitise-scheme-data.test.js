@@ -1,4 +1,6 @@
-const { sanitiseSchemeData } = require('../../../../../app/outbound/events/scheme-id/sanitise-scheme-data')
+const {
+  sanitiseSchemeData,
+} = require('../../../../../app/data-requests/scheme-id/sanitise-scheme-data')
 const schemeNames = require('../../../../../app/constants/scheme-names')
 const schemes = require('../../../../../app/constants/schemes')
 
@@ -10,8 +12,16 @@ describe('sanitiseSchemeData', () => {
     ]
 
     const expected = [
-      { scheme: schemeNames[schemes.SFI], paymentRequests: 5, value: '£1,000.00' },
-      { scheme: schemeNames[schemes.BPS], paymentRequests: 2, value: '£500.00' },
+      {
+        scheme: schemeNames[schemes.SFI],
+        paymentRequests: 5,
+        value: '£1,000.00',
+      },
+      {
+        scheme: schemeNames[schemes.BPS],
+        paymentRequests: 2,
+        value: '£500.00',
+      },
     ]
 
     const result = sanitiseSchemeData(input)
@@ -19,9 +29,7 @@ describe('sanitiseSchemeData', () => {
   })
 
   test('should preserve paymentRequests and value', () => {
-    const input = [
-      { schemeId: 1, paymentRequests: 10, value: '£2,000.00' },
-    ]
+    const input = [{ schemeId: 1, paymentRequests: 10, value: '£2,000.00' }]
 
     const result = sanitiseSchemeData(input)
     expect(result[0].paymentRequests).toBe(10)

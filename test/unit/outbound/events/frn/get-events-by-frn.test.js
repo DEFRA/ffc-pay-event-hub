@@ -1,7 +1,7 @@
 jest.mock('../../../../../app/outbound/events/get-events')
 const {
   getEvents: mockGetEvents,
-} = require('../../../../../app/outbound/events/get-events')
+} = require('../../../../../app/data-requests/correlation-id/utils/get-events')
 
 jest.mock('../../../../../app/outbound/events/frn/group-events-by-frn')
 const {
@@ -11,17 +11,17 @@ const {
 jest.mock('../../../../../app/outbound/events/order-grouped-events')
 const {
   orderGroupedEvents: mockOrderGroupedEvents,
-} = require('../../../../../app/outbound/events/order-grouped-events')
+} = require('../../../../../app/data-requests/correlation-id/utils/order-grouped-events')
 
 jest.mock('../../../../../app/outbound/events/sanitise-events')
 const {
   sanitiseEvents: mockSanitiseEvents,
-} = require('../../../../../app/outbound/events/sanitise-events')
+} = require('../../../../../app/data-requests/correlation-id/utils/sanitise-events')
 
 jest.mock('../../../../../app/outbound/events/add-values')
 const {
   addValues: mockAddValues,
-} = require('../../../../../app/outbound/events/add-values')
+} = require('../../../../../app/data-requests/correlation-id/utils/add-values')
 
 const { FRN: FRN_VALUE } = require('../../../../mocks/values/frn')
 const enriched = require('../../../../mocks/events/enriched')

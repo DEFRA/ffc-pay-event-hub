@@ -4,7 +4,7 @@ const {
   getEventsByCorrelationId: mockGetEventsByCorrelationId,
   getEventsByBatch: mockGetEventsByBatch,
   getEventsByScheme: mockGetEventsByScheme,
-} = require('../../../app/outbound/events')
+} = require('../../../app/data-requests/correlation-id/utils')
 
 const { FRN: FRN_VALUE } = require('../../mocks/values/frn')
 const {
@@ -20,7 +20,7 @@ const {
   SCHEME_ID: SCHEME_ID_CATEGORY,
 } = require('../../../app/constants/categories')
 
-const { getData } = require('../../../app/outbound/')
+const { getData } = require('../../../app/data-requests')
 
 describe('get data', () => {
   beforeEach(() => {

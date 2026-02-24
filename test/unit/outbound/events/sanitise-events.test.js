@@ -1,6 +1,6 @@
 const {
   sanitiseEvents,
-} = require('../../../../app/outbound/events/sanitise-events')
+} = require('../../../../app/data-requests/correlation-id/utils/sanitise-events')
 
 const enriched = require('../../../mocks/events/enriched')
 const extracted = require('../../../mocks/events/extracted')

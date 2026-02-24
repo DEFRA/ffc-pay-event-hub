@@ -10,7 +10,7 @@ const MAX_CONCURRENCY = 5
 
 const getCredential = () =>
   new DefaultAzureCredential({
-    managedIdentityClientId: storageConfig.managedIdentityClientId
+    managedIdentityClientId: storageConfig.managedIdentityClientId,
   })
 
 const createBlobServiceClient = () => {
@@ -57,12 +57,14 @@ const writeFile = async (filename, content) => {
 }
 
 const writeDataRequestFile = async (filename, content) => {
+  console.debug('[STORAGE] Starting dataRequest file save:', filename)
   const blob = dataRequestContainer.getBlockBlobClient(filename)
   await blob.upload(content, content.length)
-  return blob
+  console.debug('[STORAGE] Upload completed')
+  return blob.url
 }
 
-const writeReportFile = async (filename, readableStream) => { // todo: rename this to dataRequestEsc
+const streamDataRequestFile = async (filename, readableStream) => {
   try {
     console.debug('[STORAGE] Starting dataRequest file save:', filename)
     containersInitialised ?? (await initialiseContainers())
@@ -91,5 +93,5 @@ module.exports = {
   initialiseContainers,
   writeFile,
   writeDataRequestFile,
-  writeReportFile,
+  streamDataRequestFile,
 }

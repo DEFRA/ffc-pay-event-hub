@@ -2,7 +2,7 @@ const { PassThrough } = require('node:stream')
 const QueryStream = require('pg-query-stream')
 
 const db = require('../data')
-const { writeReportFile } = require('../storage')
+const { streamDataRequestFile } = require('../storage')
 const { generateUniqueFilename } = require('./utils/generate-unique-filename')
 
 const defaultStreamOptions = {
@@ -60,7 +60,7 @@ const exportQueryToJsonFile = async (
     const filename = generateUniqueFilename(fileIdentifier)
     const pgStream = createStreamingQuery(sql, client, batchSize)
 
-    const savePromise = writeReportFile(filename, passThrough)
+    const savePromise = streamDataRequestFile(filename, passThrough)
     await streamRowsAsJsonArray(
       pgStream,
       passThrough,
@@ -69,7 +69,6 @@ const exportQueryToJsonFile = async (
     )
     await savePromise
 
-    console.log(`DataRequest file saved to storage as: ${filename}`)
     return filename
   } catch (err) {
     console.error('Failed to export report:', err)
@@ -79,7 +78,7 @@ const exportQueryToJsonFile = async (
   }
 }
 
-const generateSqlQuery = (whereClause, tableName) => {
+const generateSqlQuery = (whereClause, tableName, orderBy = null) => {
   const model = db[tableName]
 
   if (!model) {
@@ -89,16 +88,43 @@ const generateSqlQuery = (whereClause, tableName) => {
   const actualTableName = model.getTableName()
   const baseQuery = `SELECT * FROM ${actualTableName}`
 
-  if (!whereClause) {
-    return baseQuery
+  const queryGenerator = db.sequelize.getQueryInterface().queryGenerator
+
+  let query = baseQuery
+
+  // WHERE
+  if (whereClause) {
+    const whereSql = queryGenerator.getWhereConditions(
+      whereClause,
+      actualTableName
+    )
+    query += ` WHERE ${whereSql}`
   }
 
-  const queryGenerator = db.sequelize.getQueryInterface().queryGenerator
-  const whereSql = queryGenerator.getWhereConditions(
-    whereClause,
-    actualTableName
-  )
-  return `${baseQuery} WHERE ${whereSql}`
+  if (orderBy) {
+    if (!Array.isArray(orderBy)) {
+      throw new TypeError('orderBy must be an array')
+    }
+
+    const validColumns = Object.keys(model.rawAttributes)
+
+    const orderParts = orderBy.map(([column, direction]) => {
+      if (!validColumns.includes(column)) {
+        throw new Error(`Invalid order column: ${column}`)
+      }
+
+      const dir = String(direction).toUpperCase()
+      if (!['ASC', 'DESC'].includes(dir)) {
+        throw new Error(`Invalid order direction: ${direction}`)
+      }
+
+      return `"${column}" ${dir}`
+    })
+
+    query += ` ORDER BY ${orderParts.join(', ')}`
+  }
+
+  return query
 }
 
 module.exports = { generateSqlQuery, exportQueryToJsonFile }

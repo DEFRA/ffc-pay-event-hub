@@ -1,13 +1,17 @@
 const db = require('../../../../../../app/data')
-const { getEventsByScheme } = require('../../../../../../app/outbound/events/scheme-id/get-events-by-scheme')
-const { sanitiseSchemeData } = require('../../../../../../app/outbound/events/scheme-id/sanitise-scheme-data')
+const {
+  getEventsByScheme,
+} = require('../../../../../../app/data-requests/scheme-id/get-events-by-scheme')
+const {
+  sanitiseSchemeData,
+} = require('../../../../../../app/data-requests/scheme-id/sanitise-scheme-data')
 const schemeNames = require('../../../../../../app/constants/scheme-names')
 
 const SCHEMES = Object.keys(schemeNames)
 let rawViewData = []
 
 beforeAll(async () => {
-  await db.sequelize.sync(({ force: true }))
+  await db.sequelize.sync({ force: true })
 })
 
 beforeEach(async () => {
@@ -16,7 +20,7 @@ beforeEach(async () => {
   rawViewData = SCHEMES.map((scheme, index) => ({
     schemeId: scheme,
     paymentRequests: 2 + index,
-    value: `£${(1000 * (index + 1)).toLocaleString()}.00`
+    value: `£${(1000 * (index + 1)).toLocaleString()}.00`,
   }))
 
   for (const row of rawViewData) {

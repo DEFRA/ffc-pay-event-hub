@@ -8,7 +8,9 @@ const enriched = require('../../../mocks/events/enriched')
 const processed = require('../../../mocks/events/processed')
 const submitted = require('../../../mocks/events/submitted')
 
-const { addValues } = require('../../../../app/outbound/events/add-values')
+const {
+  addValues,
+} = require('../../../../app/data-requests/correlation-id/utils/add-values')
 const { FC } = require('../../../../app/constants/schemes')
 
 let groupedEvent

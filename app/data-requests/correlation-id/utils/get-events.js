@@ -1,4 +1,4 @@
-const db = require('../../data')
+const db = require('../../../data')
 
 const getEvents = async (id, category) => {
   const events = await db.payments.findAll({

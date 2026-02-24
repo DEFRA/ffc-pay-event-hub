@@ -1,10 +1,17 @@
 const db = require('../../../../../app/data')
-const { getEventsByScheme } = require('../../../../../app/outbound/events/scheme-id/get-events-by-scheme')
-const { sanitiseSchemeData } = require('../../../../../app/outbound/events/scheme-id/sanitise-scheme-data')
+const {
+  getEventsByScheme,
+} = require('../../../../../app/data-requests/scheme-id/get-events-by-scheme')
+const {
+  sanitiseSchemeData,
+} = require('../../../../../app/data-requests/scheme-id/sanitise-scheme-data')
 
-jest.mock('../../../../../app/outbound/events/scheme-id/sanitise-scheme-data', () => ({
-  sanitiseSchemeData: jest.fn(data => data)
-}))
+jest.mock(
+  '../../../../../app/outbound/events/scheme-id/sanitise-scheme-data',
+  () => ({
+    sanitiseSchemeData: jest.fn((data) => data),
+  })
+)
 
 describe('getEventsByScheme', () => {
   beforeEach(() => {
@@ -16,13 +23,13 @@ describe('getEventsByScheme', () => {
       {
         schemeId: 'SFI1',
         paymentRequests: '100',
-        value: '£1,000.00'
+        value: '£1,000.00',
       },
       {
         schemeId: 'SFI2',
         paymentRequests: '200',
-        value: '£2,000.00'
-      }
+        value: '£2,000.00',
+      },
     ])
 
     const result = await getEventsByScheme()
@@ -31,7 +38,7 @@ describe('getEventsByScheme', () => {
     expect(sanitiseSchemeData).toHaveBeenCalledTimes(1)
     expect(result).toEqual([
       { schemeId: 'SFI1', paymentRequests: 100, value: '£1,000.00' },
-      { schemeId: 'SFI2', paymentRequests: 200, value: '£2,000.00' }
+      { schemeId: 'SFI2', paymentRequests: 200, value: '£2,000.00' },
     ])
   })
 
@@ -42,15 +49,17 @@ describe('getEventsByScheme', () => {
       {
         schemeId: 'SFI1',
         paymentRequests: '100',
-        value: '£1,000.00'
-      }
+        value: '£1,000.00',
+      },
     ])
 
     const result = await getEventsByScheme(schemeId)
 
-    expect(db.schemePaymentTotals.findAll).toHaveBeenCalledWith({ where: { schemeId } })
+    expect(db.schemePaymentTotals.findAll).toHaveBeenCalledWith({
+      where: { schemeId },
+    })
     expect(result).toEqual([
-      { schemeId: 'SFI1', paymentRequests: 100, value: '£1,000.00' }
+      { schemeId: 'SFI1', paymentRequests: 100, value: '£1,000.00' },
     ])
   })
 
@@ -59,8 +68,8 @@ describe('getEventsByScheme', () => {
       {
         schemeId: 'SFI3',
         paymentRequests: '42',
-        value: '£500.00'
-      }
+        value: '£500.00',
+      },
     ])
 
     const result = await getEventsByScheme('SFI3')

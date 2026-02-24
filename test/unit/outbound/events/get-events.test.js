@@ -8,7 +8,9 @@ db.payments = {
 
 const { PARTITION_KEY } = require('../../../mocks/values/partition-key')
 const { CATEGORY } = require('../../../mocks/values/category')
-const { getEvents } = require('../../../../app/outbound/events/get-events')
+const {
+  getEvents,
+} = require('../../../../app/data-requests/correlation-id/utils/get-events')
 
 let extractedEvent, enrichedEvent, mockDbEvents
 
