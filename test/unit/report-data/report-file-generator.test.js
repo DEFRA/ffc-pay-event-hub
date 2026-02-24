@@ -5,24 +5,29 @@ jest.mock('pg-query-stream')
 jest.mock('../../../app/storage')
 
 const mockPaymentsModel = { getTableName: () => 'mock_table' }
-const mockGetWhereConditions = jest.fn((where, tableName) => (where ? 'id = 1' : ''))
+const mockGetWhereConditions = jest.fn((where, tableName) =>
+  where ? 'id = 1' : ''
+)
 
 jest.mock('../../../app/data', () => ({
   sequelize: {
     connectionManager: {
       getConnection: jest.fn(),
-      releaseConnection: jest.fn()
+      releaseConnection: jest.fn(),
     },
     getQueryInterface: jest.fn(() => ({
-      queryGenerator: { getWhereConditions: mockGetWhereConditions }
-    }))
+      queryGenerator: { getWhereConditions: mockGetWhereConditions },
+    })),
   },
-  payments: mockPaymentsModel
+  payments: mockPaymentsModel,
 }))
 
 const db = require('../../../app/data')
 const storage = require('../../../app/storage')
-const { generateSqlQuery, exportQueryToJsonFile } = require('../../../app/report-data/report-file-generator')
+const {
+  generateSqlQuery,
+  exportQueryToJsonFile,
+} = require('../../../app/data-requests/file-generator')
 
 describe('report-file-generator', () => {
   beforeEach(() => {
@@ -32,7 +37,7 @@ describe('report-file-generator', () => {
   describe('generateSqlQuery', () => {
     test.each([
       [null, 'SELECT * FROM mock_table'],
-      [{ id: 1 }, 'SELECT * FROM mock_table WHERE id = 1']
+      [{ id: 1 }, 'SELECT * FROM mock_table WHERE id = 1'],
     ])('returns correct query for whereClause %p', (whereClause, expected) => {
       const result = generateSqlQuery(whereClause, 'payments')
       expect(result).toBe(expected)
@@ -53,7 +58,9 @@ describe('report-file-generator', () => {
       pgStream = new PassThrough({ objectMode: true })
       mockClient = { query: jest.fn(() => pgStream) }
 
-      db.sequelize.connectionManager.getConnection.mockResolvedValue(mockClient)
+      db.sequelize.connectionManager.getConnection.mockResolvedValue(
+        mockClient
+      )
       db.sequelize.connectionManager.releaseConnection.mockResolvedValue()
 
       storage.writeReportFile.mockImplementation((_filename, stream) => {
@@ -66,7 +73,11 @@ describe('report-file-generator', () => {
     })
 
     test('exports query results to storage as JSON array', async () => {
-      const exportPromise = exportQueryToJsonFile('SELECT * FROM mock_table', 'test-report', 100)
+      const exportPromise = exportQueryToJsonFile(
+        'SELECT * FROM mock_table',
+        'test-report',
+        100
+      )
 
       process.nextTick(() => {
         pgStream.emit('data', { id: 1, name: 'Alice' })
@@ -80,7 +91,9 @@ describe('report-file-generator', () => {
       expect(mockClient.query).toHaveBeenCalledWith(expect.any(QueryStream))
       expect(storage.writeReportFile).toHaveBeenCalled()
       expect(db.sequelize.connectionManager.getConnection).toHaveBeenCalled()
-      expect(db.sequelize.connectionManager.releaseConnection).toHaveBeenCalled()
+      expect(
+        db.sequelize.connectionManager.releaseConnection
+      ).toHaveBeenCalled()
     })
 
     test('throws error if storage.writeReportFile rejects', async () => {
@@ -92,8 +105,12 @@ describe('report-file-generator', () => {
         pgStream.emit('end')
       })
 
-      await expect(exportQueryToJsonFile('SELECT * FROM mock_table', 'fail-report', 100)).rejects.toThrow('Upload failed')
-      expect(db.sequelize.connectionManager.releaseConnection).toHaveBeenCalled()
+      await expect(
+        exportQueryToJsonFile('SELECT * FROM mock_table', 'fail-report', 100)
+      ).rejects.toThrow('Upload failed')
+      expect(
+        db.sequelize.connectionManager.releaseConnection
+      ).toHaveBeenCalled()
     })
   })
 })

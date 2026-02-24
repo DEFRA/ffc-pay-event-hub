@@ -1,0 +1,62 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+    <changeSet author="Oliver Lewington" id="1">
+        <tagDatabase tag="v1.5.0"/>
+    </changeSet>
+
+    <changeSet author="Oliver Lewington" id="2">
+        <createTable tableName="payment_batch_events">
+            <column name="id" type="UUID">
+                <constraints
+                nullable="false"
+                primaryKey="true"
+                primaryKeyName="batch_payment_events_pkey"/>
+            </column>
+            <column name="batchName" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="schemeId" type="INTEGER"/>
+            <column name="frn" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="marketingYear" type="INTEGER"/>
+            <column name="agreementNumber" type="TEXT"/>
+            <column name="paymentRequestNumber" type="INTEGER"/>
+            <column name="originalValue" type="numeric"/>
+            <column name="type" type="TEXT"/>
+        </createTable>
+
+        <createTable tableName="payment_frn_events">
+            <column name="id" type="UUID">
+                <constraints
+                    nullable="false"
+                    primaryKey="true"
+                    primaryKeyName="frn_payment_events_pkey"/>
+            </column>
+            <column name="frn" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="correlationId" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="schemeId" type="INTEGER"/>
+            <column name="agreementNumber" type="TEXT"/>
+            <column name="paymentRequestNumber" type="INTEGER"/>
+            <column name="originalValue" type="numeric"/>
+            <column name="type" type="TEXT"/>
+            <column name="lastUpdated" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>    
+
+    <changeSet author="Oliver Lewington" id="3">
+        <addUniqueConstraint
+            tableName="payment_batch_events"
+            columnNames="batchName, frn"
+            constraintName="payment_batch_events_unique"/>
+            
+        <addUniqueConstraint
+            tableName="payment_frn_events"
+            columnNames="frn, correlationId"
+            constraintName="payment_frn_events_unique"/>
+    </changeSet>    
+</databaseChangeLog>

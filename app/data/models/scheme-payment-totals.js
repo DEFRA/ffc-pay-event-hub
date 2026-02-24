@@ -6,18 +6,12 @@ const defineSchemePaymentTotals = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         primaryKey: true,
       },
-      paymentRequests: {
-        type: DataTypes.BIGINT,
-      },
-      total_value: {
-        type: DataTypes.NUMERIC,
-      },
-      value: {
-        type: DataTypes.STRING,
-      },
+      paymentRequests: DataTypes.BIGINT,
+      totalValue: DataTypes.NUMERIC,
+      value: DataTypes.STRING,
     },
     {
-      tableName: 'v_scheme_payment_totals',
+      tableName: 'v_submitted_payment_totals_by_scheme',
       timestamps: false,
     }
   )

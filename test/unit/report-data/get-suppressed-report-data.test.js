@@ -1,13 +1,18 @@
-const { generateSqlQuery, exportQueryToJsonFile } = require('../../../app/report-data/report-file-generator')
+const {
+  generateSqlQuery,
+  exportQueryToJsonFile,
+} = require('../../../app/data-requests/file-generator')
 const { PAYMENT_SUPPRESSED } = require('../../../app/constants/events')
 const { FRN } = require('../../../app/constants/categories')
 
 jest.mock('../../../app/report-data/report-file-generator', () => ({
   generateSqlQuery: jest.fn(),
-  exportQueryToJsonFile: jest.fn()
+  exportQueryToJsonFile: jest.fn(),
 }))
 
-const { getSuppressedReportData } = require('../../../app/report-data/get-suppressed-report-data')
+const {
+  getSuppressedReportData,
+} = require('../../../app/report-data/get-suppressed-report-data')
 
 describe('getSuppressedReportData', () => {
   beforeEach(() => {
@@ -23,7 +28,7 @@ describe('getSuppressedReportData', () => {
     expect(generateSqlQuery).toHaveBeenCalledWith(
       {
         category: FRN,
-        type: PAYMENT_SUPPRESSED
+        type: PAYMENT_SUPPRESSED,
       },
       'payments'
     )
@@ -45,7 +50,7 @@ describe('getSuppressedReportData', () => {
     expect(generateSqlQuery).toHaveBeenCalledWith(
       {
         category: FRN,
-        type: PAYMENT_SUPPRESSED
+        type: PAYMENT_SUPPRESSED,
       },
       'custom_table'
     )

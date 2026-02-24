@@ -62,9 +62,9 @@ const writeDataRequestFile = async (filename, content) => {
   return blob
 }
 
-const writeReportFile = async (filename, readableStream) => {
+const writeReportFile = async (filename, readableStream) => { // todo: rename this to dataRequestEsc
   try {
-    console.debug('[STORAGE] Starting report file save:', filename)
+    console.debug('[STORAGE] Starting dataRequest file save:', filename)
     containersInitialised ?? (await initialiseContainers())
 
     const blob = dataRequestContainer.getBlockBlobClient(filename)

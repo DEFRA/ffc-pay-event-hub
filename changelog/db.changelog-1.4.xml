@@ -1,52 +1,39 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
-<databaseChangeLog 
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog" 
-    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" 
-    xmlns:pro="http://www.liquibase.org/xml/ns/pro" 
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:schemaLocation="
-        http://www.liquibase.org/xml/ns/dbchangelog-ext 
-        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd 
-        http://www.liquibase.org/xml/ns/pro 
-        http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd 
-        http://www.liquibase.org/xml/ns/dbchangelog 
-        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+    <changeSet author="Oliver Lewington" id="1">
+        <tagDatabase tag="v1.4.0"/>
+    </changeSet>
 
-  <changeSet author="Oliver Lewington" id="1">
-    <tagDatabase tag="v1.4.0"/>
-  </changeSet>
+    <changeSet author="Oliver Lewington" id="2">
+        <createView viewName="v_submitted_payment_totals_by_scheme" replaceIfExists="true">
+            <![CDATA[
+                SELECT
+                    p."partitionKey" AS "schemeId",
+                    COUNT(*) AS "paymentRequests",
+                    SUM((p.data->>'value')::numeric) AS totalValue,
+                    '£' || to_char(
+                        SUM((p.data->>'value')::numeric / 100),
+                        'FM999,999,999,999,990.00'
+                    ) AS value
+                FROM public.payments p
+                WHERE p.type = 'uk.gov.defra.ffc.pay.payment.submitted'
+                  AND p."partitionKey" ~ '^[0-9]+$'
+                  AND jsonb_exists(p.data, 'schemeId')
+                  AND p."partitionKey"::bigint = (p.data->>'schemeId')::bigint
+                GROUP BY p."partitionKey"
+                ORDER BY p."partitionKey"::bigint;
+            ]]>
+        </createView>
+    </changeSet>
 
-  <changeSet author="Oliver Lewington" id="2">
-    <sql>
-      <![CDATA[
-      CREATE OR REPLACE VIEW v_scheme_payment_totals AS
-      SELECT
-          p."partitionKey" AS "schemeId",
-          COUNT(*) AS "paymentRequests",
-          SUM((p.data->>'value')::numeric) AS total_value,
-          '£' || to_char(
-              SUM((p.data->>'value')::numeric/100),
-              'FM999,999,999,999,990.00'
-          ) AS value
-      FROM public.payments p
-      WHERE p.type = 'uk.gov.defra.ffc.pay.payment.submitted'
-        AND p."partitionKey" ~ '^[0-9]+$'
-        AND jsonb_exists(p.data, 'schemeId')
-        AND p."partitionKey"::bigint = (p.data->>'schemeId')::bigint
-      GROUP BY p."partitionKey"
-      ORDER BY p."partitionKey"::bigint;
-      ]]>
-    </sql>
-  </changeSet>
-
-  <changeSet author="Oliver Lewington" id="3">
-    <sql>
-      <![CDATA[
-      CREATE INDEX idx_payments_submitted_scheme_consistent
-      ON public.payments("partitionKey")
-      WHERE type = 'uk.gov.defra.ffc.pay.payment.submitted' AND jsonb_exists(data, 'schemeId');
-      ]]>
-    </sql>
-  </changeSet>
+    <changeSet author="Oliver Lewington" id="3">
+        <sql>
+            <![CDATA[
+                CREATE INDEX IF NOT EXISTS idx_payments_submitted_scheme_partition
+                ON public.payments ("partitionKey")
+                WHERE type = 'uk.gov.defra.ffc.pay.payment.submitted' AND jsonb_exists(data, 'schemeId');
+            ]]>
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>

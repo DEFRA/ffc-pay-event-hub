@@ -1,29 +1,37 @@
 const { PassThrough } = require('node:stream')
 const QueryStream = require('pg-query-stream')
+
 const db = require('../data')
 const { writeReportFile } = require('../storage')
+const { generateUniqueFilename } = require('./utils/generate-unique-filename')
 
-const generateUniqueFilename = (prefix = 'default', ext = 'json') => {
-  const timestamp = new Date().toISOString().replaceAll(/[:.]/g, '-')
-  return `${prefix}-${timestamp}.${ext}`
+const defaultStreamOptions = {
+  onStart: (stream) => stream.write('[\n'),
+  onEnd: (stream) => stream.end('\n]\n'),
 }
 
-const streamRowsAsJsonArray = (pgStream, outputStream) =>
+const streamRowsAsJsonArray = (
+  pgStream,
+  outputStream,
+  rowProcessor,
+  options = defaultStreamOptions
+) =>
   new Promise((resolve, reject) => {
-    let isFirstRow = true
-    outputStream.write('[\n')
+    const { onStart, onEnd } = options
+    const firstRowFlag = { value: true }
 
-    pgStream.on('data', (row) => {
-      const json = JSON.stringify(row)
-      if (!isFirstRow) {
-        outputStream.write(',\n')
-      }
-      outputStream.write(json)
-      isFirstRow = false
-    })
+    if (onStart) {
+      onStart(outputStream)
+    }
+
+    pgStream.on('data', (row) => rowProcessor(row, outputStream, firstRowFlag))
 
     pgStream.on('end', () => {
-      outputStream.end('\n]\n')
+      if (onEnd) {
+        onEnd(outputStream)
+      } else {
+        outputStream.end()
+      }
       resolve()
     })
 
@@ -40,7 +48,9 @@ const releaseDbClient = async (client) =>
 
 const exportQueryToJsonFile = async (
   sql,
+  rowProcessor,
   fileIdentifier = undefined,
+  streamOptions = defaultStreamOptions,
   batchSize = 5000
 ) => {
   const client = await getDbClient()
@@ -49,10 +59,17 @@ const exportQueryToJsonFile = async (
   try {
     const filename = generateUniqueFilename(fileIdentifier)
     const pgStream = createStreamingQuery(sql, client, batchSize)
+
     const savePromise = writeReportFile(filename, passThrough)
-    await streamRowsAsJsonArray(pgStream, passThrough)
+    await streamRowsAsJsonArray(
+      pgStream,
+      passThrough,
+      rowProcessor,
+      streamOptions
+    )
     await savePromise
-    console.log(`Report saved to storage as: ${filename}`)
+
+    console.log(`DataRequest file saved to storage as: ${filename}`)
     return filename
   } catch (err) {
     console.error('Failed to export report:', err)

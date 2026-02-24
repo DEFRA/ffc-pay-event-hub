@@ -11,6 +11,7 @@ const { sendMessage } = require('./send-message')
 const { TYPE } = require('../constants/type')
 const { VALIDATION } = require('../constants/errors')
 const { writeDataRequestFile } = require('../storage')
+const { getEventsByBatchStream } = require('../data-requests/batch-events/get-events-by-batch')
 
 const processDataMessage = async (message, receiver) => {
   try {
@@ -29,6 +30,18 @@ const processDataMessage = async (message, receiver) => {
       body,
       key
     )
+
+    if (category === 'batch2') {
+      console.log('batch')
+      const blobUri = await getEventsByBatchStream(value)
+      await sendMessage({ uri: blobUri }, TYPE, messageConfig.dataQueue, {
+        sessionId: messageId,
+      })
+      await receiver.completeMessage(message)
+
+      return
+    }
+
     const response = cachedResponse ?? { data: await getData(category, value) }
 
     if (!cachedResponse) {
@@ -46,10 +59,6 @@ const processDataMessage = async (message, receiver) => {
       sessionId: messageId,
     })
     await receiver.completeMessage(message)
-    console.log(
-      'Data request completed:',
-      util.inspect(response, false, null, true)
-    )
   } catch (err) {
     console.error('Unable to process data request:', err)
     if (err.category === VALIDATION) {
