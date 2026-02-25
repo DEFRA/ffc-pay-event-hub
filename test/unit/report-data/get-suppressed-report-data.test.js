@@ -1,65 +1,57 @@
+jest.mock('../../../app/data-requests/file-generator')
+jest.mock('../../../app/report-data/report-row-processor')
+
 const {
   generateSqlQuery,
-  exportQueryToJsonFile,
+  exportQueryToJsonFile
 } = require('../../../app/data-requests/file-generator')
-const { PAYMENT_SUPPRESSED } = require('../../../app/constants/events')
+
+const { reportProcessingFunc } = require('../../../app/report-data/report-row-processor')
+
 const { FRN } = require('../../../app/constants/categories')
+const { PAYMENT_SUPPRESSED } = require('../../../app/constants/events')
 
-jest.mock('../../../app/report-data/report-file-generator', () => ({
-  generateSqlQuery: jest.fn(),
-  exportQueryToJsonFile: jest.fn(),
-}))
-
-const {
-  getSuppressedReportData,
-} = require('../../../app/report-data/get-suppressed-report-data')
+const { getSuppressedReportData } = require('../../../app/report-data/get-suppressed-report-data')
 
 describe('getSuppressedReportData', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  test('generates SQL with default table name and exports suppressed report', async () => {
-    generateSqlQuery.mockResolvedValue('SQL_QUERY')
-    exportQueryToJsonFile.mockResolvedValue({ result: 'ok' })
+  const setup = async (sql = 'SQL_QUERY', tableName) => {
+    generateSqlQuery.mockResolvedValue(sql)
+    exportQueryToJsonFile.mockResolvedValue('FILE_RESULT')
 
-    const result = await getSuppressedReportData()
+    const result = await getSuppressedReportData(tableName)
 
-    expect(generateSqlQuery).toHaveBeenCalledWith(
-      {
-        category: FRN,
-        type: PAYMENT_SUPPRESSED,
-      },
-      'payments'
-    )
+    return { result }
+  }
 
-    expect(exportQueryToJsonFile).toHaveBeenCalledWith(
-      'SQL_QUERY',
-      'suppressed-report'
-    )
+  test.each([
+    ['default table name', undefined, 'payments', 'SQL_QUERY'],
+    ['custom table name', 'custom_table', 'custom_table', 'CUSTOM_SQL']
+  ])(
+    'generates SQL using %s',
+    async (_, inputTable, expectedTable, sqlValue) => {
+      generateSqlQuery.mockResolvedValue(sqlValue)
 
-    expect(result).toEqual({ result: 'ok' })
-  })
+      const { result } = await setup(sqlValue, inputTable)
 
-  test('uses provided table name when supplied', async () => {
-    generateSqlQuery.mockResolvedValue('CUSTOM_SQL')
-    exportQueryToJsonFile.mockResolvedValue({ exported: true })
+      expect(generateSqlQuery).toHaveBeenCalledWith(
+        {
+          category: FRN,
+          type: PAYMENT_SUPPRESSED
+        },
+        expectedTable
+      )
 
-    const result = await getSuppressedReportData('custom_table')
+      expect(exportQueryToJsonFile).toHaveBeenCalledWith(
+        sqlValue,
+        reportProcessingFunc,
+        'suppressed-report'
+      )
 
-    expect(generateSqlQuery).toHaveBeenCalledWith(
-      {
-        category: FRN,
-        type: PAYMENT_SUPPRESSED,
-      },
-      'custom_table'
-    )
-
-    expect(exportQueryToJsonFile).toHaveBeenCalledWith(
-      'CUSTOM_SQL',
-      'suppressed-report'
-    )
-
-    expect(result).toEqual({ exported: true })
-  })
+      expect(result).toBe('FILE_RESULT')
+    }
+  )
 })

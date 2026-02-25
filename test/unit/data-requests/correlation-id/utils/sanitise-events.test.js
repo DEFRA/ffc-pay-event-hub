@@ -1,23 +1,26 @@
 const {
   sanitiseEvents,
-} = require('../../../../app/data-requests/correlation-id/utils/sanitise-events')
+} = require('../../../../../app/data-requests/correlation-id/utils/sanitise-events')
 
-const enriched = require('../../../mocks/events/enriched')
-const extracted = require('../../../mocks/events/extracted')
-const processed = require('../../../mocks/events/processed')
-const submitted = require('../../../mocks/events/submitted')
-const acknowledged = require('../../../mocks/events/acknowledged')
+const enriched = require('../../../../mocks/events/enriched')
+const extracted = require('../../../../mocks/events/extracted')
+const processed = require('../../../../mocks/events/processed')
+const submitted = require('../../../../mocks/events/submitted')
+const acknowledged = require('../../../../mocks/events/acknowledged')
 
-const { 1: SFI } = require('../../../../app/constants/scheme-names')
+const { 1: SFI } = require('../../../../../app/constants/scheme-names')
 const {
   PAYMENT_ACKNOWLEDGED_STATUS,
   PAYMENT_ENRICHED_STATUS,
-} = require('../../../../app/constants/statuses')
+} = require('../../../../../app/constants/statuses')
 const {
   PAYMENT_ACKNOWLEDGED_NAME,
   PAYMENT_ENRICHED_NAME,
-} = require('../../../../app/constants/names')
-const { COMPLETED, IN_PROGRESS } = require('../../../../app/constants/states')
+} = require('../../../../../app/constants/names')
+const {
+  COMPLETED,
+  IN_PROGRESS,
+} = require('../../../../../app/constants/states')
 
 let groupedEvent
 let result
@@ -25,7 +28,7 @@ let result
 describe('sanitise events', () => {
   beforeEach(() => {
     groupedEvent = structuredClone(
-      require('../../../mocks/events/grouped-event')
+      require('../../../../mocks/events/grouped-event')
     )
 
     groupedEvent.events = [enriched, processed, submitted, acknowledged]

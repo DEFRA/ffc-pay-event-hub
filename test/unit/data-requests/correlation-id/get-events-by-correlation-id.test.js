@@ -1,39 +1,45 @@
-jest.mock('../../../../../app/outbound/events/get-events')
-jest.mock('../../../../../app/outbound/events/group-events-by-correlation-id')
+jest.mock('../../../../app/data-requests/correlation-id/utils/get-events')
 jest.mock(
-  '../../../../../app/outbound/events/correlation-id/order-grouped-events'
+  '../../../../app/data-requests/correlation-id/utils/group-events-by-correlation-id'
 )
-jest.mock('../../../../../app/outbound/events/sanitise-events')
-jest.mock('../../../../../app/outbound/events/add-pending-events')
+jest.mock(
+  '../../../../app/data-requests/correlation-id/utils/order-grouped-events'
+)
+jest.mock(
+  '../../../../app/data-requests/correlation-id/utils/sanitise-events'
+)
+jest.mock(
+  '../../../../app/data-requests/correlation-id/utils/add-pending-events'
+)
 
 const {
   getEvents: mockGetEvents,
-} = require('../../../../../app/data-requests/correlation-id/utils/get-events')
+} = require('../../../../app/data-requests/correlation-id/utils/get-events')
 const {
   groupEventsByCorrelationId: mockGroupEventsByCorrelationId,
-} = require('../../../../../app/data-requests/correlation-id/utils/group-events-by-correlation-id')
+} = require('../../../../app/data-requests/correlation-id/utils/group-events-by-correlation-id')
 const {
   orderGroupedEvents: mockOrderGroupedEvents,
-} = require('../../../../../app/outbound/events/correlation-id/order-grouped-events')
+} = require('../../../../app/data-requests/correlation-id/utils/order-grouped-events')
 const {
   sanitiseEvents: mockSanitiseEvents,
-} = require('../../../../../app/data-requests/correlation-id/utils/sanitise-events')
+} = require('../../../../app/data-requests/correlation-id/utils/sanitise-events')
 const {
   addPendingEvents: mockAddPendingEvents,
-} = require('../../../../../app/data-requests/correlation-id/utils/add-pending-events')
+} = require('../../../../app/data-requests/correlation-id/utils/add-pending-events')
 
 const {
   CORRELATION_ID: CORRELATION_ID_VALUE,
-} = require('../../../../mocks/values/correlation-id')
+} = require('../../../mocks/values/correlation-id')
 const {
   CORRELATION_ID: CORRELATION_ID_CATEGORY,
-} = require('../../../../../app/constants/categories')
-const enriched = require('../../../../mocks/events/enriched')
-const groupedEvent = require('../../../../mocks/events/grouped-event')
+} = require('../../../../app/constants/categories')
+const enriched = require('../../../mocks/events/enriched')
+const groupedEvent = require('../../../mocks/events/grouped-event')
 
 const {
   getEventsByCorrelationId,
-} = require('../../../../../app/outbound/events/correlation-id/get-events-by-correlation-id')
+} = require('../../../../app/data-requests/correlation-id/get-events-by-correlation-id')
 
 describe('getEventsByCorrelationId', () => {
   beforeEach(() => {

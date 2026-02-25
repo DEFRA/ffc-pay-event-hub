@@ -15,11 +15,11 @@ const {
   PAYMENT_SUBMITTED,
   PAYMENT_ACKNOWLEDGED,
   PAYMENT_SETTLED,
-} = require('../../../../app/constants/events')
+} = require('../../../../../app/constants/events')
 
 const {
   getEventOrder,
-} = require('../../../../app/data-requests/correlation-id/utils/get-event-order')
+} = require('../../../../../app/data-requests/correlation-id/utils/get-event-order')
 
 describe('get event order', () => {
   const events = [

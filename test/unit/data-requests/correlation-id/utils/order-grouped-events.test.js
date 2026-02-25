@@ -5,7 +5,7 @@ const submitted = require('../../../../mocks/events/submitted')
 
 const {
   orderGroupedEvents,
-} = require('../../../../../app/outbound/events/correlation-id/order-grouped-events')
+} = require('../../../../../app/data-requests/correlation-id/utils/order-grouped-events')
 
 let groupedEvent
 

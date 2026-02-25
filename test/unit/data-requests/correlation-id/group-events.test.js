@@ -1,12 +1,12 @@
-const { PARTITION_KEY } = require('../../../../mocks/values/partition-key')
-const enriched = require('../../../../mocks/events/enriched')
-const processed = require('../../../../mocks/events/processed')
-const submitted = require('../../../../mocks/events/submitted')
-const acknowledged = require('../../../../mocks/events/acknowledged')
+const { PARTITION_KEY } = require('../../../mocks/values/partition-key')
+const enriched = require('../../../mocks/events/enriched')
+const processed = require('../../../mocks/events/processed')
+const submitted = require('../../../mocks/events/submitted')
+const acknowledged = require('../../../mocks/events/acknowledged')
 
 const {
   groupEventsByCorrelationId,
-} = require('../../../../../app/data-requests/correlation-id/utils/group-events-by-correlation-id')
+} = require('../../../../app/data-requests/correlation-id/utils/group-events-by-correlation-id')
 
 describe('group events by correlation id', () => {
   let events

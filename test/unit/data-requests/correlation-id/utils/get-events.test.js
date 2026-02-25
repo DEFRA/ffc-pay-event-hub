@@ -1,16 +1,16 @@
-jest.mock('../../../../app/data')
-const db = require('../../../../app/data')
+jest.mock('../../../../../app/data')
+const db = require('../../../../../app/data')
 
 const mockFindAll = jest.fn()
 db.payments = {
   findAll: mockFindAll,
 }
 
-const { PARTITION_KEY } = require('../../../mocks/values/partition-key')
-const { CATEGORY } = require('../../../mocks/values/category')
+const { PARTITION_KEY } = require('../../../../mocks/values/partition-key')
+const { CATEGORY } = require('../../../../mocks/values/category')
 const {
   getEvents,
-} = require('../../../../app/data-requests/correlation-id/utils/get-events')
+} = require('../../../../../app/data-requests/correlation-id/utils/get-events')
 
 let extractedEvent, enrichedEvent, mockDbEvents
 
@@ -19,9 +19,11 @@ describe('get events', () => {
     jest.clearAllMocks()
 
     extractedEvent = structuredClone(
-      require('../../../mocks/events/extracted')
+      require('../../../../mocks/events/extracted')
     )
-    enrichedEvent = structuredClone(require('../../../mocks/events/enriched'))
+    enrichedEvent = structuredClone(
+      require('../../../../mocks/events/enriched')
+    )
 
     // Mock database events with toJSON method
     mockDbEvents = [

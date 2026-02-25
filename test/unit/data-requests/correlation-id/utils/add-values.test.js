@@ -1,24 +1,24 @@
-jest.mock('../../../../app/currency')
+jest.mock('../../../../../app/currency')
 const {
   convertToString: mockConvertToString,
-} = require('../../../../app/currency')
+} = require('../../../../../app/currency')
 
-const acknowledged = require('../../../mocks/events/acknowledged')
-const enriched = require('../../../mocks/events/enriched')
-const processed = require('../../../mocks/events/processed')
-const submitted = require('../../../mocks/events/submitted')
+const acknowledged = require('../../../../mocks/events/acknowledged')
+const enriched = require('../../../../mocks/events/enriched')
+const processed = require('../../../../mocks/events/processed')
+const submitted = require('../../../../mocks/events/submitted')
 
 const {
   addValues,
-} = require('../../../../app/data-requests/correlation-id/utils/add-values')
-const { FC } = require('../../../../app/constants/schemes')
+} = require('../../../../../app/data-requests/correlation-id/utils/add-values')
+const { FC } = require('../../../../../app/constants/schemes')
 
 let groupedEvent
 
 describe('add value to events', () => {
   beforeEach(() => {
     groupedEvent = structuredClone(
-      require('../../../mocks/events/grouped-event')
+      require('../../../../mocks/events/grouped-event')
     )
     groupedEvent.events = [
       structuredClone(enriched),

@@ -4,27 +4,27 @@ const {
   PAYMENT_SUBMITTED_NAME,
   PAYMENT_ACKNOWLEDGED_NAME,
   PAYMENT_PROCESSED_NO_FURTHER_ACTION_NAME,
-} = require('../../../../app/constants/names')
+} = require('../../../../../app/constants/names')
 
-const enriched = require('../../../mocks/events/enriched')
-const processed = require('../../../mocks/events/processed')
-const submitted = require('../../../mocks/events/submitted')
-const acknowledged = require('../../../mocks/events/acknowledged')
-const processedNoFurtherAction = require('../../../mocks/events/processed-no-futher-action')
+const enriched = require('../../../../mocks/events/enriched')
+const processed = require('../../../../mocks/events/processed')
+const submitted = require('../../../../mocks/events/submitted')
+const acknowledged = require('../../../../mocks/events/acknowledged')
+const processedNoFurtherAction = require('../../../../mocks/events/processed-no-futher-action')
 
 const {
   addPendingEvents,
-} = require('../../../../app/data-requests/correlation-id/utils/add-pending-events')
+} = require('../../../../../app/data-requests/correlation-id/utils/add-pending-events')
 const {
   PAYMENT_PROCESSED_NO_FURTHER_ACTION_STATUS,
-} = require('../../../../app/constants/statuses')
+} = require('../../../../../app/constants/statuses')
 
 let groupedEvent
 
 describe('add pending events', () => {
   beforeEach(() => {
     groupedEvent = structuredClone(
-      require('../../../mocks/events/grouped-event')
+      require('../../../../mocks/events/grouped-event')
     )
   })
 
