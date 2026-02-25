@@ -1,9 +1,9 @@
 const { CATEGORY } = require('./values/category')
-const { REQUEST_VALUE } = require('./cache/request-value')
+const { REQUEST_VALUE } = require('./request-value')
 
 module.exports = {
   REQUEST: {
     category: CATEGORY,
-    value: REQUEST_VALUE
-  }
+    value: REQUEST_VALUE,
+  },
 }

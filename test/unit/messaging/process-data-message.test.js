@@ -17,7 +17,7 @@ const {
 const { messageConfig } = require('../../../app/config')
 const { REQUEST_MESSAGE } = require('../../mocks/messaging/message')
 const { CATEGORY } = require('../../mocks/values/category')
-const { REQUEST_VALUE } = require('../../mocks/cache/request-value')
+const { REQUEST_VALUE } = require('../../mocks/request-value')
 const { TYPE } = require('../../../app/constants/type')
 const { VALIDATION } = require('../../../app/constants/errors')
 
@@ -71,9 +71,7 @@ describe('processDataMessage', () => {
   test('should complete the message if processing succeeds', async () => {
     await processDataMessage(REQUEST_MESSAGE, receiver)
 
-    expect(receiver.completeMessage).toHaveBeenCalledWith(
-      REQUEST_MESSAGE
-    )
+    expect(receiver.completeMessage).toHaveBeenCalledWith(REQUEST_MESSAGE)
   })
 
   test('should abandon message on non-validation errors', async () => {
@@ -83,9 +81,7 @@ describe('processDataMessage', () => {
 
     await processDataMessage(REQUEST_MESSAGE, receiver)
 
-    expect(receiver.abandonMessage).toHaveBeenCalledWith(
-      REQUEST_MESSAGE
-    )
+    expect(receiver.abandonMessage).toHaveBeenCalledWith(REQUEST_MESSAGE)
   })
 
   test('should dead-letter message on validation errors', async () => {
@@ -97,8 +93,6 @@ describe('processDataMessage', () => {
 
     await processDataMessage(REQUEST_MESSAGE, receiver)
 
-    expect(receiver.deadLetterMessage).toHaveBeenCalledWith(
-      REQUEST_MESSAGE
-    )
+    expect(receiver.deadLetterMessage).toHaveBeenCalledWith(REQUEST_MESSAGE)
   })
 })
