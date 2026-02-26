@@ -16,24 +16,14 @@ const { persistExportFile } = require('./utils/persist-export-file')
 
 const processDataExportRequest = async (category, value) => {
   switch (category) {
-    case BATCH: {
+    case BATCH:
       return getEventsByBatch(value)
-    }
-
-    case FRN: {
+    case FRN:
       return getEventsByFrn(value)
-    }
-
-    case CORRELATION_ID: {
-      const data = await getEventsByCorrelationId(value)
-      return persistExportFile('events-by-correlation-id', data)
-    }
-
-    case SCHEME_ID: {
-      const data = await getEventsByScheme(value)
-      return persistExportFile('events-by-scheme-id', data)
-    }
-
+    case CORRELATION_ID:
+      return persistExportFile('events-by-correlation-id', await getEventsByCorrelationId(value))
+    case SCHEME_ID:
+      return persistExportFile('events-by-scheme-id', await getEventsByScheme(value))
     default:
       throw new Error(`Unknown category: ${category}`)
   }
