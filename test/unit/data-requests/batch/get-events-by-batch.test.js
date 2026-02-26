@@ -1,11 +1,11 @@
 jest.mock('../../../../app/data-requests/file-generator', () => ({
   generateSqlQuery: jest.fn(),
-  exportQueryToJsonFile: jest.fn().mockResolvedValue('mock-file.json'),
+  exportQueryToJsonFile: jest.fn().mockResolvedValue('mock-file.json')
 }))
 
 jest.mock('../../../../app/data-requests/utils/json-stream', () => ({
   writeJsonRow: jest.fn(),
-  createReportProcessor: jest.fn((fn) => fn),
+  createReportProcessor: jest.fn((fn) => fn)
 }))
 
 jest.mock('../../../../app/data-requests/utils/transform', () => ({
@@ -18,23 +18,23 @@ jest.mock('../../../../app/data-requests/utils/transform', () => ({
   }),
   mapCommonFields: jest.fn((row, target) => {
     if (row.commonField) target.commonField = row.commonField
-  }),
+  })
 }))
 
 const {
   generateSqlQuery,
-  exportQueryToJsonFile,
+  exportQueryToJsonFile
 } = require('../../../../app/data-requests/file-generator')
 const {
   copyNonExcludedKeys,
-  mapCommonFields,
+  mapCommonFields
 } = require('../../../../app/data-requests/utils/transform')
 const {
-  createReportProcessor,
+  createReportProcessor
 } = require('../../../../app/data-requests/utils/json-stream')
 const {
   getEventsByBatch,
-  transformRow,
+  transformRow
 } = require('../../../../app/data-requests/batch/get-events-by-batch')
 
 describe('events-by-batch module', () => {
@@ -49,7 +49,7 @@ describe('events-by-batch module', () => {
         frn: '123',
         type: 'PAYMENT',
         value: 100,
-        commonField: 'common',
+        commonField: 'common'
       }
 
       const result = transformRow(row)
@@ -63,7 +63,7 @@ describe('events-by-batch module', () => {
         value: 100,
         commonField: 'common',
         frn: '123',
-        batch: 'BATCH1',
+        batch: 'BATCH1'
       })
     })
 

@@ -3,7 +3,7 @@ const {
   PAYMENT_PROCESSED_NAME,
   PAYMENT_SUBMITTED_NAME,
   PAYMENT_ACKNOWLEDGED_NAME,
-  PAYMENT_PROCESSED_NO_FURTHER_ACTION_NAME,
+  PAYMENT_PROCESSED_NO_FURTHER_ACTION_NAME
 } = require('../../../../../app/constants/names')
 
 const enriched = require('../../../../mocks/events/enriched')
@@ -13,10 +13,10 @@ const acknowledged = require('../../../../mocks/events/acknowledged')
 const processedNoFurtherAction = require('../../../../mocks/events/processed-no-futher-action')
 
 const {
-  addPendingEvents,
+  addPendingEvents
 } = require('../../../../../app/data-requests/correlation-id/utils/add-pending-events')
 const {
-  PAYMENT_PROCESSED_NO_FURTHER_ACTION_STATUS,
+  PAYMENT_PROCESSED_NO_FURTHER_ACTION_STATUS
 } = require('../../../../../app/constants/statuses')
 
 let groupedEvent
@@ -32,7 +32,7 @@ describe('add pending events', () => {
     { name: PAYMENT_ENRICHED_NAME, existingEvent: enriched },
     { name: PAYMENT_PROCESSED_NAME, existingEvent: processed },
     { name: PAYMENT_SUBMITTED_NAME, existingEvent: submitted },
-    { name: PAYMENT_ACKNOWLEDGED_NAME, existingEvent: acknowledged },
+    { name: PAYMENT_ACKNOWLEDGED_NAME, existingEvent: acknowledged }
   ]
 
   test('should add all default events if no events exist', () => {
@@ -58,7 +58,7 @@ describe('add pending events', () => {
     groupedEvent.events = [processedNoFurtherAction]
     groupedEvent.status = {
       detail: PAYMENT_PROCESSED_NO_FURTHER_ACTION_STATUS,
-      name: PAYMENT_PROCESSED_NO_FURTHER_ACTION_NAME,
+      name: PAYMENT_PROCESSED_NO_FURTHER_ACTION_NAME
     }
     const result = addPendingEvents([groupedEvent])
     expect(result[0].events).toHaveLength(1)

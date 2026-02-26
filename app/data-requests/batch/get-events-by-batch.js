@@ -1,6 +1,6 @@
 const {
   generateSqlQuery,
-  exportQueryToJsonFile,
+  exportQueryToJsonFile
 } = require('../file-generator')
 
 const { streamOptions } = require('../utils/stream-options')
@@ -25,7 +25,7 @@ const transformRow = (row) => {
 
 const getEventsByBatch = async (batch) => {
   const sql = generateSqlQuery({ batchName: batch }, 'paymentBatchEvents', [
-    ['frn', 'ASC'],
+    ['frn', 'ASC']
   ])
   return exportQueryToJsonFile(
     sql,
@@ -38,5 +38,5 @@ const getEventsByBatch = async (batch) => {
 module.exports = {
   getEventsByBatch,
   transformRow,
-  writeJsonRow,
+  writeJsonRow
 }

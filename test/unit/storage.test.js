@@ -10,20 +10,20 @@ describe('Storage initialization and functionality', () => {
       getBlockBlobClientMock = jest.fn().mockImplementation((filename) => ({
         upload: uploadMock,
         uploadStream: jest.fn().mockResolvedValue(),
-        url: filename,
+        url: filename
       }))
 
       const getContainerClientMock = jest.fn().mockReturnValue({
         createIfNotExists: jest.fn().mockResolvedValue(),
-        getBlockBlobClient: getBlockBlobClientMock,
+        getBlockBlobClient: getBlockBlobClientMock
       })
 
       const fromConnectionStringMock = jest.fn().mockReturnValue({
-        getContainerClient: getContainerClientMock,
+        getContainerClient: getContainerClientMock
       })
 
       const BlobServiceClientMock = jest.fn().mockImplementation(() => ({
-        getContainerClient: getContainerClientMock,
+        getContainerClient: getContainerClientMock
       }))
       BlobServiceClientMock.fromConnectionString = fromConnectionStringMock
       return { BlobServiceClient: BlobServiceClientMock }
@@ -32,8 +32,8 @@ describe('Storage initialization and functionality', () => {
     jest.doMock('@azure/identity', () => ({
       DefaultAzureCredential: jest.fn().mockImplementation((options) => ({
         type: 'DefaultAzureCredential',
-        options,
-      })),
+        options
+      }))
     }))
   })
 

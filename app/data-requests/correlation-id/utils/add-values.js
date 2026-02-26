@@ -16,11 +16,11 @@ const addValues = (events) => {
       currentValue: event.events[event.events.length - 1]?.data.value,
       currentValueText: convertToString(
         event.events[event.events.length - 1]?.data.value
-      ),
+      )
     }
   })
 }
 
 module.exports = {
-  addValues,
+  addValues
 }

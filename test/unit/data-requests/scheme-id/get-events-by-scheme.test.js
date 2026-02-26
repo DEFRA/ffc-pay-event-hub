@@ -1,22 +1,22 @@
 jest.mock('../../../../app/data', () => ({
   schemePaymentTotals: {
-    findAll: jest.fn(),
-  },
+    findAll: jest.fn()
+  }
 }))
 
 jest.mock(
   '../../../../app/data-requests/scheme-id/sanitise-scheme-data',
   () => ({
-    sanitiseSchemeData: jest.fn((data) => data),
+    sanitiseSchemeData: jest.fn((data) => data)
   })
 )
 
 const db = require('../../../../app/data')
 const {
-  sanitiseSchemeData,
+  sanitiseSchemeData
 } = require('../../../../app/data-requests/scheme-id//sanitise-scheme-data')
 const {
-  getEventsByScheme,
+  getEventsByScheme
 } = require('../../../../app/data-requests/scheme-id/get-events-by-scheme')
 
 describe('getEventsByScheme', () => {
@@ -27,7 +27,7 @@ describe('getEventsByScheme', () => {
   test('fetches all scheme events when no schemeId is provided', async () => {
     const rawData = [
       { schemeId: 1, paymentRequests: '5', value: 100 },
-      { schemeId: 2, paymentRequests: '10', value: 250 },
+      { schemeId: 2, paymentRequests: '10', value: 250 }
     ]
     db.schemePaymentTotals.findAll.mockResolvedValue(rawData)
 
@@ -36,11 +36,11 @@ describe('getEventsByScheme', () => {
     expect(db.schemePaymentTotals.findAll).toHaveBeenCalledWith({ where: {} })
     expect(sanitiseSchemeData).toHaveBeenCalledWith([
       { schemeId: 1, paymentRequests: 5, value: 100 },
-      { schemeId: 2, paymentRequests: 10, value: 250 },
+      { schemeId: 2, paymentRequests: 10, value: 250 }
     ])
     expect(result).toEqual([
       { schemeId: 1, paymentRequests: 5, value: 100 },
-      { schemeId: 2, paymentRequests: 10, value: 250 },
+      { schemeId: 2, paymentRequests: 10, value: 250 }
     ])
   })
 
@@ -51,10 +51,10 @@ describe('getEventsByScheme', () => {
     const result = await getEventsByScheme(42)
 
     expect(db.schemePaymentTotals.findAll).toHaveBeenCalledWith({
-      where: { schemeId: 42 },
+      where: { schemeId: 42 }
     })
     expect(sanitiseSchemeData).toHaveBeenCalledWith([
-      { schemeId: 42, paymentRequests: 3, value: 75 },
+      { schemeId: 42, paymentRequests: 3, value: 75 }
     ])
     expect(result).toEqual([{ schemeId: 42, paymentRequests: 3, value: 75 }])
   })
@@ -65,7 +65,7 @@ describe('getEventsByScheme', () => {
     const result = await getEventsByScheme(99)
 
     expect(db.schemePaymentTotals.findAll).toHaveBeenCalledWith({
-      where: { schemeId: 99 },
+      where: { schemeId: 99 }
     })
     expect(sanitiseSchemeData).toHaveBeenCalledWith([])
     expect(result).toEqual([])

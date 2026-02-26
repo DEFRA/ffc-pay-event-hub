@@ -9,12 +9,12 @@ const getEventsByScheme = async (schemeId) => {
   const schemeData = rawSchemeData.map((event) => ({
     schemeId: event.schemeId,
     paymentRequests: Number(event.paymentRequests),
-    value: event.value,
+    value: event.value
   }))
 
   return sanitiseSchemeData(schemeData)
 }
 
 module.exports = {
-  getEventsByScheme,
+  getEventsByScheme
 }

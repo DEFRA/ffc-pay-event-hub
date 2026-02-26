@@ -2,7 +2,7 @@ const moment = require('moment-timezone')
 
 const {
   generateSqlQuery,
-  exportQueryToJsonFile,
+  exportQueryToJsonFile
 } = require('../file-generator')
 
 const { streamOptions } = require('../utils/stream-options')
@@ -16,7 +16,7 @@ const EXCLUDED_KEYS = new Set([
   'schemeId',
   'type',
   'originalValue',
-  'lastUpdated',
+  'lastUpdated'
 ])
 
 const mapFrnFields = (row, target) => {
@@ -37,7 +37,7 @@ const getEventsByFrn = async (frn) => {
   const sql = generateSqlQuery({ frn }, 'paymentFrnEvents', [
     ['schemeId', 'ASC'],
     ['lastUpdated', 'DESC'],
-    ['paymentRequestNumber', 'ASC'],
+    ['paymentRequestNumber', 'ASC']
   ])
   return exportQueryToJsonFile(
     sql,
@@ -50,5 +50,5 @@ const getEventsByFrn = async (frn) => {
 module.exports = {
   getEventsByFrn,
   transformRow,
-  writeJsonRow,
+  writeJsonRow
 }

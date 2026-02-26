@@ -3,13 +3,13 @@ const db = require('../../../../../app/data')
 
 const mockFindAll = jest.fn()
 db.payments = {
-  findAll: mockFindAll,
+  findAll: mockFindAll
 }
 
 const { PARTITION_KEY } = require('../../../../mocks/values/partition-key')
 const { CATEGORY } = require('../../../../mocks/values/category')
 const {
-  getEvents,
+  getEvents
 } = require('../../../../../app/data-requests/correlation-id/utils/get-events')
 
 let extractedEvent, enrichedEvent, mockDbEvents
@@ -47,9 +47,9 @@ describe('get events', () => {
             subject: this.subject,
             time: this.time,
             type: this.type,
-            data: this.data,
+            data: this.data
           }
-        },
+        }
       },
       {
         id: 'uuid-2',
@@ -71,10 +71,10 @@ describe('get events', () => {
             subject: this.subject,
             time: this.time,
             type: this.type,
-            data: this.data,
+            data: this.data
           }
-        },
-      },
+        }
+      }
     ]
 
     mockFindAll.mockResolvedValue(mockDbEvents)
@@ -86,9 +86,9 @@ describe('get events', () => {
     expect(mockFindAll).toHaveBeenCalledWith({
       where: {
         partitionKey: PARTITION_KEY,
-        category: CATEGORY,
+        category: CATEGORY
       },
-      order: [['timestamp', 'ASC']],
+      order: [['timestamp', 'ASC']]
     })
   })
 
@@ -142,9 +142,9 @@ describe('get events', () => {
           subject: this.subject,
           time: this.time,
           type: this.type,
-          data: this.data,
+          data: this.data
         }
-      },
+      }
     }
 
     mockFindAll.mockResolvedValue([eventWithNoData])
@@ -173,9 +173,9 @@ describe('get events', () => {
           subject: this.subject,
           time: this.time,
           type: this.type,
-          data: this.data,
+          data: this.data
         }
-      },
+      }
     }
 
     mockFindAll.mockResolvedValue([eventWithEmptyData])
@@ -194,7 +194,7 @@ describe('get events', () => {
       source: mockDbEvents[0].source,
       subject: mockDbEvents[0].subject,
       time: mockDbEvents[0].time,
-      type: mockDbEvents[0].type,
+      type: mockDbEvents[0].type
     })
 
     expect(result[1]).toMatchObject({
@@ -205,7 +205,7 @@ describe('get events', () => {
       source: mockDbEvents[1].source,
       subject: mockDbEvents[1].subject,
       time: mockDbEvents[1].time,
-      type: mockDbEvents[1].type,
+      type: mockDbEvents[1].type
     })
   })
 
@@ -213,8 +213,8 @@ describe('get events', () => {
     const complexData = {
       nested: {
         property: 'value',
-        array: [1, 2, 3],
-      },
+        array: [1, 2, 3]
+      }
     }
 
     const eventWithComplexData = {
@@ -237,9 +237,9 @@ describe('get events', () => {
           subject: this.subject,
           time: this.time,
           type: this.type,
-          data: this.data,
+          data: this.data
         }
-      },
+      }
     }
 
     mockFindAll.mockResolvedValue([eventWithComplexData])
@@ -250,7 +250,7 @@ describe('get events', () => {
   test('should parse stringified JSON data', async () => {
     const stringifiedData = JSON.stringify({
       foo: 'bar',
-      nested: { value: 42 },
+      nested: { value: 42 }
     })
 
     const eventWithStringData = {
@@ -273,9 +273,9 @@ describe('get events', () => {
           subject: this.subject,
           time: this.time,
           type: this.type,
-          data: this.data,
+          data: this.data
         }
-      },
+      }
     }
 
     mockFindAll.mockResolvedValue([eventWithStringData])
@@ -284,7 +284,7 @@ describe('get events', () => {
 
     expect(result[0].data).toEqual({
       foo: 'bar',
-      nested: { value: 42 },
+      nested: { value: 42 }
     })
   })
 })

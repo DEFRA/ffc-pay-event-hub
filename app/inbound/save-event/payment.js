@@ -4,7 +4,7 @@ const {
   FRN,
   CORRELATION_ID,
   SCHEME_ID,
-  BATCH,
+  BATCH
 } = require('../../constants/categories')
 const { createRow } = require('./create-row')
 const { getTimestamp } = require('./get-timestamp')
@@ -30,7 +30,7 @@ const savePaymentEvent = async (event) => {
       `${event.data.frn}|${event.data.invoiceNumber}`,
       SCHEME_ID,
       event
-    ),
+    )
   ]
 
   if (event.data.batch) {
@@ -54,12 +54,12 @@ const savePaymentEvent = async (event) => {
     subject: row.subject,
     time: row.time,
     type: row.type,
-    data: row.data,
+    data: row.data
   }))
 
   await db.payments.bulkCreate(records)
 }
 
 module.exports = {
-  savePaymentEvent,
+  savePaymentEvent
 }

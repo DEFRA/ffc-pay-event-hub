@@ -7,7 +7,7 @@ const { generateUniqueFilename } = require('./utils/generate-unique-filename')
 
 const defaultStreamOptions = {
   onStart: (stream) => stream.write('[\n'),
-  onEnd: (stream) => stream.end('\n]\n'),
+  onEnd: (stream) => stream.end('\n]\n')
 }
 
 const streamRowsAsJsonArray = (

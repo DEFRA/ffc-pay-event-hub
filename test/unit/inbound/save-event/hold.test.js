@@ -14,12 +14,12 @@ jest.mock('../../../../app/data')
 const db = require('../../../../app/data')
 const mockBulkCreate = jest.fn()
 db.holds = {
-  bulkCreate: mockBulkCreate,
+  bulkCreate: mockBulkCreate
 }
 
 jest.mock('../../../../app/inbound/save-event/create-row')
 const {
-  createRow: mockCreateRow,
+  createRow: mockCreateRow
 } = require('../../../../app/inbound/save-event/create-row')
 mockCreateRow.mockImplementation((partitionKey, rowKey, category, event) => ({
   partitionKey,
@@ -29,12 +29,12 @@ mockCreateRow.mockImplementation((partitionKey, rowKey, category, event) => ({
   subject: event.subject,
   time: event.time,
   type: event.type,
-  data: JSON.stringify(event.data),
+  data: JSON.stringify(event.data)
 }))
 
 jest.mock('../../../../app/inbound/save-event/get-timestamp')
 const {
-  getTimestamp: mockGetTimestamp,
+  getTimestamp: mockGetTimestamp
 } = require('../../../../app/inbound/save-event/get-timestamp')
 const mockTimestamp = 9988776655
 mockGetTimestamp.mockReturnValue(mockTimestamp)
@@ -105,8 +105,8 @@ describe('save hold event', () => {
         ...event.data,
         frn: '9876543210',
         schemeId: 'scheme-789',
-        holdCategoryId: 'hold-cat-123',
-      },
+        holdCategoryId: 'hold-cat-123'
+      }
     }
     await saveHoldEvent(holdEvent)
 
@@ -123,7 +123,7 @@ describe('save hold event', () => {
       subject: event.subject,
       time: event.time,
       type: event.type,
-      data: JSON.stringify(holdEvent.data),
+      data: JSON.stringify(holdEvent.data)
     })
 
     expect(records[1]).toEqual({
@@ -136,7 +136,7 @@ describe('save hold event', () => {
       subject: event.subject,
       time: event.time,
       type: event.type,
-      data: JSON.stringify(holdEvent.data),
+      data: JSON.stringify(holdEvent.data)
     })
 
     expect(records[2]).toEqual({
@@ -149,7 +149,7 @@ describe('save hold event', () => {
       subject: event.subject,
       time: event.time,
       type: event.type,
-      data: JSON.stringify(holdEvent.data),
+      data: JSON.stringify(holdEvent.data)
     })
   })
 

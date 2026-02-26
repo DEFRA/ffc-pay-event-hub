@@ -3,7 +3,7 @@ const { generateUniqueFilename } = require('./generate-unique-filename')
 
 const persistExportFile = async (fileIdentifier, eventData) => {
   const payload = {
-    data: eventData,
+    data: eventData
   }
 
   const filename = generateUniqueFilename(fileIdentifier)

@@ -14,11 +14,11 @@ const {
   PAYMENT_PROCESSED,
   PAYMENT_SUBMITTED,
   PAYMENT_ACKNOWLEDGED,
-  PAYMENT_SETTLED,
+  PAYMENT_SETTLED
 } = require('../../../../../app/constants/events')
 
 const {
-  getEventOrder,
+  getEventOrder
 } = require('../../../../../app/data-requests/correlation-id/utils/get-event-order')
 
 describe('get event order', () => {
@@ -38,7 +38,7 @@ describe('get event order', () => {
     [PAYMENT_PROCESSED, 13],
     [PAYMENT_SUBMITTED, 14],
     [PAYMENT_ACKNOWLEDGED, 15],
-    [PAYMENT_SETTLED, 16],
+    [PAYMENT_SETTLED, 16]
   ]
 
   test.each(events)('should return %i for event %s', (event, expectedOrder) => {

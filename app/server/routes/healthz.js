@@ -6,5 +6,5 @@ module.exports = {
   path: '/healthz',
   handler: (_request, h) => {
     return h.response('ok').code(SUCCESS)
-  },
+  }
 }

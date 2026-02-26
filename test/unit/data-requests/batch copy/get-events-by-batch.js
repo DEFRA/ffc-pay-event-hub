@@ -1,16 +1,16 @@
 const {
   generateSqlQuery,
-  exportQueryToJsonFile,
+  exportQueryToJsonFile
 } = require('../file-generator')
 
 const { streamOptions } = require('../utils/stream-options.test')
 const {
   writeJsonRow,
-  createReportProcessor,
+  createReportProcessor
 } = require('../utils/json-stream.test')
 const {
   copyNonExcludedKeys,
-  mapCommonFields,
+  mapCommonFields
 } = require('../utils/transform.test')
 
 const EXCLUDED_KEYS = new Set(['batchName', 'schemeId', 'type'])
@@ -31,7 +31,7 @@ const transformRow = (row) => {
 
 const getEventsByBatch = async (batch) => {
   const sql = generateSqlQuery({ batchName: batch }, 'paymentBatchEvents', [
-    ['frn', 'ASC'],
+    ['frn', 'ASC']
   ])
   return exportQueryToJsonFile(
     sql,
@@ -44,5 +44,5 @@ const getEventsByBatch = async (batch) => {
 module.exports = {
   getEventsByBatch,
   transformRow,
-  writeJsonRow,
+  writeJsonRow
 }

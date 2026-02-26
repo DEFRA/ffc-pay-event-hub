@@ -5,7 +5,7 @@ const submitted = require('../../../mocks/events/submitted')
 const acknowledged = require('../../../mocks/events/acknowledged')
 
 const {
-  groupEventsByCorrelationId,
+  groupEventsByCorrelationId
 } = require('../../../../app/data-requests/correlation-id/utils/group-events-by-correlation-id')
 
 describe('group events by correlation id', () => {
@@ -23,7 +23,7 @@ describe('group events by correlation id', () => {
     ['schemeId', enriched.data.schemeId],
     ['paymentRequestNumber', enriched.data.paymentRequestNumber],
     ['agreementNumber', enriched.data.agreementNumber],
-    ['marketingYear', enriched.data.marketingYear],
+    ['marketingYear', enriched.data.marketingYear]
   ]
 
   test.each(testCases)(

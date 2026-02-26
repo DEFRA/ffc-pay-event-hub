@@ -4,9 +4,9 @@ const getEvents = async (id, category) => {
   const events = await db.payments.findAll({
     where: {
       partitionKey: id,
-      category,
+      category
     },
-    order: [['timestamp', 'ASC']],
+    order: [['timestamp', 'ASC']]
   })
 
   return events.map((event) => {
@@ -24,11 +24,11 @@ const getEvents = async (id, category) => {
 
     return {
       ...event.toJSON(),
-      data: parsed,
+      data: parsed
     }
   })
 }
 
 module.exports = {
-  getEvents,
+  getEvents
 }

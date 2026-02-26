@@ -4,7 +4,7 @@ const processed = require('../../../../mocks/events/processed')
 const submitted = require('../../../../mocks/events/submitted')
 
 const {
-  orderGroupedEvents,
+  orderGroupedEvents
 } = require('../../../../../app/data-requests/correlation-id/utils/order-grouped-events')
 
 let groupedEvent

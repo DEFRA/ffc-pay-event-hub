@@ -1,11 +1,11 @@
 jest.mock('../../../../app/data-requests/file-generator', () => ({
   generateSqlQuery: jest.fn(),
-  exportQueryToJsonFile: jest.fn().mockResolvedValue('mock-file.json'),
+  exportQueryToJsonFile: jest.fn().mockResolvedValue('mock-file.json')
 }))
 
 jest.mock('../../../../app/data-requests/utils/json-stream', () => ({
   writeJsonRow: jest.fn(),
-  createReportProcessor: jest.fn((fn) => fn),
+  createReportProcessor: jest.fn((fn) => fn)
 }))
 
 jest.mock('../../../../app/data-requests/utils/transform', () => ({
@@ -18,30 +18,30 @@ jest.mock('../../../../app/data-requests/utils/transform', () => ({
   }),
   mapCommonFields: jest.fn((row, target) => {
     if (row.commonField) target.commonField = row.commonField
-  }),
+  })
 }))
 
 jest.mock('moment-timezone', () => {
   return jest.fn((date) => ({
     tz: jest.fn().mockReturnThis(),
-    format: jest.fn().mockReturnValue('FORMATTED_DATE'),
+    format: jest.fn().mockReturnValue('FORMATTED_DATE')
   }))
 })
 
 const {
   generateSqlQuery,
-  exportQueryToJsonFile,
+  exportQueryToJsonFile
 } = require('../../../../app/data-requests/file-generator')
 const {
   copyNonExcludedKeys,
-  mapCommonFields,
+  mapCommonFields
 } = require('../../../../app/data-requests/utils/transform')
 const {
-  createReportProcessor,
+  createReportProcessor
 } = require('../../../../app/data-requests/utils/json-stream')
 const {
   getEventsByFrn,
-  transformRow,
+  transformRow
 } = require('../../../../app/data-requests/frn/get-events-by-frn')
 
 describe('events-by-frn module', () => {
@@ -57,7 +57,7 @@ describe('events-by-frn module', () => {
         originalValue: 100,
         lastUpdated: '2026-01-01T10:00:00Z',
         value: 500,
-        commonField: 'common',
+        commonField: 'common'
       }
 
       const result = transformRow(row)
@@ -67,7 +67,7 @@ describe('events-by-frn module', () => {
       expect(result).toEqual({
         value: 500,
         commonField: 'common',
-        lastUpdated: 'FORMATTED_DATE',
+        lastUpdated: 'FORMATTED_DATE'
       })
     })
 
@@ -91,7 +91,7 @@ describe('events-by-frn module', () => {
         [
           ['schemeId', 'ASC'],
           ['lastUpdated', 'DESC'],
-          ['paymentRequestNumber', 'ASC'],
+          ['paymentRequestNumber', 'ASC']
         ]
       )
 

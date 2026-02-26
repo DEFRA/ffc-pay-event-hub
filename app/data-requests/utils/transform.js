@@ -27,5 +27,5 @@ const mapCommonFields = (row, target) => {
 
 module.exports = {
   copyNonExcludedKeys,
-  mapCommonFields,
+  mapCommonFields
 }

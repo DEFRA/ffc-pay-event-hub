@@ -20,12 +20,12 @@ const saveWarningEvent = async (event) => {
     subject: row.subject,
     time: row.time,
     type: row.type,
-    data: row.data,
+    data: row.data
   }
 
   await db.warnings.create(record)
 }
 
 module.exports = {
-  saveWarningEvent,
+  saveWarningEvent
 }

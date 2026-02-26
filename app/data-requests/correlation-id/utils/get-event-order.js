@@ -14,7 +14,7 @@ const {
   PAYMENT_RESET,
   PAYMENT_SUBMITTED,
   PAYMENT_ACKNOWLEDGED,
-  PAYMENT_SETTLED,
+  PAYMENT_SETTLED
 } = require('../../../constants/events')
 
 const getEventOrder = (event) => {
@@ -34,11 +34,11 @@ const getEventOrder = (event) => {
     PAYMENT_PROCESSED,
     PAYMENT_SUBMITTED,
     PAYMENT_ACKNOWLEDGED,
-    PAYMENT_SETTLED,
+    PAYMENT_SETTLED
   ]
   return eventOrder.indexOf(event) + 1
 }
 
 module.exports = {
-  getEventOrder,
+  getEventOrder
 }

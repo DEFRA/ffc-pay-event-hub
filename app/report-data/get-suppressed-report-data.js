@@ -1,6 +1,6 @@
 const {
   generateSqlQuery,
-  exportQueryToJsonFile,
+  exportQueryToJsonFile
 } = require('../data-requests/file-generator')
 
 const { reportProcessingFunc } = require('./report-row-processor')
@@ -11,7 +11,7 @@ const { PAYMENT_SUPPRESSED } = require('../constants/events')
 const generateSuppressedReportSql = async (tableName = 'payments') => {
   const whereClause = {
     category: FRN,
-    type: PAYMENT_SUPPRESSED,
+    type: PAYMENT_SUPPRESSED
   }
 
   return generateSqlQuery(whereClause, tableName)
@@ -23,5 +23,5 @@ const getSuppressedReportData = async (tableName = 'payments') => {
 }
 
 module.exports = {
-  getSuppressedReportData,
+  getSuppressedReportData
 }

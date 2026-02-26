@@ -3,15 +3,15 @@ jest.mock('../../../app/messaging/send-message')
 jest.mock('../../../app/data-requests')
 
 const {
-  validateMessage: mockValidateMessage,
+  validateMessage: mockValidateMessage
 } = require('../../../app/messaging/validate-message')
 
 const {
-  sendMessage: mockSendMessage,
+  sendMessage: mockSendMessage
 } = require('../../../app/messaging/send-message')
 
 const {
-  processDataExportRequest: mockProcessDataExportRequest,
+  processDataExportRequest: mockProcessDataExportRequest
 } = require('../../../app/data-requests')
 
 const { messageConfig } = require('../../../app/config')
@@ -22,7 +22,7 @@ const { TYPE } = require('../../../app/constants/type')
 const { VALIDATION } = require('../../../app/constants/errors')
 
 const {
-  processDataMessage,
+  processDataMessage
 } = require('../../../app/messaging/process-data-message')
 
 describe('processDataMessage', () => {
@@ -38,7 +38,7 @@ describe('processDataMessage', () => {
     receiver = {
       completeMessage: jest.fn(),
       abandonMessage: jest.fn(),
-      deadLetterMessage: jest.fn(),
+      deadLetterMessage: jest.fn()
     }
   })
 

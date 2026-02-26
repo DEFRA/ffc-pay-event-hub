@@ -9,11 +9,11 @@ const sanitiseSchemeData = (schemeData) => {
     return {
       scheme: schemeName,
       paymentRequests: scheme.paymentRequests,
-      value: scheme.value,
+      value: scheme.value
     }
   })
 }
 
 module.exports = {
-  sanitiseSchemeData,
+  sanitiseSchemeData
 }

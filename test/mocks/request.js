@@ -4,6 +4,6 @@ const { REQUEST_VALUE } = require('./request-value')
 module.exports = {
   REQUEST: {
     category: CATEGORY,
-    value: REQUEST_VALUE,
-  },
+    value: REQUEST_VALUE
+  }
 }

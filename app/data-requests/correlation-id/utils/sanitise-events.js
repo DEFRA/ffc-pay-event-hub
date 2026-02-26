@@ -21,14 +21,14 @@ const sanitiseEvents = (events) => {
         value:
           event.type === PAYMENT_EXTRACTED
             ? convertToPence(event.data.value)
-            : event.data.value,
+            : event.data.value
       },
       status: eventDetails[event.type],
-      timestamp: moment(event.time).tz(TIMEZONE).format(DATE),
-    })),
+      timestamp: moment(event.time).tz(TIMEZONE).format(DATE)
+    }))
   }))
 }
 
 module.exports = {
-  sanitiseEvents,
+  sanitiseEvents
 }

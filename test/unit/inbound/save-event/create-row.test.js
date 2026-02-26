@@ -1,6 +1,6 @@
 jest.mock('../../../../app/inbound/save-event/get-timestamp')
 const {
-  getTimestamp: mockGetTimestamp,
+  getTimestamp: mockGetTimestamp
 } = require('../../../../app/inbound/save-event/get-timestamp')
 
 const mockTimestamp = 1234567890
@@ -27,7 +27,7 @@ describe('create row', () => {
     ['rowKey', () => `${mockRowKey}|${mockTimestamp}`, (v) => v],
     ['category', () => mockCategory, (v) => v],
     ['time', () => mockEvent.time, (v) => v],
-    ['data', () => mockEvent.data, (v) => v],
+    ['data', () => mockEvent.data, (v) => v]
   ])('creates entity with %s', async (_, valueFn, expectedFn) => {
     const entity = await createRow(
       mockPartitionKey,

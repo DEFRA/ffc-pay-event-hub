@@ -11,32 +11,32 @@ jest.mock(
 )
 
 const {
-  getEvents: mockGetEvents,
+  getEvents: mockGetEvents
 } = require('../../../../app/data-requests/correlation-id/utils/get-events')
 const {
-  groupEventsByCorrelationId: mockGroupEventsByCorrelationId,
+  groupEventsByCorrelationId: mockGroupEventsByCorrelationId
 } = require('../../../../app/data-requests/correlation-id/utils/group-events-by-correlation-id')
 const {
-  orderGroupedEvents: mockOrderGroupedEvents,
+  orderGroupedEvents: mockOrderGroupedEvents
 } = require('../../../../app/data-requests/correlation-id/utils/order-grouped-events')
 const {
-  sanitiseEvents: mockSanitiseEvents,
+  sanitiseEvents: mockSanitiseEvents
 } = require('../../../../app/data-requests/correlation-id/utils/sanitise-events')
 const {
-  addPendingEvents: mockAddPendingEvents,
+  addPendingEvents: mockAddPendingEvents
 } = require('../../../../app/data-requests/correlation-id/utils/add-pending-events')
 
 const {
-  CORRELATION_ID: CORRELATION_ID_VALUE,
+  CORRELATION_ID: CORRELATION_ID_VALUE
 } = require('../../../mocks/values/correlation-id')
 const {
-  CORRELATION_ID: CORRELATION_ID_CATEGORY,
+  CORRELATION_ID: CORRELATION_ID_CATEGORY
 } = require('../../../../app/constants/categories')
 const enriched = require('../../../mocks/events/enriched')
 const groupedEvent = require('../../../mocks/events/grouped-event')
 
 const {
-  getEventsByCorrelationId,
+  getEventsByCorrelationId
 } = require('../../../../app/data-requests/correlation-id/get-events-by-correlation-id')
 
 describe('getEventsByCorrelationId', () => {

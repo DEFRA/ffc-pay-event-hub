@@ -2,7 +2,7 @@ const { PassThrough } = require('node:stream')
 const {
   parseRow,
   writeJsonRow,
-  createReportProcessor,
+  createReportProcessor
 } = require('../../../../app/data-requests/utils/json-stream')
 
 describe('json-stream utils', () => {
@@ -62,7 +62,7 @@ describe('json-stream utils', () => {
       write: jest.fn((chunk) => {
         output += chunk
       }),
-      end: jest.fn(),
+      end: jest.fn()
     })
 
     test('processes invalid JSON string as string', () => {

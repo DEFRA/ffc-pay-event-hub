@@ -1,13 +1,13 @@
 const {
   copyNonExcludedKeys,
-  mapCommonFields,
+  mapCommonFields
 } = require('../../../../app/data-requests/utils/transform')
 const eventDetails = require('../../../../app/constants/event-details')
 const schemeNames = require('../../../../app/constants/scheme-names')
 const { convertToString } = require('../../../../app/currency')
 
 jest.mock('../../../../app/currency', () => ({
-  convertToString: jest.fn((value) => `£${value}`),
+  convertToString: jest.fn((value) => `£${value}`)
 }))
 
 describe('transform utilities', () => {
@@ -68,7 +68,7 @@ describe('transform utilities', () => {
       expect(target).toEqual({
         scheme: 'Scheme Two',
         status: 'Pending',
-        originalValueText: '£99.99',
+        originalValueText: '£99.99'
       })
     })
   })

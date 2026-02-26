@@ -43,5 +43,5 @@ const processDataMessage = async (message, receiver) => {
 }
 
 module.exports = {
-  processDataMessage,
+  processDataMessage
 }

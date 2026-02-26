@@ -1,6 +1,6 @@
 jest.mock('../../../../../app/currency')
 const {
-  convertToString: mockConvertToString,
+  convertToString: mockConvertToString
 } = require('../../../../../app/currency')
 
 const acknowledged = require('../../../../mocks/events/acknowledged')
@@ -9,7 +9,7 @@ const processed = require('../../../../mocks/events/processed')
 const submitted = require('../../../../mocks/events/submitted')
 
 const {
-  addValues,
+  addValues
 } = require('../../../../../app/data-requests/correlation-id/utils/add-values')
 const { FC } = require('../../../../../app/constants/schemes')
 
@@ -24,7 +24,7 @@ describe('add value to events', () => {
       structuredClone(enriched),
       structuredClone(processed),
       structuredClone(submitted),
-      structuredClone(acknowledged),
+      structuredClone(acknowledged)
     ]
     mockConvertToString.mockImplementation((value) =>
       value !== undefined && value !== null ? value.toString() : '0'
@@ -45,14 +45,14 @@ describe('add value to events', () => {
     {
       prop: 'originalValueText',
       eventIndex: 0,
-      expected: enriched.data.value.toString(),
+      expected: enriched.data.value.toString()
     },
     { prop: 'currentValue', eventIndex: 3, expected: acknowledged.data.value },
     {
       prop: 'currentValueText',
       eventIndex: 3,
-      expected: acknowledged.data.value.toString(),
-    },
+      expected: acknowledged.data.value.toString()
+    }
   ]
 
   test.each(valueTests)(

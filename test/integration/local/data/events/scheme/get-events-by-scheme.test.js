@@ -1,9 +1,9 @@
 const db = require('../../../../../../app/data')
 const {
-  getEventsByScheme,
+  getEventsByScheme
 } = require('../../../../../../app/data-requests/scheme-id/get-events-by-scheme')
 const {
-  sanitiseSchemeData,
+  sanitiseSchemeData
 } = require('../../../../../../app/data-requests/scheme-id/sanitise-scheme-data')
 const schemeNames = require('../../../../../../app/constants/scheme-names')
 
@@ -20,7 +20,7 @@ beforeEach(async () => {
   rawViewData = SCHEMES.map((scheme, index) => ({
     schemeId: scheme,
     paymentRequests: 2 + index,
-    value: `£${(1000 * (index + 1)).toLocaleString()}.00`,
+    value: `£${(1000 * (index + 1)).toLocaleString()}.00`
   }))
 
   for (const row of rawViewData) {
