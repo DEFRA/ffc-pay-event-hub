@@ -7,7 +7,6 @@ const defineSchemePaymentTotals = (sequelize, DataTypes) => {
         primaryKey: true,
       },
       paymentRequests: DataTypes.BIGINT,
-      totalValue: DataTypes.NUMERIC,
       value: DataTypes.STRING,
     },
     {

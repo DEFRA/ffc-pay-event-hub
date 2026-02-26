@@ -22,7 +22,7 @@
 
                             -- Convert pounds → pence only for extracted events
                             IF NEW.type = 'uk.gov.defra.ffc.pay.payment.extracted' THEN
-                                v_value := ROUND(v_value * 100);
+                                v_value := v_value * 100;
                             END IF;
 
                         ELSE

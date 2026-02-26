@@ -10,7 +10,7 @@
                 SELECT
                     p."partitionKey" AS "schemeId",
                     COUNT(*) AS "paymentRequests",
-                    SUM((p.data->>'value')::numeric) AS totalValue,
+                    SUM((p.data->>'value')::numeric) AS "totalValue",
                     '£' || to_char(
                         SUM((p.data->>'value')::numeric / 100),
                         'FM999,999,999,999,990.00'
