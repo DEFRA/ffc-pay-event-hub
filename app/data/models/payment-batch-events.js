@@ -4,7 +4,7 @@ const definePaymentBatchEvents = (sequelize, DataTypes) => {
     {
       id: {
         type: DataTypes.UUID,
-        primaryKey: true,
+        primaryKey: true
       },
       batchName: DataTypes.STRING,
       schemeId: DataTypes.INTEGER,
@@ -17,7 +17,7 @@ const definePaymentBatchEvents = (sequelize, DataTypes) => {
     },
     {
       tableName: 'payment_batch_events',
-      timestamps: false,
+      timestamps: false
     }
   )
 

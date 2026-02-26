@@ -4,13 +4,20 @@ jest.mock('../../../../app/data', () => ({
   },
 }))
 
-jest.mock('../../../../app/data-requests/scheme-id/sanitise-scheme-data', () => ({
-  sanitiseSchemeData: jest.fn((data) => data),
-}))
+jest.mock(
+  '../../../../app/data-requests/scheme-id/sanitise-scheme-data',
+  () => ({
+    sanitiseSchemeData: jest.fn((data) => data),
+  })
+)
 
 const db = require('../../../../app/data')
-const { sanitiseSchemeData } = require('../../../../app/data-requests/scheme-id//sanitise-scheme-data')
-const { getEventsByScheme } = require('../../../../app/data-requests/scheme-id/get-events-by-scheme')
+const {
+  sanitiseSchemeData,
+} = require('../../../../app/data-requests/scheme-id//sanitise-scheme-data')
+const {
+  getEventsByScheme,
+} = require('../../../../app/data-requests/scheme-id/get-events-by-scheme')
 
 describe('getEventsByScheme', () => {
   beforeEach(() => {
@@ -43,13 +50,13 @@ describe('getEventsByScheme', () => {
 
     const result = await getEventsByScheme(42)
 
-    expect(db.schemePaymentTotals.findAll).toHaveBeenCalledWith({ where: { schemeId: 42 } })
+    expect(db.schemePaymentTotals.findAll).toHaveBeenCalledWith({
+      where: { schemeId: 42 },
+    })
     expect(sanitiseSchemeData).toHaveBeenCalledWith([
       { schemeId: 42, paymentRequests: 3, value: 75 },
     ])
-    expect(result).toEqual([
-      { schemeId: 42, paymentRequests: 3, value: 75 },
-    ])
+    expect(result).toEqual([{ schemeId: 42, paymentRequests: 3, value: 75 }])
   })
 
   test('handles empty results', async () => {
@@ -57,7 +64,9 @@ describe('getEventsByScheme', () => {
 
     const result = await getEventsByScheme(99)
 
-    expect(db.schemePaymentTotals.findAll).toHaveBeenCalledWith({ where: { schemeId: 99 } })
+    expect(db.schemePaymentTotals.findAll).toHaveBeenCalledWith({
+      where: { schemeId: 99 },
+    })
     expect(sanitiseSchemeData).toHaveBeenCalledWith([])
     expect(result).toEqual([])
   })

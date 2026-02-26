@@ -28,10 +28,21 @@ jest.mock('moment-timezone', () => {
   }))
 })
 
-const { generateSqlQuery, exportQueryToJsonFile } = require('../../../../app/data-requests/file-generator')
-const { copyNonExcludedKeys, mapCommonFields } = require('../../../../app/data-requests/utils/transform')
-const { createReportProcessor } = require('../../../../app/data-requests/utils/json-stream')
-const { getEventsByFrn, transformRow } = require('../../../../app/data-requests/frn/get-events-by-frn')
+const {
+  generateSqlQuery,
+  exportQueryToJsonFile,
+} = require('../../../../app/data-requests/file-generator')
+const {
+  copyNonExcludedKeys,
+  mapCommonFields,
+} = require('../../../../app/data-requests/utils/transform')
+const {
+  createReportProcessor,
+} = require('../../../../app/data-requests/utils/json-stream')
+const {
+  getEventsByFrn,
+  transformRow,
+} = require('../../../../app/data-requests/frn/get-events-by-frn')
 
 describe('events-by-frn module', () => {
   beforeEach(() => {
@@ -51,10 +62,7 @@ describe('events-by-frn module', () => {
 
       const result = transformRow(row)
 
-      expect(copyNonExcludedKeys).toHaveBeenCalledWith(
-        row,
-        expect.any(Set)
-      )
+      expect(copyNonExcludedKeys).toHaveBeenCalledWith(row, expect.any(Set))
       expect(mapCommonFields).toHaveBeenCalledWith(row, expect.any(Object))
       expect(result).toEqual({
         value: 500,
@@ -80,7 +88,11 @@ describe('events-by-frn module', () => {
       expect(generateSqlQuery).toHaveBeenCalledWith(
         { frn },
         'paymentFrnEvents',
-        [['schemeId', 'ASC'], ['lastUpdated', 'DESC'], ['paymentRequestNumber', 'ASC']]
+        [
+          ['schemeId', 'ASC'],
+          ['lastUpdated', 'DESC'],
+          ['paymentRequestNumber', 'ASC'],
+        ]
       )
 
       expect(createReportProcessor).toHaveBeenCalled()

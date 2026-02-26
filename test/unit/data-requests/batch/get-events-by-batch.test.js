@@ -21,10 +21,21 @@ jest.mock('../../../../app/data-requests/utils/transform', () => ({
   }),
 }))
 
-const { generateSqlQuery, exportQueryToJsonFile } = require('../../../../app/data-requests/file-generator')
-const { copyNonExcludedKeys, mapCommonFields } = require('../../../../app/data-requests/utils/transform')
-const { createReportProcessor } = require('../../../../app/data-requests/utils/json-stream')
-const { getEventsByBatch, transformRow } = require('../../../../app/data-requests/batch/get-events-by-batch')
+const {
+  generateSqlQuery,
+  exportQueryToJsonFile,
+} = require('../../../../app/data-requests/file-generator')
+const {
+  copyNonExcludedKeys,
+  mapCommonFields,
+} = require('../../../../app/data-requests/utils/transform')
+const {
+  createReportProcessor,
+} = require('../../../../app/data-requests/utils/json-stream')
+const {
+  getEventsByBatch,
+  transformRow,
+} = require('../../../../app/data-requests/batch/get-events-by-batch')
 
 describe('events-by-batch module', () => {
   beforeEach(() => {
@@ -43,7 +54,10 @@ describe('events-by-batch module', () => {
 
       const result = transformRow(row)
 
-      expect(copyNonExcludedKeys).toHaveBeenCalledWith(row, new Set(['batchName', 'schemeId', 'type']))
+      expect(copyNonExcludedKeys).toHaveBeenCalledWith(
+        row,
+        new Set(['batchName', 'schemeId', 'type'])
+      )
       expect(mapCommonFields).toHaveBeenCalledWith(row, expect.any(Object))
       expect(result).toEqual({
         value: 100,

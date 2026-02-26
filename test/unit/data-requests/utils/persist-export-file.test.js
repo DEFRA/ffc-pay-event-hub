@@ -1,13 +1,20 @@
 jest.mock('../../../../app/storage', () => ({
   writeDataRequestFile: jest.fn(),
 }))
-jest.mock('../../../../app/data-requests/utils/generate-unique-filename', () => ({
-  generateUniqueFilename: jest.fn(),
-}))
+jest.mock(
+  '../../../../app/data-requests/utils/generate-unique-filename',
+  () => ({
+    generateUniqueFilename: jest.fn(),
+  })
+)
 
 const { writeDataRequestFile } = require('../../../../app/storage')
-const { generateUniqueFilename } = require('../../../../app/data-requests/utils/generate-unique-filename')
-const { persistExportFile } = require('../../../../app/data-requests/utils/persist-export-file')
+const {
+  generateUniqueFilename,
+} = require('../../../../app/data-requests/utils/generate-unique-filename')
+const {
+  persistExportFile,
+} = require('../../../../app/data-requests/utils/persist-export-file')
 
 describe('persistExportFile', () => {
   beforeEach(() => {

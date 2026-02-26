@@ -1,9 +1,9 @@
 const {
   generateSqlQuery,
   exportQueryToJsonFile,
-} = require('../data-requests/file-generator.js')
+} = require('../data-requests/file-generator')
 
-const { reportProcessingFunc } = require('./report-row-processor.js')
+const { reportProcessingFunc } = require('./report-row-processor')
 
 const { FRN } = require('../constants/categories')
 const { PAYMENT_SUPPRESSED } = require('../constants/events')

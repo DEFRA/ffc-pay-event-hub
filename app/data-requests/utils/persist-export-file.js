@@ -8,10 +8,7 @@ const persistExportFile = async (fileIdentifier, eventData) => {
 
   const filename = generateUniqueFilename(fileIdentifier)
 
-  const blobUrl = await writeDataRequestFile(
-    filename,
-    JSON.stringify(payload)
-  )
+  const blobUrl = await writeDataRequestFile(filename, JSON.stringify(payload))
 
   return blobUrl
 }

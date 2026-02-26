@@ -34,7 +34,11 @@ const transformRow = (row) => {
 }
 
 const getEventsByFrn = async (frn) => {
-  const sql = generateSqlQuery({ frn }, 'paymentFrnEvents', [['schemeId', 'ASC'], ['lastUpdated', 'DESC'], ['paymentRequestNumber', 'ASC']])
+  const sql = generateSqlQuery({ frn }, 'paymentFrnEvents', [
+    ['schemeId', 'ASC'],
+    ['lastUpdated', 'DESC'],
+    ['paymentRequestNumber', 'ASC'],
+  ])
   return exportQueryToJsonFile(
     sql,
     createReportProcessor(transformRow),

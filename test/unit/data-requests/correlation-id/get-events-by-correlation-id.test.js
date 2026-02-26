@@ -5,9 +5,7 @@ jest.mock(
 jest.mock(
   '../../../../app/data-requests/correlation-id/utils/order-grouped-events'
 )
-jest.mock(
-  '../../../../app/data-requests/correlation-id/utils/sanitise-events'
-)
+jest.mock('../../../../app/data-requests/correlation-id/utils/sanitise-events')
 jest.mock(
   '../../../../app/data-requests/correlation-id/utils/add-pending-events'
 )

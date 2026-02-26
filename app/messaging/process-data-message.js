@@ -10,7 +10,10 @@ const { processDataExportRequest } = require('../data-requests')
 
 const processDataMessage = async (message, receiver) => {
   try {
-    console.log('Data request received:', util.inspect(message.body, false, null, true))
+    console.log(
+      'Data request received:',
+      util.inspect(message.body, false, null, true)
+    )
 
     validateMessage(message)
 
@@ -21,7 +24,12 @@ const processDataMessage = async (message, receiver) => {
 
     console.info(`Data Request file saved at: ${blobUri.split('/').pop()}`)
 
-    await sendMessage({ uri: blobUri.split('/').pop() }, TYPE, messageConfig.dataQueue, { sessionId: messageId })
+    await sendMessage(
+      { uri: blobUri.split('/').pop() },
+      TYPE,
+      messageConfig.dataQueue,
+      { sessionId: messageId }
+    )
     await receiver.completeMessage(message)
   } catch (err) {
     console.error('Unable to process data request:', err)

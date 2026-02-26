@@ -4,7 +4,7 @@ const definePaymentFrnEvents = (sequelize, DataTypes) => {
     {
       id: {
         type: DataTypes.UUID,
-        primaryKey: true,
+        primaryKey: true
       },
       frn: DataTypes.STRING,
       correlationId: DataTypes.STRING,
@@ -17,7 +17,7 @@ const definePaymentFrnEvents = (sequelize, DataTypes) => {
     },
     {
       tableName: 'payment_frn_events',
-      timestamps: false,
+      timestamps: false
     }
   )
 

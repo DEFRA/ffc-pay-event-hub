@@ -10,7 +10,7 @@ const MAX_CONCURRENCY = 5
 
 const getCredential = () =>
   new DefaultAzureCredential({
-    managedIdentityClientId: storageConfig.managedIdentityClientId,
+    managedIdentityClientId: storageConfig.managedIdentityClientId
   })
 
 const createBlobServiceClient = () => {
@@ -44,7 +44,7 @@ const initialiseContainers = async () => {
 
     await Promise.all([
       container.createIfNotExists(),
-      dataRequestContainer.createIfNotExists(),
+      dataRequestContainer.createIfNotExists()
     ])
 
     containersInitialised = true
@@ -72,8 +72,8 @@ const streamDataRequestFile = async (filename, readableStream) => {
     const blob = dataRequestContainer.getBlockBlobClient(filename)
     const options = {
       blobHTTPHeaders: {
-        blobContentType: 'text/json',
-      },
+        blobContentType: 'text/json'
+      }
     }
 
     await blob.uploadStream(
@@ -93,5 +93,5 @@ module.exports = {
   initialiseContainers,
   writeFile,
   writeDataRequestFile,
-  streamDataRequestFile,
+  streamDataRequestFile
 }

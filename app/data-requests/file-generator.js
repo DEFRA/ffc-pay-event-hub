@@ -41,10 +41,13 @@ const streamRowsAsJsonArray = (
 const createStreamingQuery = (sql, client, batchSize = 5000) =>
   client.query(new QueryStream(sql, [], { batchSize }))
 
-const getDbClient = async () => db.sequelize.connectionManager.getConnection()
+const getDbClient = async () => {
+  return db.sequelize.connectionManager.getConnection()
+}
 
-const releaseDbClient = async (client) =>
-  db.sequelize.connectionManager.releaseConnection(client)
+const releaseDbClient = async (client) => {
+  return db.sequelize.connectionManager.releaseConnection(client)
+}
 
 const exportQueryToJsonFile = async (
   sql,
@@ -92,7 +95,6 @@ const generateSqlQuery = (whereClause, tableName, orderBy = null) => {
 
   let query = baseQuery
 
-  // WHERE
   if (whereClause) {
     const whereSql = queryGenerator.getWhereConditions(
       whereClause,

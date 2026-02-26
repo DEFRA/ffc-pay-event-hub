@@ -3,7 +3,9 @@ jest.mock('../../../../app/constants/scheme-names', () => ({
   2: 'Scheme Two',
 }))
 
-const { sanitiseSchemeData } = require('../../../../app/data-requests/scheme-id/sanitise-scheme-data')
+const {
+  sanitiseSchemeData,
+} = require('../../../../app/data-requests/scheme-id/sanitise-scheme-data')
 
 describe('sanitiseSchemeData', () => {
   test('maps schemeId to scheme name and preserves fields', () => {
@@ -23,9 +25,7 @@ describe('sanitiseSchemeData', () => {
   test('throws an error for unknown schemeId', () => {
     const input = [{ schemeId: 99, paymentRequests: 3, value: 50 }]
 
-    expect(() => sanitiseSchemeData(input)).toThrow(
-      'Unknown schemeId: 99'
-    )
+    expect(() => sanitiseSchemeData(input)).toThrow('Unknown schemeId: 99')
   })
 
   test('works with a single scheme', () => {
@@ -33,6 +33,8 @@ describe('sanitiseSchemeData', () => {
 
     const result = sanitiseSchemeData(input)
 
-    expect(result).toEqual([{ scheme: 'Scheme One', paymentRequests: 1, value: 10 }])
+    expect(result).toEqual([
+      { scheme: 'Scheme One', paymentRequests: 1, value: 10 },
+    ])
   })
 })

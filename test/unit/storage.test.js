@@ -10,7 +10,7 @@ describe('Storage initialization and functionality', () => {
       getBlockBlobClientMock = jest.fn().mockImplementation((filename) => ({
         upload: uploadMock,
         uploadStream: jest.fn().mockResolvedValue(),
-        url: filename
+        url: filename,
       }))
 
       const getContainerClientMock = jest.fn().mockReturnValue({

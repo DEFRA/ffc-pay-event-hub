@@ -1,4 +1,7 @@
-const { copyNonExcludedKeys, mapCommonFields } = require('../../../../app/data-requests/utils/transform')
+const {
+  copyNonExcludedKeys,
+  mapCommonFields,
+} = require('../../../../app/data-requests/utils/transform')
 const eventDetails = require('../../../../app/constants/event-details')
 const schemeNames = require('../../../../app/constants/scheme-names')
 const { convertToString } = require('../../../../app/currency')

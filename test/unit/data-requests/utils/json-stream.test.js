@@ -59,7 +59,9 @@ describe('json-stream utils', () => {
     })
 
     const makeStream = () => ({
-      write: jest.fn((chunk) => { output += chunk }),
+      write: jest.fn((chunk) => {
+        output += chunk
+      }),
       end: jest.fn(),
     })
 
