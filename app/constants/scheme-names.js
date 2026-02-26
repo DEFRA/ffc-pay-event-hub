@@ -13,7 +13,8 @@ const {
   DELINKED,
   SFI_EXPANDED,
   COHT_REVENUE,
-  COHT_CAPITAL
+  COHT_CAPITAL,
+  FPTT
 } = require('./schemes')
 
 module.exports = {
@@ -31,5 +32,6 @@ module.exports = {
   [DELINKED]: 'Delinked',
   [SFI_EXPANDED]: 'Expanded SFI Offer',
   [COHT_REVENUE]: 'COHT Revenue',
-  [COHT_CAPITAL]: 'COHT Capital'
+  [COHT_CAPITAL]: 'COHT Capital',
+  [FPTT]: 'Future Payments Technical Test'
 }
