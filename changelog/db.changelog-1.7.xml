@@ -4,19 +4,15 @@
         <tagDatabase tag="v1.7.0"/>
     </changeSet>
 
-    <changeSet author="Oliver Lewington" id="0">
-        <preConditions onFail="MARK_RAN" onError="MARK_RAN">
-            <not>
-                <sqlCheck expectedResult="1">
-                    SELECT COUNT(*) 
-                    FROM pg_extension 
-                    WHERE extname = 'pgcrypto';
-                </sqlCheck>
-            </not>
-        </preConditions>
-
+    <changeSet author="Oliver Lewington" id="2">
         <sql>
-            CREATE EXTENSION pgcrypto;
+            DO $$
+            BEGIN
+                CREATE EXTENSION IF NOT EXISTS pgcrypto;
+            EXCEPTION
+                WHEN OTHERS THEN NULL;
+            END
+            $$;
         </sql>
     </changeSet>
 </databaseChangeLog>
