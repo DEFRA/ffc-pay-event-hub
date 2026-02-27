@@ -38,8 +38,9 @@ const streamRowsAsJsonArray = (
     pgStream.on('error', reject)
   })
 
-const createStreamingQuery = (sql, client, batchSize = 5000) =>
-  client.query(new QueryStream(sql, [], { batchSize }))
+const createStreamingQuery = (sql, client, batchSize = 5000) => {
+  return client.query(new QueryStream(sql, [], { batchSize }))
+}
 
 const getDbClient = async () => {
   return db.sequelize.connectionManager.getConnection()
