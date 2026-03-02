@@ -1,0 +1,34 @@
+const {
+  BATCH,
+  FRN,
+  CORRELATION_ID,
+  SCHEME_ID
+} = require('../constants/categories')
+
+const { getEventsByBatch } = require('./batch/get-events-by-batch')
+const { getEventsByFrn } = require('./frn/get-events-by-frn')
+const {
+  getEventsByCorrelationId
+} = require('./correlation-id/get-events-by-correlation-id')
+const { getEventsByScheme } = require('./scheme-id/get-events-by-scheme')
+
+const { persistExportFile } = require('./utils/persist-export-file')
+
+const processDataExportRequest = async (category, value) => {
+  switch (category) {
+    case BATCH:
+      return getEventsByBatch(value)
+    case FRN:
+      return getEventsByFrn(value)
+    case CORRELATION_ID:
+      return persistExportFile('events-by-correlation-id', await getEventsByCorrelationId(value))
+    case SCHEME_ID:
+      return persistExportFile('events-by-scheme-id', await getEventsByScheme(value))
+    default:
+      throw new Error(`Unknown category: ${category}`)
+  }
+}
+
+module.exports = {
+  processDataExportRequest
+}

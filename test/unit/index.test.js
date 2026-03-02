@@ -11,11 +11,6 @@ jest.mock('../../app/storage', () => ({
   initialiseContainers: jest.fn()
 }))
 
-jest.mock('../../app/cache', () => ({
-  start: jest.fn(),
-  stopCache: jest.fn()
-}))
-
 jest.mock('../../app/config', () => ({
   processingActive: true
 }))
@@ -24,7 +19,6 @@ describe('app startup', () => {
   let server
   let messaging
   let storage
-  let cache
 
   beforeEach(async () => {
     jest.resetModules()
@@ -34,15 +28,10 @@ describe('app startup', () => {
     server = require('../../app/server/server')
     messaging = require('../../app/messaging')
     storage = require('../../app/storage')
-    cache = require('../../app/cache')
   })
 
   test('starts server once', () => {
     expect(server.start).toHaveBeenCalledTimes(1)
-  })
-
-  test('starts cache once', () => {
-    expect(cache.start).toHaveBeenCalledTimes(1)
   })
 
   test('initialises storage once', () => {

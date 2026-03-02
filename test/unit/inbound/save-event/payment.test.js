@@ -3,7 +3,7 @@ const {
   FRN,
   CORRELATION_ID,
   SCHEME_ID,
-  BATCH,
+  BATCH
 } = require('../../../../app/constants/categories')
 
 jest.mock('uuid')
@@ -19,23 +19,23 @@ jest.mock('../../../../app/data')
 const db = require('../../../../app/data')
 const mockBulkCreate = jest.fn()
 db.payments = {
-  bulkCreate: mockBulkCreate,
+  bulkCreate: mockBulkCreate
 }
 
 jest.mock('../../../../app/inbound/save-event/create-row')
 const {
-  createRow: mockCreateRow,
+  createRow: mockCreateRow
 } = require('../../../../app/inbound/save-event/create-row')
 
 jest.mock('../../../../app/inbound/save-event/get-timestamp')
 const {
-  getTimestamp: mockGetTimestamp,
+  getTimestamp: mockGetTimestamp
 } = require('../../../../app/inbound/save-event/get-timestamp')
 const mockTimestamp = 1122334455
 mockGetTimestamp.mockReturnValue(mockTimestamp)
 
 const {
-  savePaymentEvent,
+  savePaymentEvent
 } = require('../../../../app/inbound/save-event/payment')
 const event = require('../../../mocks/events/payment')
 
@@ -54,7 +54,7 @@ describe('save payment event', () => {
         subject: event.subject,
         time: event.time,
         type: event.type,
-        data: JSON.stringify(event.data),
+        data: JSON.stringify(event.data)
       })
     )
   })
@@ -99,8 +99,8 @@ describe('save payment event', () => {
       ...event,
       data: {
         ...event.data,
-        batch: undefined,
-      },
+        batch: undefined
+      }
     }
     await savePaymentEvent(eventWithoutBatch)
     expect(mockCreateRow).toHaveBeenCalledTimes(3)
@@ -111,8 +111,8 @@ describe('save payment event', () => {
       ...event,
       data: {
         ...event.data,
-        batch: 'batch-123',
-      },
+        batch: 'batch-123'
+      }
     }
     await savePaymentEvent(eventWithBatch)
     expect(mockCreateRow).toHaveBeenCalledTimes(4)
@@ -123,8 +123,8 @@ describe('save payment event', () => {
       ...event,
       data: {
         ...event.data,
-        batch: 'batch-456',
-      },
+        batch: 'batch-456'
+      }
     }
     await savePaymentEvent(eventWithBatch)
     expect(mockCreateRow).toHaveBeenCalledWith(
@@ -140,8 +140,8 @@ describe('save payment event', () => {
       ...event,
       data: {
         ...event.data,
-        batch: null,
-      },
+        batch: null
+      }
     }
     await savePaymentEvent(eventWithoutBatch)
     const batchCalls = mockCreateRow.mock.calls.filter(
@@ -155,8 +155,8 @@ describe('save payment event', () => {
       ...event,
       data: {
         ...event.data,
-        batch: 'batch-789',
-      },
+        batch: 'batch-789'
+      }
     }
     await savePaymentEvent(eventWithBatch)
     expect(uuidv4).toHaveBeenCalledTimes(4)
@@ -175,8 +175,8 @@ describe('save payment event', () => {
         correlationId: 'corr-123',
         invoiceNumber: 'INV-001',
         schemeId: 'scheme-456',
-        batch: undefined,
-      },
+        batch: undefined
+      }
     }
     await savePaymentEvent(eventWithoutBatch)
 
@@ -193,7 +193,7 @@ describe('save payment event', () => {
       subject: event.subject,
       time: event.time,
       type: event.type,
-      data: JSON.stringify(eventWithoutBatch.data),
+      data: JSON.stringify(eventWithoutBatch.data)
     })
 
     expect(records[1]).toEqual({
@@ -206,7 +206,7 @@ describe('save payment event', () => {
       subject: event.subject,
       time: event.time,
       type: event.type,
-      data: JSON.stringify(eventWithoutBatch.data),
+      data: JSON.stringify(eventWithoutBatch.data)
     })
 
     expect(records[2]).toEqual({
@@ -219,7 +219,7 @@ describe('save payment event', () => {
       subject: event.subject,
       time: event.time,
       type: event.type,
-      data: JSON.stringify(eventWithoutBatch.data),
+      data: JSON.stringify(eventWithoutBatch.data)
     })
   })
 
@@ -231,8 +231,8 @@ describe('save payment event', () => {
         correlationId: 'corr-123',
         invoiceNumber: 'INV-001',
         schemeId: 'scheme-456',
-        batch: 'batch-999',
-      },
+        batch: 'batch-999'
+      }
     }
     await savePaymentEvent(eventWithBatch)
 
@@ -249,7 +249,7 @@ describe('save payment event', () => {
       subject: event.subject,
       time: event.time,
       type: event.type,
-      data: JSON.stringify(eventWithBatch.data),
+      data: JSON.stringify(eventWithBatch.data)
     })
   })
 
@@ -258,8 +258,8 @@ describe('save payment event', () => {
       ...event,
       data: {
         ...event.data,
-        batch: 'batch-111',
-      },
+        batch: 'batch-111'
+      }
     }
     await savePaymentEvent(eventWithBatch)
 
@@ -274,8 +274,8 @@ describe('save payment event', () => {
       ...event,
       data: {
         ...event.data,
-        batch: 'batch-222',
-      },
+        batch: 'batch-222'
+      }
     }
     await savePaymentEvent(eventWithBatch)
 

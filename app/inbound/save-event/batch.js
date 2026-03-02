@@ -16,12 +16,12 @@ const saveBatchEvent = async (event) => {
     subject: event.subject,
     time: event.time,
     type: event.type,
-    data: JSON.stringify(event.data),
+    data: JSON.stringify(event.data)
   }
 
   await db.batches.create(batchRecord)
 }
 
 module.exports = {
-  saveBatchEvent,
+  saveBatchEvent
 }

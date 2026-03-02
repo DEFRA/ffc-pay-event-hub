@@ -18,7 +18,7 @@ describe('healthz route', () => {
   test('GET /healthz route returns 200', async () => {
     const options = {
       method: GET,
-      url: '/healthz',
+      url: '/healthz'
     }
 
     const result = await server.inject(options)
@@ -28,7 +28,7 @@ describe('healthz route', () => {
   test('GET /healthz route returns ok when healthy', async () => {
     const options = {
       method: GET,
-      url: '/healthz',
+      url: '/healthz'
     }
 
     const result = await server.inject(options)
