@@ -9,12 +9,12 @@ jest.mock('../../../../app/data')
 const db = require('../../../../app/data')
 const mockCreate = jest.fn()
 db.batches = {
-  create: mockCreate,
+  create: mockCreate
 }
 
 jest.mock('../../../../app/inbound/save-event/get-timestamp')
 const {
-  getTimestamp: mockGetTimestamp,
+  getTimestamp: mockGetTimestamp
 } = require('../../../../app/inbound/save-event/get-timestamp')
 const mockTimestamp = 1234567890
 mockGetTimestamp.mockReturnValue(mockTimestamp)
@@ -54,7 +54,7 @@ describe('save batch event', () => {
       subject: event.subject,
       time: event.time,
       type: event.type,
-      data: JSON.stringify(event.data),
+      data: JSON.stringify(event.data)
     })
   })
 

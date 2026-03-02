@@ -1,6 +1,6 @@
 {
   "name": "ffc-pay-event-hub",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Event hub",
   "homepage": "https://github.com/DEFRA/ffc-pay-event-hub",
   "main": "app/index.js",
@@ -33,7 +33,6 @@
     "log-timestamp": "0.3.0",
     "moment-timezone": "0.5.43",
     "pg-query-stream": "4.9.6",
-    "redis": "4.6.5",
     "sequelize": "6.37.7",
     "uuid": "9.0.0"
   },

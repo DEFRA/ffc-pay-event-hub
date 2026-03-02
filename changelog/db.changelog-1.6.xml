@@ -1,0 +1,143 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+    <changeSet author="Oliver Lewington" id="1">
+        <tagDatabase tag="v1.6.0"/>
+    </changeSet>
+
+    <changeSet author="Oliver Lewington" id="2">
+        <sql splitStatements="false" stripComments="false">
+            <![CDATA[
+                CREATE OR REPLACE FUNCTION upsert_payment_batch_events()
+                    RETURNS TRIGGER AS $$
+                    DECLARE
+                        v_value numeric;
+                    BEGIN
+                        IF NEW.category <> 'batch' THEN
+                            RETURN NEW;
+                        END IF;
+
+                        -- Extract numeric value safely
+                        IF NEW.data->>'value' ~ '^-?[0-9]+(\.[0-9]+)?$' THEN
+                            v_value := (NEW.data->>'value')::numeric;
+
+                            -- Convert pounds → pence only for extracted events
+                            IF NEW.type = 'uk.gov.defra.ffc.pay.payment.extracted' THEN
+                                v_value := v_value * 100;
+                            END IF;
+
+                        ELSE
+                            v_value := NULL;
+                        END IF;
+
+                        INSERT INTO payment_batch_events (
+                            id,
+                            "batchName",
+                            "schemeId",
+                            frn,
+                            "marketingYear",
+                            "agreementNumber",
+                            "paymentRequestNumber",
+                            "originalValue",
+                            type
+                        )
+                        VALUES (
+                            gen_random_uuid(),
+                            NEW."partitionKey",
+                            (NEW.data->>'schemeId')::int,
+                            NEW.data->>'frn',
+                            (NEW.data->>'marketingYear')::int,
+                            NEW.data->>'agreementNumber',
+                            (NEW.data->>'paymentRequestNumber')::int,
+                            v_value,
+                            NEW.type
+                        )
+                        ON CONFLICT ("batchName", frn)
+                        DO UPDATE SET
+                            type = EXCLUDED.type,
+                            "originalValue" = EXCLUDED."originalValue";
+
+                        RETURN NEW;
+                    END;
+                    $$ LANGUAGE plpgsql;
+
+                    DROP TRIGGER IF EXISTS trg_upsert_payment_batch_events ON payments;
+
+                CREATE TRIGGER trg_upsert_payment_batch_events
+                AFTER INSERT ON payments
+                FOR EACH ROW
+                EXECUTE FUNCTION upsert_payment_batch_events();
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="Oliver Lewington" id="3">
+        <sql splitStatements="false" stripComments="false">
+            <![CDATA[
+                CREATE OR REPLACE FUNCTION upsert_payment_frn_events()
+                    RETURNS TRIGGER AS $$
+                    DECLARE
+                        v_correlation_id text;
+                        v_value numeric;
+                    BEGIN
+                        -- Only process FRN category rows
+                        IF NEW.category <> 'frn' THEN
+                            RETURN NEW;
+                        END IF;
+
+                        v_correlation_id := split_part(NEW."rowKey", '|', 1);
+
+                        -- Extract numeric value safely
+                        IF NEW.data->>'value' ~ '^-?[0-9]+(\.[0-9]+)?$' THEN
+                            v_value := (NEW.data->>'value')::numeric;
+
+                            -- Convert pounds → pence only for extracted events
+                            IF NEW.type = 'uk.gov.defra.ffc.pay.payment.extracted' THEN
+                                v_value := v_value * 100;
+                            END IF;
+
+                        ELSE
+                            v_value := NULL;
+                        END IF;
+
+                        INSERT INTO payment_frn_events (
+                            id,
+                            "correlationId",
+                            frn,
+                            "schemeId",
+                            "agreementNumber",
+                            "paymentRequestNumber",
+                            "originalValue",
+                            type,
+                            "lastUpdated"
+                        )
+                        VALUES (
+                            gen_random_uuid(),
+                            v_correlation_id,
+                            NEW."partitionKey",
+                            (NEW.data->>'schemeId')::int,
+                            NEW.data->>'agreementNumber',
+                            (NEW.data->>'paymentRequestNumber')::int,
+                            v_value,
+                            NEW.type,
+                            NEW."time"
+                        )
+                        ON CONFLICT (frn, "correlationId")
+                        DO UPDATE SET
+                            type = EXCLUDED.type,
+                            "lastUpdated" = EXCLUDED."lastUpdated",
+                            "originalValue" = EXCLUDED."originalValue";
+
+                        RETURN NEW;
+                    END;
+                    $$ LANGUAGE plpgsql;
+
+                    DROP TRIGGER IF EXISTS trg_upsert_payment_frn_events ON payments;
+
+                CREATE TRIGGER trg_upsert_payment_frn_events
+                AFTER INSERT ON payments
+                FOR EACH ROW
+                EXECUTE FUNCTION upsert_payment_frn_events();
+            ]]>
+        </sql>
+    </changeSet>
+</databaseChangeLog>

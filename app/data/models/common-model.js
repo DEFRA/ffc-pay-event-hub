@@ -7,7 +7,7 @@ const defineCommonModel = (
   const baseFields = {
     id: {
       type: DataTypes.UUID,
-      primaryKey: true,
+      primaryKey: true
     },
     partitionKey: DataTypes.TEXT,
     rowKey: DataTypes.TEXT,

@@ -3,8 +3,8 @@ const mockSendMessage = jest.fn()
 jest.mock('ffc-messaging', () => ({
   MessageSender: jest.fn().mockImplementation(() => ({
     sendMessage: mockSendMessage,
-    closeConnection: jest.fn(),
-  })),
+    closeConnection: jest.fn()
+  }))
 }))
 
 const {
@@ -12,7 +12,7 @@ const {
   CORRELATION_ID,
   SCHEME_ID,
   BATCH,
-  WARNING,
+  WARNING
 } = require('../../../app/constants/categories')
 
 const db = require('../../../app/data')
@@ -36,7 +36,7 @@ beforeEach(async () => {
     payment: structuredClone(require('../../mocks/events/payment')),
     hold: structuredClone(require('../../mocks/events/hold')),
     batch: structuredClone(require('../../mocks/events/batch')),
-    warning: structuredClone(require('../../mocks/events/warning')),
+    warning: structuredClone(require('../../mocks/events/warning'))
   }
 })
 
@@ -48,8 +48,8 @@ const expectRecordCreated = async (dbModel, partitionKey, category) => {
   const records = await dbModel.findAll({
     where: {
       partitionKey,
-      category,
-    },
+      category
+    }
   })
   expect(records.length).toBeGreaterThan(0)
 }
@@ -58,7 +58,7 @@ describe('inbound payment event', () => {
   test.each([
     ['FRN', (e) => e.data.frn.toString(), FRN],
     ['CorrelationId', (e) => e.data.correlationId, CORRELATION_ID],
-    ['SchemeId', (e) => e.data.schemeId.toString(), SCHEME_ID],
+    ['SchemeId', (e) => e.data.schemeId.toString(), SCHEME_ID]
   ])('saves %s payment entity without batch', async (name, keyFn, category) => {
     await processEvent(events.payment)
     await expectRecordCreated(db.payments, keyFn(events.payment), category)
@@ -110,7 +110,7 @@ describe('inbound payment event', () => {
 describe('inbound hold event', () => {
   test.each([
     ['FRN', (e) => e.data.frn.toString(), FRN],
-    ['SchemeId', (e) => e.data.schemeId.toString(), SCHEME_ID],
+    ['SchemeId', (e) => e.data.schemeId.toString(), SCHEME_ID]
   ])('saves %s hold entity', async (name, keyFn, category) => {
     await processEvent(events.hold)
     await expectRecordCreated(db.holds, keyFn(events.hold), category)
@@ -127,8 +127,8 @@ describe('inbound hold event', () => {
 
     const records = await db.holds.findAll({
       where: {
-        partitionKey: events.hold.data.holdCategoryId.toString(),
-      },
+        partitionKey: events.hold.data.holdCategoryId.toString()
+      }
     })
 
     expect(records.length).toBeGreaterThan(0)

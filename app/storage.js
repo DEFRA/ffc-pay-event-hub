@@ -44,7 +44,7 @@ const initialiseContainers = async () => {
 
     await Promise.all([
       container.createIfNotExists(),
-      dataRequestContainer.createIfNotExists(),
+      dataRequestContainer.createIfNotExists()
     ])
 
     containersInitialised = true
@@ -57,21 +57,23 @@ const writeFile = async (filename, content) => {
 }
 
 const writeDataRequestFile = async (filename, content) => {
+  console.debug('[STORAGE] Starting dataRequest file save:', filename)
   const blob = dataRequestContainer.getBlockBlobClient(filename)
   await blob.upload(content, content.length)
-  return blob
+  console.debug('[STORAGE] Upload completed')
+  return blob.url
 }
 
-const writeReportFile = async (filename, readableStream) => {
+const streamDataRequestFile = async (filename, readableStream) => {
   try {
-    console.debug('[STORAGE] Starting report file save:', filename)
+    console.debug('[STORAGE] Starting dataRequest file save:', filename)
     containersInitialised ?? (await initialiseContainers())
 
     const blob = dataRequestContainer.getBlockBlobClient(filename)
     const options = {
       blobHTTPHeaders: {
-        blobContentType: 'text/json',
-      },
+        blobContentType: 'text/json'
+      }
     }
 
     await blob.uploadStream(
@@ -91,5 +93,5 @@ module.exports = {
   initialiseContainers,
   writeFile,
   writeDataRequestFile,
-  writeReportFile,
+  streamDataRequestFile
 }
