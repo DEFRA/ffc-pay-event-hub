@@ -1,6 +1,6 @@
 {
   "name": "ffc-pay-event-hub",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Event hub",
   "homepage": "https://github.com/DEFRA/ffc-pay-event-hub",
   "main": "app/index.js",
@@ -23,7 +23,7 @@
   "license": "OGL-UK-3.0",
   "dependencies": {
     "@azure/identity": "4.4.1",
-    "@azure/storage-blob": "12.29.1",
+    "@azure/storage-blob": "12.31.0",
     "@hapi/hapi": "20.2.2",
     "applicationinsights": "2.9.6",
     "ffc-database": "1.0.23",
