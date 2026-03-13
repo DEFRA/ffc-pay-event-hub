@@ -38,14 +38,14 @@ extends:
     failOnThreshold: moderate  # Optional: moderate (default), low, high, critical
     variableGroupName: ffc-pay-event-hub-env-var
     pr_params:
-      container.processingActive: $('pr_processingActive')
+      container.processingActive: $(pr_processingActive)
     snd2_params:
-      container.processingActive: $('snd2_processingActive')
+      container.processingActive: $(snd2_processingActive)
     dev_params:
-      container.processingActive: $('dev_processingActive')
+      container.processingActive: $(dev_processingActive)
     test_params:
-      container.processingActive: $('test_processingActive')
+      container.processingActive: $(test_processingActive)
     pre_params:
-      container.processingActive: $('pre_processingActive')
+      container.processingActive: $(pre_processingActive)
     prd_params:
-      container.processingActive: $('prd_processingActive')
+      container.processingActive: $(prd_processingActive)
