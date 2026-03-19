@@ -1,0 +1,127 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+
+    <changeSet author="Oliver Lewington" id="1">
+        <tagDatabase tag="v1.8.0"/>
+    </changeSet>
+
+    <changeSet author="Oliver Lewington" id="2">
+        <sql splitStatements="false" stripComments="false">
+         <![CDATA[       
+            TRUNCATE TABLE payment_frn_events;
+        ]]>
+        </sql>
+    </changeSet>
+    
+    <changeSet author="Oliver Lewington" id="3">
+        <sql splitStatements="false" stripComments="false">
+            <![CDATA[            
+            INSERT INTO payment_frn_events (
+                id,
+                frn,
+                "correlationId",
+                "schemeId",
+                "agreementNumber",
+                "paymentRequestNumber",
+                "originalValue",
+                type,
+                "lastUpdated"
+            )
+            WITH ranked AS (
+                SELECT
+                    p."partitionKey" AS frn,
+                    p."partitionKey" || '-' || split_part(p."rowKey", '|', 1) AS group_key,
+                    split_part(p."rowKey", '|', 1) AS "correlationId",
+                    p.type,
+                    p.time,
+                    (p.data->>'schemeId')::int AS "schemeId",
+                    (p.data->>'paymentRequestNumber')::int AS "paymentRequestNumber",
+                    (p.data->>'agreementNumber') AS "agreementNumber",
+                    CASE
+                        WHEN p.data->>'value' ~ '^-?[0-9]+(\.[0-9]+)?$'
+                        THEN (p.data->>'value')::numeric
+                        ELSE NULL
+                    END AS value,
+                    CASE p.type
+                        WHEN 'uk.gov.defra.ffc.pay.payment.extracted' THEN 1
+                        WHEN 'uk.gov.defra.ffc.pay.payment.enriched' THEN 2
+                        WHEN 'uk.gov.defra.ffc.pay.payment.paused.cross-border' THEN 3
+                        WHEN 'uk.gov.defra.ffc.pay.payment.paused.debt' THEN 4
+                        WHEN 'uk.gov.defra.ffc.pay.payment.debt.attached' THEN 5
+                        WHEN 'uk.gov.defra.ffc.pay.payment.paused.ledger' THEN 6
+                        WHEN 'uk.gov.defra.ffc.pay.payment.ledger.assigned' THEN 7
+                        WHEN 'uk.gov.defra.ffc.pay.payment.ledger.quality-check.pending' THEN 8
+                        WHEN 'uk.gov.defra.ffc.pay.payment.ledger.quality-check.failed' THEN 9
+                        WHEN 'uk.gov.defra.ffc.pay.payment.ledger.quality-check.passed' THEN 10
+                        WHEN 'uk.gov.defra.ffc.pay.payment.reset' THEN 11
+                        WHEN 'uk.gov.defra.ffc.pay.payment.processed.no.further.action' THEN 12
+                        WHEN 'uk.gov.defra.ffc.pay.payment.processed' THEN 13
+                        WHEN 'uk.gov.defra.ffc.pay.payment.submitted' THEN 14
+                        WHEN 'uk.gov.defra.ffc.pay.payment.acknowledged' THEN 15
+                        WHEN 'uk.gov.defra.ffc.pay.payment.settled' THEN 16
+                        ELSE 0
+                    END AS event_order
+                FROM payments p
+                WHERE p.category = 'frn'
+            ),
+            annotated AS (
+                SELECT *,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY group_key
+                        ORDER BY event_order ASC
+                    ) AS rn_first,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY group_key
+                        ORDER BY event_order DESC
+                    ) AS rn_last,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY group_key
+                        ORDER BY
+                            CASE
+                                WHEN type = 'uk.gov.defra.ffc.pay.payment.extracted' THEN 1
+                                WHEN type = 'uk.gov.defra.ffc.pay.payment.enriched'  THEN 2
+                                ELSE 3
+                            END ASC,
+                            time ASC
+                    ) AS rn_original,
+                    FIRST_VALUE("schemeId") OVER w AS first_scheme,
+                    FIRST_VALUE("paymentRequestNumber") OVER w AS first_request,
+                    FIRST_VALUE("agreementNumber") OVER w AS first_agreement
+                FROM ranked
+                WINDOW w AS (
+                    PARTITION BY group_key
+                    ORDER BY time ASC
+                    ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+                )
+            )
+            SELECT
+                gen_random_uuid() AS id,
+                frn,
+                "correlationId",
+                first_scheme AS "schemeId",
+                first_agreement AS "agreementNumber",
+                first_request AS "paymentRequestNumber",
+                MAX(
+                    CASE
+                        WHEN rn_original = 1 AND type = 'uk.gov.defra.ffc.pay.payment.extracted'
+                        THEN (value * 100)::numeric
+                        WHEN rn_original = 1 AND type = 'uk.gov.defra.ffc.pay.payment.enriched'
+                        THEN value::numeric
+                    END
+                ) AS "originalValue",
+                MAX(type) FILTER (WHERE rn_last = 1) AS type,
+                MAX(time) FILTER (WHERE rn_last = 1) AS "lastUpdated"
+            FROM annotated
+            WHERE first_scheme IS NOT NULL OR first_agreement IS NOT NULL
+            GROUP BY
+                frn,
+                group_key,
+                "correlationId",
+                first_scheme,
+                first_request,
+                first_agreement;
+            ]]>
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
