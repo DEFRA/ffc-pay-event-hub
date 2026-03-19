@@ -36,8 +36,9 @@ const transformRow = (row) => {
 const getEventsByFrn = async (frn) => {
   const sql = generateSqlQuery({ frn }, 'paymentFrnEvents', [
     ['schemeId', 'ASC'],
-    ['lastUpdated', 'DESC'],
-    ['paymentRequestNumber', 'ASC']
+    ['agreementNumber', 'ASC'],
+    ['paymentRequestNumber', 'ASC'],
+    ['lastUpdated', 'DESC']
   ])
   return exportQueryToJsonFile(
     sql,
