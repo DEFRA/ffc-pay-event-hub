@@ -20,8 +20,6 @@
 
                     v_correlation_id := split_part(NEW."rowKey", '|', 1);
 
-                    -- Only capture originalValue from extracted or enriched events.
-                    -- All other event types insert NULL so the original is never overwritten.
                     IF NEW.type IN (
                         'uk.gov.defra.ffc.pay.payment.extracted',
                         'uk.gov.defra.ffc.pay.payment.enriched'
@@ -64,10 +62,8 @@
                     DO UPDATE SET
                         type              = EXCLUDED.type,
                         "lastUpdated"     = EXCLUDED."lastUpdated",
-                        -- Only overwrite agreementNumber if the incoming value is not NULL
                         "agreementNumber" = COALESCE(EXCLUDED."agreementNumber", payment_frn_events."agreementNumber"),
-                        -- Only overwrite originalValue if the stored value is currently NULL
-                        "originalValue"   = COALESCE(payment_frn_events."originalValue", EXCLUDED."originalValue");
+                        "originalValue"   = COALESCE(NULLIF(payment_frn_events."originalValue", 0), EXCLUDED."originalValue");
 
                     RETURN NEW;
                 END;
@@ -95,8 +91,6 @@
                         RETURN NEW;
                     END IF;
 
-                    -- Only capture originalValue from extracted or enriched events.
-                    -- All other event types insert NULL so the original is never overwritten.
                     IF NEW.type IN (
                         'uk.gov.defra.ffc.pay.payment.extracted',
                         'uk.gov.defra.ffc.pay.payment.enriched'
@@ -104,7 +98,6 @@
 
                         v_value := (NEW.data->>'value')::numeric;
 
-                        -- Convert pounds to pence for extracted events only
                         IF NEW.type = 'uk.gov.defra.ffc.pay.payment.extracted' THEN
                             v_value := v_value * 100;
                         END IF;
@@ -138,7 +131,6 @@
                     ON CONFLICT ("batchName", frn)
                     DO UPDATE SET
                         type            = EXCLUDED.type,
-                        -- Only overwrite originalValue if the stored value is currently NULL
                         "originalValue" = COALESCE(payment_batch_events."originalValue", EXCLUDED."originalValue");
 
                     RETURN NEW;
