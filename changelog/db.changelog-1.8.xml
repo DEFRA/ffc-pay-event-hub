@@ -68,10 +68,6 @@
                 SELECT *,
                     ROW_NUMBER() OVER (
                         PARTITION BY group_key
-                        ORDER BY event_order ASC
-                    ) AS rn_first,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY group_key
                         ORDER BY event_order DESC
                     ) AS rn_last,
                     ROW_NUMBER() OVER (
