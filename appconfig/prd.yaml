@@ -4,7 +4,6 @@ environmentCode: prd
 container:
   messageQueueHost: PRDFFCINFSB1001.servicebus.windows.net
   azureStorageAccountName: prdffcpayst1001
-  endpointEnabled: true
 secretProviderClass:
   azure:
     keyvaultName: PRDFFCINFKV1001
