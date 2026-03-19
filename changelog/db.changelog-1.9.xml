@@ -65,7 +65,7 @@
                         -- Only the status and timestamp progress — originalValue is never touched
                         type          = EXCLUDED.type,
                         "lastUpdated" = EXCLUDED."lastUpdated";
-
+                        "agreementNumber" = COALESCE(EXCLUDED."agreementNumber", payment_frn_events."agreementNumber");
                     RETURN NEW;
                 END;
                 $$ LANGUAGE plpgsql;
