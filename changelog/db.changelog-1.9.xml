@@ -62,10 +62,13 @@
                     )
                     ON CONFLICT (frn, "correlationId")
                     DO UPDATE SET
-                        -- Only the status and timestamp progress — originalValue is never touched
-                        type          = EXCLUDED.type,
-                        "lastUpdated" = EXCLUDED."lastUpdated",
-                        "agreementNumber" = COALESCE(EXCLUDED."agreementNumber", payment_frn_events."agreementNumber");
+                        type              = EXCLUDED.type,
+                        "lastUpdated"     = EXCLUDED."lastUpdated",
+                        -- Only overwrite agreementNumber if the incoming value is not NULL
+                        "agreementNumber" = COALESCE(EXCLUDED."agreementNumber", payment_frn_events."agreementNumber"),
+                        -- Only overwrite originalValue if the stored value is currently NULL
+                        "originalValue"   = COALESCE(payment_frn_events."originalValue", EXCLUDED."originalValue");
+
                     RETURN NEW;
                 END;
                 $$ LANGUAGE plpgsql;
@@ -134,8 +137,9 @@
                     )
                     ON CONFLICT ("batchName", frn)
                     DO UPDATE SET
-                        -- Only the status progresses — originalValue is never touched
-                        type = EXCLUDED.type;
+                        type            = EXCLUDED.type,
+                        -- Only overwrite originalValue if the stored value is currently NULL
+                        "originalValue" = COALESCE(payment_batch_events."originalValue", EXCLUDED."originalValue");
 
                     RETURN NEW;
                 END;
