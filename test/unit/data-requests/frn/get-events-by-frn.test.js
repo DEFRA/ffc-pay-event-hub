@@ -90,8 +90,9 @@ describe('events-by-frn module', () => {
         'paymentFrnEvents',
         [
           ['schemeId', 'ASC'],
-          ['lastUpdated', 'DESC'],
-          ['paymentRequestNumber', 'ASC']
+          ['agreementNumber', 'ASC'],
+          ['paymentRequestNumber', 'ASC'],
+          ['lastUpdated', 'DESC']
         ]
       )
 
