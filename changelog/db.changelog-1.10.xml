@@ -7,6 +7,14 @@
 
     <changeSet author="Oliver Lewington" id="2">
         <sql splitStatements="false" stripComments="false">
+         <![CDATA[       
+            TRUNCATE TABLE payment_frn_events;
+        ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="Oliver Lewington" id="3">
+        <sql splitStatements="false" stripComments="false">
             <![CDATA[
              INSERT INTO payment_frn_events (
                 id,
