@@ -132,7 +132,6 @@
                     DO UPDATE SET
                         type            = EXCLUDED.type,
                         "originalValue"   = COALESCE(payment_frn_events."originalValue", EXCLUDED."originalValue");
-
                     RETURN NEW;
                 END;
                 $$ LANGUAGE plpgsql;
