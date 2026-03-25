@@ -64,7 +64,6 @@
                         "lastUpdated"     = EXCLUDED."lastUpdated",
                         "agreementNumber" = COALESCE(EXCLUDED."agreementNumber", payment_frn_events."agreementNumber"),
                         "originalValue"   = COALESCE(payment_frn_events."originalValue", EXCLUDED."originalValue");
-                    
                     RETURN NEW;
                 END;
                 $$ LANGUAGE plpgsql;
@@ -132,6 +131,7 @@
                     DO UPDATE SET
                         type            = EXCLUDED.type,
                         "originalValue"   = COALESCE(payment_frn_events."originalValue", EXCLUDED."originalValue");
+                    
                     RETURN NEW;
                 END;
                 $$ LANGUAGE plpgsql;
