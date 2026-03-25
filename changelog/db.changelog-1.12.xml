@@ -131,7 +131,7 @@
                     ON CONFLICT ("batchName", frn)
                     DO UPDATE SET
                         type            = EXCLUDED.type,
-                        "originalValue"   = COALESCE(payment_frn_events."originalValue", EXCLUDED."originalValue");
+                        "originalValue"   = COALESCE(payment_batch_events."originalValue", EXCLUDED."originalValue");
 
                     RETURN NEW;
                 END;
