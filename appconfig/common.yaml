@@ -1,2 +1,0 @@
-container.eventsTopicAddress: queue:ffc-pay-events
-container.alertTopicAddress: queue:ffc-pay-alert

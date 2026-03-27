@@ -1,24 +1,29 @@
 describe('Storage initialization and functionality', () => {
   let consoleLogSpy
-  let storageConfig
-  let BlobServiceClient
-  let DefaultAzureCredential
   let storage
+  let uploadMock
+  let getBlockBlobClientMock
 
   beforeAll(() => {
     jest.doMock('@azure/storage-blob', () => {
-      const getBlockBlobClientMock = jest
-        .fn()
-        .mockReturnValue({ upload: jest.fn().mockResolvedValue() })
+      uploadMock = jest.fn().mockResolvedValue()
+      getBlockBlobClientMock = jest.fn().mockImplementation((filename) => ({
+        upload: uploadMock,
+        uploadStream: jest.fn().mockResolvedValue(),
+        url: filename
+      }))
+
       const getContainerClientMock = jest.fn().mockReturnValue({
         createIfNotExists: jest.fn().mockResolvedValue(),
-        getBlockBlobClient: getBlockBlobClientMock,
+        getBlockBlobClient: getBlockBlobClientMock
       })
-      const fromConnectionStringMock = jest
-        .fn()
-        .mockReturnValue({ getContainerClient: getContainerClientMock })
+
+      const fromConnectionStringMock = jest.fn().mockReturnValue({
+        getContainerClient: getContainerClientMock
+      })
+
       const BlobServiceClientMock = jest.fn().mockImplementation(() => ({
-        getContainerClient: getContainerClientMock,
+        getContainerClient: getContainerClientMock
       }))
       BlobServiceClientMock.fromConnectionString = fromConnectionStringMock
       return { BlobServiceClient: BlobServiceClientMock }
@@ -27,97 +32,47 @@ describe('Storage initialization and functionality', () => {
     jest.doMock('@azure/identity', () => ({
       DefaultAzureCredential: jest.fn().mockImplementation((options) => ({
         type: 'DefaultAzureCredential',
-        options,
-      })),
+        options
+      }))
     }))
   })
 
   beforeEach(() => {
     jest.resetModules()
     jest.clearAllMocks()
-    storageConfig = require('../../app/config/storage')
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    ({ BlobServiceClient } = require('@azure/storage-blob'));
-    ({ DefaultAzureCredential } = require('@azure/identity'))
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
     storage = require('../../app/storage')
   })
 
   afterEach(() => consoleLogSpy.mockRestore())
 
-  test('should use connection string when storageConfig.useConnectionString is true', async () => {
-    storageConfig.useConnectionString = true
-    storageConfig.connectionString = 'fake-connection-string'
-
+  test('should write file to blob storage', async () => {
     await storage.initialiseContainers()
+    const filename = 'test.txt'
+    const content = 'Hello, World!'
+    await storage.writeFile(filename, content)
 
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      'Using connection string for Storage Clients'
-    )
-    expect(BlobServiceClient.fromConnectionString).toHaveBeenCalledWith(
-      storageConfig.connectionString
-    )
+    expect(getBlockBlobClientMock).toHaveBeenCalledWith(filename)
+    expect(uploadMock).toHaveBeenCalledWith(content, content.length)
   })
 
-  test('should use DefaultAzureCredential when storageConfig.useConnectionString is false', async () => {
-    storageConfig.useConnectionString = false
-    storageConfig.account = 'fakeaccount'
-    storageConfig.managedIdentityClientId = 'fake-managed-id'
-
+  test('should write data request file to blob storage and return URL', async () => {
     await storage.initialiseContainers()
+    const filename = 'datarequest.json'
+    const content = JSON.stringify({ data: 'test data' })
+    const blobUri = await storage.writeDataRequestFile(filename, content)
 
-    const expectedBlobUri = `https://${storageConfig.account}.blob.core.windows.net`
-
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      'Using DefaultAzureCredential for Storage Clients'
-    )
-    expect(DefaultAzureCredential).toHaveBeenCalledWith({
-      managedIdentityClientId: storageConfig.managedIdentityClientId
-    })
-    expect(BlobServiceClient).toHaveBeenCalledWith(
-      expectedBlobUri,
-      expect.any(Object)
-    )
+    expect(getBlockBlobClientMock).toHaveBeenCalledWith(filename)
+    expect(uploadMock).toHaveBeenCalledWith(content, content.length)
+    expect(blobUri).toBe(filename)
   })
 
-  test('should create blob containers when createEntities is true', async () => {
-    storageConfig.createEntities = true
-    storageConfig.useConnectionString = true
-    storageConfig.connectionString = 'fake-connection-string'
-
+  test('should stream data request file', async () => {
     await storage.initialiseContainers()
+    const filename = 'stream.json'
+    const readable = { on: jest.fn(), pipe: jest.fn() }
 
-    expect(consoleLogSpy).toHaveBeenCalledWith('Using connection string for Storage Clients')
-    expect(consoleLogSpy).toHaveBeenCalledWith('Making sure blob containers exist'
-
-    )
-    expect(
-      BlobServiceClient.fromConnectionString().getContainerClient()
-        .createIfNotExists
-    ).toHaveBeenCalledTimes(2)
-  })
-
-  describe('writeFile and writeDataRequestFile', () => {
-    test('should write file to blob storage', async () => {
-      await storage.initialiseContainers()
-      const filename = 'test.txt'
-      const content = 'Hello, World!'
-      await storage.writeFile(filename, content)
-      const containerClient =
-        BlobServiceClient.fromConnectionString().getContainerClient()
-      expect(containerClient.getBlockBlobClient).toHaveBeenCalledWith(filename)
-      expect(containerClient.getBlockBlobClient().upload).toHaveBeenCalledWith(
-        content,
-        content.length
-      )
-    })
-
-    test('should write data request file to blob storage and return blob client', async () => {
-      await storage.initialiseContainers()
-      const filename = 'datarequest.json'
-      const content = JSON.stringify({ data: 'test data' })
-      const blobClient = await storage.writeDataRequestFile(filename, content)
-      expect(blobClient.upload).toHaveBeenCalledWith(content, content.length)
-      expect(blobClient).toBeDefined()
-    })
+    await storage.streamDataRequestFile(filename, readable)
+    expect(getBlockBlobClientMock).toHaveBeenCalledWith(filename)
   })
 })

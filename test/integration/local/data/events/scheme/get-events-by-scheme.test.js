@@ -1,13 +1,17 @@
 const db = require('../../../../../../app/data')
-const { getEventsByScheme } = require('../../../../../../app/outbound/events/scheme-id/get-events-by-scheme')
-const { sanitiseSchemeData } = require('../../../../../../app/outbound/events/scheme-id/sanitise-scheme-data')
+const {
+  getEventsByScheme
+} = require('../../../../../../app/data-requests/scheme-id/get-events-by-scheme')
+const {
+  sanitiseSchemeData
+} = require('../../../../../../app/data-requests/scheme-id/sanitise-scheme-data')
 const schemeNames = require('../../../../../../app/constants/scheme-names')
 
 const SCHEMES = Object.keys(schemeNames)
 let rawViewData = []
 
 beforeAll(async () => {
-  await db.sequelize.sync(({ force: true }))
+  await db.sequelize.sync({ force: true })
 })
 
 beforeEach(async () => {

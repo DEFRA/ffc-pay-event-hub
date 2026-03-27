@@ -1,0 +1,51 @@
+name: '$(Build.SourceBranchName)$(System.PullRequest.SourceBranch)$(Rev:.r)'
+
+trigger:
+  - main
+  - feature/*
+  - release/*
+
+pr:
+  - main
+  - releases/*
+
+parameters:
+  - name: prDeployment
+    type: boolean
+    default: true
+  - name: branchDeployment
+    type: boolean
+    default: true
+  - name: sndDeployment
+    type: boolean
+    default: true
+
+resources:
+  repositories:
+    - repository: templates
+      endpoint: DEFRA
+      type: github
+      name: defra/fcp-pipeline-common
+      # ref: branch-name
+
+extends:
+  template: fcp-common-pipeline.yaml@templates
+  parameters:
+    appFrameworkType: nodejs
+    prDeployment: ${{ parameters.prDeployment }}
+    branchDeployment: ${{ parameters.branchDeployment }}
+    sndDeployment: ${{ parameters.sndDeployment }}
+    failOnThreshold: moderate  # Optional: moderate (default), low, high, critical
+    variableGroupName: ffc-pay-event-hub-env-var
+    pr_params:
+      container.processingActive: $(pr_processingActive)
+    snd2_params:
+      container.processingActive: $(snd2_processingActive)
+    dev_params:
+      container.processingActive: $(dev_processingActive)
+    test_params:
+      container.processingActive: $(test_processingActive)
+    pre_params:
+      container.processingActive: $(pre_processingActive)
+    prd_params:
+      container.processingActive: $(prd_processingActive)
