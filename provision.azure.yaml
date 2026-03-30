@@ -2,10 +2,44 @@ resources:
   identity: pay-event-hub
   postgreSql:
     name: ffc-pay-event-hub
-  topics:
-    - name: ffc-pay-events
-      role: receiver
-      subscriptions:
-        - name: ffc-pay-event-hub
-    - name: ffc-pay-alert
-      role: sender
+  service_bus:
+    topics:
+      - name: ffc-pay-events
+        defaultMessageTimeToLive: P3650D
+        duplicateDetectionHistoryTimeWindow: PT10M30S
+        requiresDuplicateDetection: true
+        roles: 
+        - name: receiver
+        subscriptions:
+          - name: ffc-pay-event-hub
+            deadLetteringOnMessageExpiration: true
+            defaultMessageTimeToLive: P3650D
+            lockDuration: PT5M
+            maxDeliveryCount: 2000
+      - name: ffc-pay-data-request
+        defaultMessageTimeToLive: P3650D
+        duplicateDetectionHistoryTimeWindow: PT10M30S
+        requiresDuplicateDetection: true
+        roles: 
+        - name: receiver
+        subscriptions:
+          - name: ffc-pay-data-hub
+            deadLetteringOnMessageExpiration: true
+            defaultMessageTimeToLive: P3650D
+            lockDuration: PT5M
+            maxDeliveryCount: 2000
+      - name: ffc-pay-alert
+        defaultMessageTimeToLive: P3650D
+        duplicateDetectionHistoryTimeWindow: PT10M30S
+        requiresDuplicateDetection: true
+        roles: 
+        - name: sender
+    queues:
+      - name: ffc-pay-data-request-response
+        autoDeleteOnIdle: P10675199DT2H48M5.4775807S
+        defaultMessageTimeToLive: P100D
+        lockDuration: PT5M
+        requiresDuplicateDetection: true
+        requiresSession: true
+        roles: 
+        - name: sender

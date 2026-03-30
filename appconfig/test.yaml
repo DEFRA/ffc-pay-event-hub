@@ -2,7 +2,7 @@
 environment: production
 environmentCode: test
 container:
-  azureStorageAccountName: devffcpayst1001
+  azureStorageAccountName: testffcpayst1001
   messageQueueHost: DEVFFCINFSB1001.servicebus.windows.net
 secretProviderClass:
   azure:

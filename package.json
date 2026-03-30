@@ -1,6 +1,6 @@
 {
   "name": "ffc-pay-event-hub",
-  "version": "2.0.5",
+  "version": "2.0.11",
   "description": "Event hub",
   "homepage": "https://github.com/DEFRA/ffc-pay-event-hub",
   "main": "app/index.js",
@@ -26,14 +26,14 @@
     "@azure/storage-blob": "12.31.0",
     "@hapi/hapi": "20.2.2",
     "applicationinsights": "2.9.6",
-    "ffc-database": "1.0.23",
-    "ffc-messaging": "2.10.1",
+    "ffc-database": "1.0.24",
+    "ffc-messaging": "2.10.4",
     "hapi-pino": "13.0.0",
     "joi": "17.7.1",
     "log-timestamp": "0.3.0",
     "moment-timezone": "0.5.43",
     "pg-query-stream": "4.9.6",
-    "sequelize": "6.37.7",
+    "sequelize": "6.37.8",
     "uuid": "9.0.0"
   },
   "devDependencies": {

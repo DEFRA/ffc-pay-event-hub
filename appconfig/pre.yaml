@@ -4,7 +4,6 @@ environmentCode: pre
 container:
   messageQueueHost: PREFFCINFSB1001.servicebus.windows.net
   azureStorageAccountName: preffcpayst1001
-  endpointEnabled: true
 secretProviderClass:
   azure:
     keyvaultName: PREFFCINFKV1001
