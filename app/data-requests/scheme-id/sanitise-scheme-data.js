@@ -14,7 +14,6 @@ const sanitiseSchemeData = (schemeData) => {
       throw new Error(`Unknown schemeId: ${scheme.schemeId}`)
     }
     const schemeProvidesAccountingValues = accountingValueSchemes.includes(Number(scheme.schemeId))
-    console.log(scheme)
     return {
       scheme: schemeName,
       paymentRequests: scheme.paymentRequests,
