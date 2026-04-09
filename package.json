@@ -24,7 +24,7 @@
   "dependencies": {
     "@azure/identity": "4.4.1",
     "@azure/storage-blob": "12.31.0",
-    "@hapi/hapi": "20.2.2",
+    "@hapi/hapi": "21.4.8",
     "applicationinsights": "2.9.6",
     "ffc-database": "1.0.24",
     "ffc-messaging": "2.10.4",
