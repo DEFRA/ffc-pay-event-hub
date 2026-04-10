@@ -5,7 +5,6 @@ const {
 const eventDetails = require('../../../../app/constants/event-details')
 const schemeNames = require('../../../../app/constants/scheme-names')
 const { convertToString } = require('../../../../app/currency')
-const accountingValueSchemes = require('../../../../app/constants/accounting-value-schemes')
 const { FPTT, SFI } = require('../../../../app/constants/schemes')
 
 jest.mock('../../../../app/currency', () => ({
