@@ -1,3 +1,4 @@
+const accountingValueSchemes = require('../../constants/accounting-value-schemes')
 const eventDetails = require('../../constants/event-details')
 const schemeNames = require('../../constants/scheme-names')
 const { convertToString } = require('../../currency')
@@ -21,6 +22,9 @@ const mapCommonFields = (row, target) => {
   }
 
   if (row.originalValue) {
+    if (accountingValueSchemes.includes(row.schemeId)) {
+      row.originalValue = -1 * row.originalValue
+    }
     target.originalValueText = convertToString(row.originalValue)
   }
 }

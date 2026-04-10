@@ -6,6 +6,7 @@ const {
   sanitiseSchemeData
 } = require('../../../../../../app/data-requests/scheme-id/sanitise-scheme-data')
 const schemeNames = require('../../../../../../app/constants/scheme-names')
+const accountingValueSchemes = require('../../../../../../app/constants/accounting-value-schemes')
 
 const SCHEMES = Object.keys(schemeNames)
 let rawViewData = []
@@ -16,11 +17,10 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await db.schemePaymentTotals.destroy({ where: {} })
-
   rawViewData = SCHEMES.map((scheme, index) => ({
     schemeId: scheme,
     paymentRequests: 2 + index,
-    value: `£${(1000 * (index + 1)).toLocaleString()}.00`
+    value: accountingValueSchemes.includes(Number(scheme)) ? `£-${(1000 * (index + 1)).toLocaleString()}.00` : `£${(1000 * (index + 1)).toLocaleString()}.00`
   }))
 
   for (const row of rawViewData) {
