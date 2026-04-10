@@ -5,7 +5,7 @@ const showNonAccountingValue = (value) => {
   const cleaned = value.replace(/£|,/g, '')
   const amount = Number.parseFloat(cleaned)
   const flipped = -amount
-  return `£${flipped.toFixed(2)}`
+  return `£${flipped.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
 const sanitiseSchemeData = (schemeData) => {
