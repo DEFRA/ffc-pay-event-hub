@@ -2,7 +2,8 @@ const accountingValueSchemes = require('../../constants/accounting-value-schemes
 const schemeNames = require('../../constants/scheme-names')
 
 const showNonAccountingValue = (value) => {
-  const amount = Number.parseFloat(value.replace('£', ''))
+  const cleaned = value.replace(/£|,/g, '')
+  const amount = Number.parseFloat(cleaned)
   const flipped = -amount
   return `£${flipped.toFixed(2)}`
 }
