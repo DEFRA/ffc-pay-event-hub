@@ -4,7 +4,7 @@ const schemeNames = require('../../constants/scheme-names')
 const showNonAccountingValue = (value) => {
   const amount = parseFloat(value.replace('£', ''))
   const flipped = -amount
-  return `£${flipped}`
+  return `£${flipped.toFixed(2)}`
 }
 
 const sanitiseSchemeData = (schemeData) => {
