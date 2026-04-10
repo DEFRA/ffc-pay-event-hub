@@ -33,5 +33,5 @@ module.exports = {
   [SFI_EXPANDED]: 'Expanded SFI Offer',
   [COHT_REVENUE]: 'COHT Revenue',
   [COHT_CAPITAL]: 'COHT Capital',
-  [FPTT]: 'Future Payments Technical Test'
+  [FPTT]: 'Farm Payments Technical Test'
 }

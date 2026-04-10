@@ -5,6 +5,7 @@ const {
 const eventDetails = require('../../../../app/constants/event-details')
 const schemeNames = require('../../../../app/constants/scheme-names')
 const { convertToString } = require('../../../../app/currency')
+const { FPTT, SFI } = require('../../../../app/constants/schemes')
 
 jest.mock('../../../../app/currency', () => ({
   convertToString: jest.fn((value) => `£${value}`)
@@ -70,6 +71,28 @@ describe('transform utilities', () => {
         status: 'Pending',
         originalValueText: '£99.99'
       })
+    })
+
+    test('negates originalValue when schemeId is in accountingValueSchemes', () => {
+      const schemeId = FPTT
+      const row = { schemeId, originalValue: -200 }
+      const target = {}
+
+      mapCommonFields(row, target)
+
+      expect(target.originalValueText).toBe('£200')
+      expect(convertToString).toHaveBeenCalledWith(200)
+    })
+
+    test('does not negate originalValue when schemeId is not in accountingValueSchemes', () => {
+      const schemeId = SFI
+      const row = { schemeId, originalValue: 150 }
+      const target = {}
+
+      mapCommonFields(row, target)
+
+      expect(target.originalValueText).toBe('£150')
+      expect(convertToString).toHaveBeenCalledWith(150)
     })
   })
 })
