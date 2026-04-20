@@ -1,8 +1,17 @@
 const db = require('../data')
 
-const removePaymentBatchEvents = async (agreementNumber, frn, schemeId, transaction) => {
+const removePaymentBatchEvents = async (agreementNumber, frn, schemeId, usesContractNumber, transaction) => {
+  const where = {
+    agreementNumber,
+    frn,
+    schemeId
+  }
+  if (usesContractNumber) {
+    delete where.agreementNumber
+    where.contractNumber = agreementNumber
+  }
   await db.paymentBatchEvents.destroy({
-    where: { agreementNumber, frn, schemeId },
+    where,
     transaction
   })
 }

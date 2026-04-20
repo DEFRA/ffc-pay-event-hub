@@ -7,7 +7,7 @@ jest.mock('../../../app/data', () => ({
   },
   sequelize: {
     Op: {
-      and: jest.fn()
+      and: Symbol('and')
     }
   }
 }))
@@ -22,8 +22,8 @@ describe('removePayments', () => {
     jest.clearAllMocks()
   })
 
-  test('calls db.payments.destroy with correct parameters', async () => {
-    await removePayments(agreementNumber, frn, schemeId, transaction)
+  test('calls db.payments.destroy with agreementNumber in where when usesContractNumber is false or omitted', async () => {
+    await removePayments(agreementNumber, frn, schemeId, false, transaction)
 
     expect(db.payments.destroy).toHaveBeenCalledTimes(1)
     expect(db.payments.destroy).toHaveBeenCalledWith({
@@ -38,8 +38,24 @@ describe('removePayments', () => {
     })
   })
 
-  test('calls db.payments.destroy with undefined transaction if not provided', async () => {
-    await removePayments(agreementNumber, frn, schemeId)
+  test('calls db.payments.destroy with contractNumber in where when usesContractNumber is true', async () => {
+    await removePayments(agreementNumber, frn, schemeId, true, transaction)
+
+    expect(db.payments.destroy).toHaveBeenCalledTimes(1)
+    expect(db.payments.destroy).toHaveBeenCalledWith({
+      where: {
+        [db.sequelize.Op.and]: [
+          { 'data.contractNumber': agreementNumber },
+          { 'data.frn': frn },
+          { 'data.schemeId': schemeId }
+        ]
+      },
+      transaction
+    })
+  })
+
+  test('calls db.payments.destroy with undefined transaction if not provided, usesContractNumber false', async () => {
+    await removePayments(agreementNumber, frn, schemeId, false)
 
     expect(db.payments.destroy).toHaveBeenCalledWith({
       where: {
@@ -53,10 +69,25 @@ describe('removePayments', () => {
     })
   })
 
+  test('calls db.payments.destroy with undefined transaction if not provided, usesContractNumber true', async () => {
+    await removePayments(agreementNumber, frn, schemeId, true)
+
+    expect(db.payments.destroy).toHaveBeenCalledWith({
+      where: {
+        [db.sequelize.Op.and]: [
+          { 'data.contractNumber': agreementNumber },
+          { 'data.frn': frn },
+          { 'data.schemeId': schemeId }
+        ]
+      },
+      transaction: undefined
+    })
+  })
+
   test('propagates errors from db.payments.destroy', async () => {
     const error = new Error('DB failure')
     db.payments.destroy.mockRejectedValue(error)
 
-    await expect(removePayments(agreementNumber, frn, schemeId, transaction)).rejects.toThrow('DB failure')
+    await expect(removePayments(agreementNumber, frn, schemeId, false, transaction)).rejects.toThrow('DB failure')
   })
 })

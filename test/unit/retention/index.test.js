@@ -32,10 +32,12 @@ describe('removeAgreementData', () => {
   const agreementNumber = 'AGR123'
   const frn = 456789
   const schemeId = 10
+  const usesContractNumber = false
   const retentionData = {
     agreementNumber,
     frn,
-    schemeId
+    schemeId,
+    usesContractNumber
   }
   let transaction
 
@@ -58,10 +60,10 @@ describe('removeAgreementData', () => {
     await removeAgreementData(retentionData)
 
     expect(db.sequelize.transaction).toHaveBeenCalledTimes(1)
-    expect(removeWarnings).toHaveBeenCalledWith(agreementNumber, frn, schemeId, transaction)
-    expect(removePaymentBatchEvents).toHaveBeenCalledWith(agreementNumber, frn, schemeId, transaction)
-    expect(removePaymentFRNEvents).toHaveBeenCalledWith(agreementNumber, frn, schemeId, transaction)
-    expect(removePayments).toHaveBeenCalledWith(agreementNumber, frn, schemeId, transaction)
+    expect(removeWarnings).toHaveBeenCalledWith(agreementNumber, frn, schemeId, usesContractNumber, transaction)
+    expect(removePaymentBatchEvents).toHaveBeenCalledWith(agreementNumber, frn, schemeId, usesContractNumber, transaction)
+    expect(removePaymentFRNEvents).toHaveBeenCalledWith(agreementNumber, frn, schemeId, usesContractNumber, transaction)
+    expect(removePayments).toHaveBeenCalledWith(agreementNumber, frn, schemeId, usesContractNumber, transaction)
     expect(transaction.commit).toHaveBeenCalledTimes(1)
     expect(transaction.rollback).not.toHaveBeenCalled()
   })

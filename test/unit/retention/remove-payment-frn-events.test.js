@@ -17,8 +17,8 @@ describe('removePaymentFRNEvents', () => {
     jest.clearAllMocks()
   })
 
-  test('calls db.paymentFrnEvents.destroy with correct parameters', async () => {
-    await removePaymentFRNEvents(agreementNumber, frn, schemeId, transaction)
+  test('calls db.paymentFrnEvents.destroy with agreementNumber in where when usesContractNumber is false or omitted', async () => {
+    await removePaymentFRNEvents(agreementNumber, frn, schemeId, false, transaction)
 
     expect(db.paymentFrnEvents.destroy).toHaveBeenCalledTimes(1)
     expect(db.paymentFrnEvents.destroy).toHaveBeenCalledWith({
@@ -27,11 +27,30 @@ describe('removePaymentFRNEvents', () => {
     })
   })
 
-  test('calls db.paymentFrnEvents.destroy with undefined transaction if not provided', async () => {
-    await removePaymentFRNEvents(agreementNumber, frn, schemeId)
+  test('calls db.paymentFrnEvents.destroy with contractNumber in where when usesContractNumber is true', async () => {
+    await removePaymentFRNEvents(agreementNumber, frn, schemeId, true, transaction)
+
+    expect(db.paymentFrnEvents.destroy).toHaveBeenCalledTimes(1)
+    expect(db.paymentFrnEvents.destroy).toHaveBeenCalledWith({
+      where: { contractNumber: agreementNumber, frn, schemeId },
+      transaction
+    })
+  })
+
+  test('calls db.paymentFrnEvents.destroy with undefined transaction if not provided, usesContractNumber false', async () => {
+    await removePaymentFRNEvents(agreementNumber, frn, schemeId, false)
 
     expect(db.paymentFrnEvents.destroy).toHaveBeenCalledWith({
       where: { agreementNumber, frn, schemeId },
+      transaction: undefined
+    })
+  })
+
+  test('calls db.paymentFrnEvents.destroy with undefined transaction if not provided, usesContractNumber true', async () => {
+    await removePaymentFRNEvents(agreementNumber, frn, schemeId, true)
+
+    expect(db.paymentFrnEvents.destroy).toHaveBeenCalledWith({
+      where: { contractNumber: agreementNumber, frn, schemeId },
       transaction: undefined
     })
   })
@@ -40,6 +59,6 @@ describe('removePaymentFRNEvents', () => {
     const error = new Error('DB failure')
     db.paymentFrnEvents.destroy.mockRejectedValue(error)
 
-    await expect(removePaymentFRNEvents(agreementNumber, frn, schemeId, transaction)).rejects.toThrow('DB failure')
+    await expect(removePaymentFRNEvents(agreementNumber, frn, schemeId, false, transaction)).rejects.toThrow('DB failure')
   })
 })
