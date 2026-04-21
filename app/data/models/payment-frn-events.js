@@ -13,7 +13,8 @@ const definePaymentFrnEvents = (sequelize, DataTypes) => {
       paymentRequestNumber: DataTypes.INTEGER,
       originalValue: DataTypes.NUMERIC,
       type: DataTypes.STRING,
-      lastUpdated: DataTypes.DATE
+      lastUpdated: DataTypes.DATE,
+      providesAccountingValues: DataTypes.BOOLEAN
     },
     {
       tableName: 'payment_frn_events',
