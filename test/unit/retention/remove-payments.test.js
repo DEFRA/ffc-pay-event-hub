@@ -1,16 +1,23 @@
 const db = require('../../../app/data')
 const { removePayments } = require('../../../app/retention/remove-payments')
 
-jest.mock('../../../app/data', () => ({
-  payments: {
-    destroy: jest.fn()
-  },
-  sequelize: {
-    Op: {
-      and: Symbol('and')
+jest.mock('../../../app/data', () => {
+  const sequelizeWhereMock = jest.fn()
+  const sequelizeJsonMock = jest.fn((path) => path)
+
+  return {
+    payments: {
+      destroy: jest.fn()
+    },
+    sequelize: {
+      Op: {
+        and: Symbol('and')
+      },
+      where: sequelizeWhereMock,
+      json: sequelizeJsonMock
     }
   }
-}))
+})
 
 describe('removePayments', () => {
   const agreementNumber = 'AGR123'
@@ -25,63 +32,62 @@ describe('removePayments', () => {
   test('calls db.payments.destroy with agreementNumber in where when usesContractNumber is false or omitted', async () => {
     await removePayments(agreementNumber, frn, schemeId, false, transaction)
 
+    const { sequelize } = db
+    const destroyCallArg = db.payments.destroy.mock.calls[0][0]
+
+    expect(sequelize.json).toHaveBeenCalledWith('data.agreementNumber')
+    expect(sequelize.json).toHaveBeenCalledWith('data.frn')
+    expect(sequelize.json).toHaveBeenCalledWith('data.schemeId')
+
+    expect(sequelize.where).toHaveBeenCalledWith('data.agreementNumber', agreementNumber)
+    expect(sequelize.where).toHaveBeenCalledWith('data.frn', frn)
+    expect(sequelize.where).toHaveBeenCalledWith('data.schemeId', schemeId)
+
     expect(db.payments.destroy).toHaveBeenCalledTimes(1)
-    expect(db.payments.destroy).toHaveBeenCalledWith({
-      where: {
-        [db.sequelize.Op.and]: [
-          { 'data.agreementNumber': agreementNumber },
-          { 'data.frn': frn },
-          { 'data.schemeId': schemeId }
-        ]
-      },
-      transaction
-    })
+    expect(destroyCallArg).toHaveProperty('where')
+
+    const symbols = Object.getOwnPropertySymbols(destroyCallArg.where)
+    expect(symbols).toContain(db.sequelize.Op.and)
+
+    expect(destroyCallArg.where[db.sequelize.Op.and]).toEqual(sequelize.where.mock.results.map(r => r.value))
+    expect(destroyCallArg.transaction).toBe(transaction)
   })
 
   test('calls db.payments.destroy with contractNumber in where when usesContractNumber is true', async () => {
     await removePayments(agreementNumber, frn, schemeId, true, transaction)
 
+    const { sequelize } = db
+    const destroyCallArg = db.payments.destroy.mock.calls[0][0]
+
+    expect(sequelize.json).toHaveBeenCalledWith('data.contractNumber')
+    expect(sequelize.json).toHaveBeenCalledWith('data.frn')
+    expect(sequelize.json).toHaveBeenCalledWith('data.schemeId')
+
+    expect(sequelize.where).toHaveBeenCalledWith('data.contractNumber', agreementNumber)
+    expect(sequelize.where).toHaveBeenCalledWith('data.frn', frn)
+    expect(sequelize.where).toHaveBeenCalledWith('data.schemeId', schemeId)
+
     expect(db.payments.destroy).toHaveBeenCalledTimes(1)
-    expect(db.payments.destroy).toHaveBeenCalledWith({
-      where: {
-        [db.sequelize.Op.and]: [
-          { 'data.contractNumber': agreementNumber },
-          { 'data.frn': frn },
-          { 'data.schemeId': schemeId }
-        ]
-      },
-      transaction
-    })
+
+    const symbols = Object.getOwnPropertySymbols(destroyCallArg.where)
+    expect(symbols).toContain(db.sequelize.Op.and)
+
+    expect(destroyCallArg.where[db.sequelize.Op.and]).toEqual(sequelize.where.mock.results.map(r => r.value))
+    expect(destroyCallArg.transaction).toBe(transaction)
   })
 
   test('calls db.payments.destroy with undefined transaction if not provided, usesContractNumber false', async () => {
     await removePayments(agreementNumber, frn, schemeId, false)
 
-    expect(db.payments.destroy).toHaveBeenCalledWith({
-      where: {
-        [db.sequelize.Op.and]: [
-          { 'data.agreementNumber': agreementNumber },
-          { 'data.frn': frn },
-          { 'data.schemeId': schemeId }
-        ]
-      },
-      transaction: undefined
-    })
+    const destroyCallArg = db.payments.destroy.mock.calls[0][0]
+    expect(destroyCallArg.transaction).toBeUndefined()
   })
 
   test('calls db.payments.destroy with undefined transaction if not provided, usesContractNumber true', async () => {
     await removePayments(agreementNumber, frn, schemeId, true)
 
-    expect(db.payments.destroy).toHaveBeenCalledWith({
-      where: {
-        [db.sequelize.Op.and]: [
-          { 'data.contractNumber': agreementNumber },
-          { 'data.frn': frn },
-          { 'data.schemeId': schemeId }
-        ]
-      },
-      transaction: undefined
-    })
+    const destroyCallArg = db.payments.destroy.mock.calls[0][0]
+    expect(destroyCallArg.transaction).toBeUndefined()
   })
 
   test('propagates errors from db.payments.destroy', async () => {
