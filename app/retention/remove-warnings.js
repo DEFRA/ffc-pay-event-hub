@@ -1,14 +1,14 @@
 const db = require('../data')
 
 const removeWarnings = async (agreementNumber, frn, schemeId, usesContractNumber, transaction) => {
-  const agreementField = usesContractNumber ? 'data.contractNumber' : 'data.agreementNumber'
+  const agreementKey = usesContractNumber ? 'contractNumber' : 'agreementNumber'
 
   await db.warnings.destroy({
     where: {
       [db.sequelize.Op.and]: [
-        { [agreementField]: agreementNumber },
-        { 'data.frn': frn },
-        { 'data.schemeId': schemeId }
+        db.sequelize.where(db.sequelize.json(`data.${agreementKey}`), agreementNumber),
+        db.sequelize.where(db.sequelize.json('data.frn'), frn),
+        db.sequelize.where(db.sequelize.json('data.schemeId'), schemeId)
       ]
     },
     transaction
