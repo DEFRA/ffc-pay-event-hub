@@ -1,6 +1,6 @@
 {
   "name": "ffc-pay-event-hub",
-  "version": "2.0.14",
+  "version": "2.0.15",
   "description": "Event hub",
   "homepage": "https://github.com/DEFRA/ffc-pay-event-hub",
   "main": "app/index.js",
@@ -26,7 +26,7 @@
     "@azure/identity": "4.4.1",
     "@azure/storage-blob": "12.31.0",
     "@hapi/hapi": "21.4.8",
-    "applicationinsights": "2.9.6",
+    "@azure/monitor-opentelemetry": "1.16.0",
     "ffc-database": "1.0.24",
     "ffc-messaging": "2.10.4",
     "hapi-pino": "13.0.0",
