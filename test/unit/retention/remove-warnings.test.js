@@ -47,9 +47,9 @@ describe('removeWarnings', () => {
     expect(destroyCallArg).toHaveProperty('where')
 
     const symbols = Object.getOwnPropertySymbols(destroyCallArg.where)
-    expect(symbols).toContain(db.sequelize.Op.and)
+    expect(symbols).toContain(db.Sequelize.Op.and)
 
-    expect(destroyCallArg.where[db.sequelize.Op.and]).toEqual(sequelize.where.mock.results.map(r => r.value))
+    expect(destroyCallArg.where[db.Sequelize.Op.and]).toEqual(sequelize.where.mock.results.map(r => r.value))
     expect(destroyCallArg.transaction).toBe(transaction)
   })
 
@@ -70,9 +70,9 @@ describe('removeWarnings', () => {
     expect(db.warnings.destroy).toHaveBeenCalledTimes(1)
 
     const symbols = Object.getOwnPropertySymbols(destroyCallArg.where)
-    expect(symbols).toContain(db.sequelize.Op.and)
+    expect(symbols).toContain(db.Sequelize.Op.and)
 
-    expect(destroyCallArg.where[db.sequelize.Op.and]).toEqual(sequelize.where.mock.results.map(r => r.value))
+    expect(destroyCallArg.where[db.Sequelize.Op.and]).toEqual(sequelize.where.mock.results.map(r => r.value))
     expect(destroyCallArg.transaction).toBe(transaction)
   })
 
