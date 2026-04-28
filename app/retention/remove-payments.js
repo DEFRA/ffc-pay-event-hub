@@ -7,8 +7,8 @@ const removePayments = async (agreementNumber, frn, schemeId, usesContractNumber
     where: {
       [db.Sequelize.Op.and]: [
         db.Sequelize.where(db.sequelize.json(`data.${agreementKey}`), agreementNumber),
-        db.Sequelize.where(db.sequelize.json('data.frn'), frn),
-        db.Sequelize.where(db.sequelize.json('data.schemeId'), schemeId)
+        db.Sequelize.where(db.Sequelize.literal('(data->>\'frn\')::int'), Number(frn)),
+        db.Sequelize.where(db.Sequelize.literal('(data->>\'schemeId\')::int'), Number(schemeId))
       ]
     },
     transaction
