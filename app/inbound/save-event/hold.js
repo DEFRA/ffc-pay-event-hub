@@ -1,5 +1,5 @@
 const db = require('../../data')
-const { v4: uuidv4 } = require('uuid')
+const { randomUUID } = require('node:crypto')
 const { FRN, SCHEME_ID } = require('../../constants/categories')
 const { createRow } = require('./create-row')
 const { getTimestamp } = require('./get-timestamp')
@@ -14,7 +14,7 @@ const saveHoldEvent = async (event) => {
   ]
 
   const records = rows.map((row) => ({
-    id: uuidv4(),
+    id: randomUUID(),
     partitionKey: row.partitionKey,
     rowKey: row.rowKey,
     timestamp,
