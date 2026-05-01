@@ -1,5 +1,5 @@
 const util = require('node:util')
-const { v4: uuidv4 } = require('uuid')
+const { randomUUID } = require('node:crypto')
 const { VALIDATION } = require('../constants/errors')
 const { processEvent } = require('../inbound')
 const { validateEvent } = require('./validate-event')
@@ -26,7 +26,7 @@ const processEventMessage = async (message, receiver) => {
       const alert = {
         type: alertTypes.EVENT_SAVE_ALERT,
         source: source.SOURCE,
-        id: message.id ?? uuidv4(),
+        id: message.id ?? randomUUID(),
         time: new Date().toISOString(),
         data: { ...event?.data }
       }

@@ -1,5 +1,5 @@
 const db = require('../../data')
-const { v4: uuidv4 } = require('uuid')
+const { randomUUID } = require('node:crypto')
 const {
   FRN,
   CORRELATION_ID,
@@ -45,7 +45,7 @@ const savePaymentEvent = async (event) => {
   }
 
   const records = rows.map((row) => ({
-    id: uuidv4(),
+    id: randomUUID(),
     partitionKey: row.partitionKey,
     rowKey: row.rowKey,
     timestamp,
