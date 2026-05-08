@@ -1,4 +1,3 @@
-const util = require('node:util')
 const { validateMessage } = require('./validate-message')
 
 const { messageConfig } = require('../config')
@@ -10,15 +9,11 @@ const { processDataExportRequest } = require('../data-requests')
 
 const processDataMessage = async (message, receiver) => {
   try {
-    console.log(
-      'Data request received:',
-      util.inspect(message.body, false, null, true)
-    )
-
-    validateMessage(message)
-
     const { body, messageId } = message
     const { category, value } = body
+    console.log(`Data request received: category:${category}, value:${value}, messageId:${messageId}`)
+
+    validateMessage(message)
 
     const blobUri = await processDataExportRequest(category, value)
 
