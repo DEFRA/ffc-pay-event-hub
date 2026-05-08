@@ -27,7 +27,7 @@
     "@azure/identity": "4.13.1",
     "@azure/storage-blob": "12.31.0",
     "@hapi/hapi": "21.4.8",
-    "applicationinsights": "2.9.6",
+    "@azure/monitor-opentelemetry": "1.16.0",
     "ffc-database": "1.0.25",
     "ffc-messaging": "2.10.6",
     "hapi-pino": "13.0.0",
