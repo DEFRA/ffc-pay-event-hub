@@ -1,9 +1,9 @@
-const { v4: uuidv4 } = require('uuid')
+const { randomUUID } = require('node:crypto')
 const { BATCH } = require('../../../../app/constants/categories')
 
-jest.mock('uuid')
+jest.mock('node:crypto', () => ({ randomUUID: jest.fn() }))
 const mockUuid = 'test-uuid-1234'
-uuidv4.mockReturnValue(mockUuid)
+randomUUID.mockReturnValue(mockUuid)
 
 jest.mock('../../../../app/data')
 const db = require('../../../../app/data')
@@ -34,7 +34,7 @@ describe('save batch event', () => {
 
   test('generates a UUID for the batch record', async () => {
     await saveBatchEvent(event)
-    expect(uuidv4).toHaveBeenCalledTimes(1)
+    expect(randomUUID).toHaveBeenCalledTimes(1)
   })
 
   test('creates one batch record', async () => {

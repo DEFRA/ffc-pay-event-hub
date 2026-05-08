@@ -1,5 +1,5 @@
 const db = require('../../data')
-const { v4: uuidv4 } = require('uuid')
+const { randomUUID } = require('node:crypto')
 const { WARNING } = require('../../constants/categories')
 const { createRow } = require('./create-row')
 const { getWarningType } = require('./get-warning-type')
@@ -11,7 +11,7 @@ const saveWarningEvent = async (event) => {
   const row = createRow(getWarningType(event.type), event.id, WARNING, event)
 
   const record = {
-    id: uuidv4(),
+    id: randomUUID(),
     partitionKey: row.partitionKey,
     rowKey: row.rowKey,
     timestamp,

@@ -2,9 +2,12 @@ const accountingValueSchemes = require('../../constants/accounting-value-schemes
 const schemeNames = require('../../constants/scheme-names')
 
 const showNonAccountingValue = (value) => {
+  if (typeof value !== 'string') {
+    return value
+  }
   const cleaned = value.replaceAll(/[£,]/g, '')
   const amount = Number.parseFloat(cleaned)
-  const flipped = -amount
+  const flipped = amount === 0 ? amount : -amount
   return `£${flipped.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 

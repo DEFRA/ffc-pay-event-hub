@@ -1,4 +1,4 @@
-const { v4: uuidv4 } = require('uuid')
+const { randomUUID } = require('node:crypto')
 const {
   FRN,
   CORRELATION_ID,
@@ -6,10 +6,10 @@ const {
   BATCH
 } = require('../../../../app/constants/categories')
 
-jest.mock('uuid')
+jest.mock('node:crypto', () => ({ randomUUID: jest.fn() }))
 const mockUuids = ['uuid-1', 'uuid-2', 'uuid-3', 'uuid-4']
 let uuidCallCount = 0
-uuidv4.mockImplementation(() => {
+randomUUID.mockImplementation(() => {
   const uuid = mockUuids[uuidCallCount]
   uuidCallCount++
   return uuid
@@ -159,7 +159,7 @@ describe('save payment event', () => {
       }
     }
     await savePaymentEvent(eventWithBatch)
-    expect(uuidv4).toHaveBeenCalledTimes(4)
+    expect(randomUUID).toHaveBeenCalledTimes(4)
   })
 
   test('calls bulkCreate once', async () => {
