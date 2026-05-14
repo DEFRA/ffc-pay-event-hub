@@ -1,10 +1,10 @@
-const { v4: uuidv4 } = require('uuid')
+const { randomUUID } = require('node:crypto')
 const { FRN, SCHEME_ID } = require('../../../../app/constants/categories')
 
-jest.mock('uuid')
+jest.mock('node:crypto', () => ({ randomUUID: jest.fn() }))
 const mockUuids = ['uuid-1', 'uuid-2', 'uuid-3']
 let uuidCallCount = 0
-uuidv4.mockImplementation(() => {
+randomUUID.mockImplementation(() => {
   const uuid = mockUuids[uuidCallCount]
   uuidCallCount++
   return uuid
@@ -90,7 +90,7 @@ describe('save hold event', () => {
 
   test('generates UUID for each record', async () => {
     await saveHoldEvent(event)
-    expect(uuidv4).toHaveBeenCalledTimes(3)
+    expect(randomUUID).toHaveBeenCalledTimes(3)
   })
 
   test('calls bulkCreate once', async () => {

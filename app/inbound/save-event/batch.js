@@ -1,5 +1,5 @@
 const db = require('../../data')
-const { v4: uuidv4 } = require('uuid')
+const { randomUUID } = require('node:crypto')
 const { BATCH } = require('../../constants/categories')
 const { getTimestamp } = require('./get-timestamp')
 
@@ -7,7 +7,7 @@ const saveBatchEvent = async (event) => {
   const timestamp = getTimestamp(event.time)
 
   const batchRecord = {
-    id: uuidv4(),
+    id: randomUUID(),
     partitionKey: event.data.filename,
     timestamp,
     rowKey: timestamp.toString(),
