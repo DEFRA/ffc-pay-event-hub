@@ -13,7 +13,8 @@ const definePaymentBatchEvents = (sequelize, DataTypes) => {
       agreementNumber: DataTypes.STRING,
       paymentRequestNumber: DataTypes.INTEGER,
       originalValue: DataTypes.NUMERIC,
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
+      providesAccountingValues: DataTypes.BOOLEAN
     },
     {
       tableName: 'payment_batch_events',
