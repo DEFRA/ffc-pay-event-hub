@@ -20,19 +20,32 @@ describe('messaging', () => {
     jest.clearAllMocks()
   })
 
-  test('creates receiver for events topic', async () => {
+  test('creates receiver for events and data topics', async () => {
     await messageService.start()
-    expect(MockReceiver).toHaveBeenCalledWith(config.eventsSubscription, expect.anything())
-    expect(MockReceiver).toHaveBeenCalledWith(config.dataSubscription, expect.anything())
+    expect(MockReceiver).toHaveBeenCalledWith(config.eventsSubscription, expect.any(Function))
+    expect(MockReceiver).toHaveBeenCalledWith(config.dataSubscription, expect.any(Function))
   })
 
-  test('subscribes to topic', async () => {
+  test('creates receiver for retention topic', async () => {
     await messageService.start()
-    expect(mockSubscribe).toHaveBeenCalledTimes(2)
+    expect(MockReceiver).toHaveBeenCalledWith(config.retentionSubscription, expect.any(Function))
   })
 
-  test('closes connection when stopped', async () => {
+  test('subscribes to all topics', async () => {
+    await messageService.start()
+    expect(mockSubscribe).toHaveBeenCalledTimes(3)
+  })
+
+  test('closes connections for all receivers when stopped', async () => {
+    await messageService.start()
     await messageService.stop()
-    expect(mockCloseConnection).toHaveBeenCalledTimes(2)
+    expect(mockCloseConnection).toHaveBeenCalledTimes(3)
+  })
+
+  test('logs readiness message after starting', async () => {
+    const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => { })
+    await messageService.start()
+    expect(consoleInfoSpy).toHaveBeenCalledWith('Ready to receive messages')
+    consoleInfoSpy.mockRestore()
   })
 })
