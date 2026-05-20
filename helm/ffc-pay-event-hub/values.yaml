@@ -33,6 +33,8 @@ container:
   messageQueueHost: namespace.servicebus.windows.net
   eventsTopicAddress: ffc-pay-events
   eventsSubscriptionAddress: ffc-pay-event-hub
+  retentionTopicAddress: fcp-pds-data-retention
+  retentionSubscriptionAddress: ffc-pay-event-hub
   maxConcurrentCalls: 10
   alertTopicAddress: ffc-pay-alert
   dataTopicAddress: ffc-pay-data-request

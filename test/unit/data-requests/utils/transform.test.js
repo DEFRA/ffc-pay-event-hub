@@ -5,7 +5,6 @@ const {
 const eventDetails = require('../../../../app/constants/event-details')
 const schemeNames = require('../../../../app/constants/scheme-names')
 const { convertToString } = require('../../../../app/currency')
-const { FPTT, SFI } = require('../../../../app/constants/schemes')
 
 jest.mock('../../../../app/currency', () => ({
   convertToString: jest.fn((value) => `£${value}`)
@@ -73,9 +72,8 @@ describe('transform utilities', () => {
       })
     })
 
-    test('negates originalValue when schemeId is in accountingValueSchemes', () => {
-      const schemeId = FPTT
-      const row = { schemeId, originalValue: -200 }
+    test('negates originalValue when providesAccountingValues is true', () => {
+      const row = { originalValue: -200, providesAccountingValues: true }
       const target = {}
 
       mapCommonFields(row, target)
@@ -84,9 +82,8 @@ describe('transform utilities', () => {
       expect(convertToString).toHaveBeenCalledWith(200)
     })
 
-    test('does not negate originalValue when schemeId is not in accountingValueSchemes', () => {
-      const schemeId = SFI
-      const row = { schemeId, originalValue: 150 }
+    test('does not negate originalValue when providesAccountingValues is false', () => {
+      const row = { originalValue: 150, providesAccountingValues: false }
       const target = {}
 
       mapCommonFields(row, target)
