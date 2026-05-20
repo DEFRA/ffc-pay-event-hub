@@ -46,12 +46,12 @@
     "neostandard": "0.12.2",
     "nodemon": "3.0.1"
   },
-  "overrides": {
-    "protobufjs": "8.0.2"
-  },
   "nodemonConfig": {
     "ignore": [
       "**/test-output/**"
     ]
+  },
+  "overrides": {
+    "protobufjs": "8.2.0"
   }
 }
