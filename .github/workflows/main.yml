@@ -1,7 +1,13 @@
 name: Version Bump
 
 on:
-  workflow_call:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 jobs:
   version-bump:
@@ -40,21 +46,29 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Prefer the latest GitHub release; fall back to the latest git tag
           LATEST_TAG=$(gh release view --json tagName -q .tagName 2>/dev/null || echo "")
           if [ -z "$LATEST_TAG" ]; then
             LATEST_TAG=$(git tag --sort=-version:refname | head -1)
           fi
+
+          # If nothing exists yet, treat baseline as 0.0.0
           LATEST_VERSION="${LATEST_TAG#v}"
           LATEST_VERSION="${LATEST_VERSION:-0.0.0}"
+
           CURRENT_VERSION=$(node -p "require('./package.json').version")
+
           echo "Latest released version : $LATEST_VERSION"
           echo "Current package.json version: $CURRENT_VERSION"
+
+          # Only bump if the current version is not already strictly ahead
           NEEDS_BUMP=$(node -e "
             const [cm, cn, cp] = '$CURRENT_VERSION'.split('.').map(Number);
             const [lm, ln, lp] = '$LATEST_VERSION'.split('.').map(Number);
             const ahead = cm > lm || (cm === lm && cn > ln) || (cm === lm && cn === ln && cp > lp);
             console.log(ahead ? 'false' : 'true');
           ")
+
           echo "needs_bump=$NEEDS_BUMP" >> $GITHUB_OUTPUT
 
       - name: Bump patch version
