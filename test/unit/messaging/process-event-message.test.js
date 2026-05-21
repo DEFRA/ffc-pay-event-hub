@@ -9,7 +9,7 @@ const { validateEvent: mockValidateEvent } = require('../../../app/messaging/val
 const { sendAlert } = require('../../../app/messaging/send-alert')
 jest.mock('../../../app/messaging/send-alert')
 
-const message = require('../../mocks/events/event')
+const message = { body: require('../../mocks/events/event') }
 const { processEventMessage } = require('../../../app/messaging/process-event-message')
 
 const receiver = {

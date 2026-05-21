@@ -1,4 +1,3 @@
-const util = require('node:util')
 const { randomUUID } = require('node:crypto')
 const { VALIDATION } = require('../constants/errors')
 const { processEvent } = require('../inbound')
@@ -13,7 +12,7 @@ const oneHourInSeconds = 3600000
 const processEventMessage = async (message, receiver) => {
   const event = message.body
   try {
-    console.log('Event received:', util.inspect(event, false, null, true))
+    console.log(`Event received: ${event.id}, type: ${event.type}, source: ${event.source}`)
     validateEvent(event)
     await processEvent(event)
     await receiver.completeMessage(message)
