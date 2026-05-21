@@ -1,4 +1,4 @@
-const util = require('util')
+const util = require('node:util')
 const { validateMessage } = require('./validate-message')
 const { messageConfig } = require('../config')
 
