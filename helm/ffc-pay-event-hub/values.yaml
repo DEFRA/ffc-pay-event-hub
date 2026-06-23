@@ -43,6 +43,7 @@ container:
   azureStorageConnectionString: dummy
   azureStorageUseConnectionString: false
   azureStorageAccountName: ffcpay
+  azureLogLevel: error
 
 postgresService:
   postgresDb: ffc_pay_event_hub
