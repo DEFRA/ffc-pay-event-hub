@@ -1,17 +1,42 @@
 const db = require('../data')
 
-const removePaymentBatchEvents = async (agreementNumber, frn, schemeId, usesContractNumber, transaction) => {
-  const where = {
-    agreementNumber,
-    frn,
-    schemeId
-  }
+const removePaymentBatchEvents = async (
+  agreementNumber,
+  frn,
+  schemeId,
+  usesContractNumber,
+  batches,
+  agreementNumbers,
+  transaction
+) => {
   if (usesContractNumber) {
-    delete where.agreementNumber
-    where.contractNumber = agreementNumber
+    if (!batches.length || !agreementNumbers.length) {
+      return
+    }
+
+    await db.paymentBatchEvents.destroy({
+      where: {
+        batchName: {
+          [db.Sequelize.Op.in]: batches
+        },
+        agreementNumber: {
+          [db.Sequelize.Op.in]: agreementNumbers
+        },
+        frn,
+        schemeId
+      },
+      transaction
+    })
+
+    return
   }
+
   await db.paymentBatchEvents.destroy({
-    where,
+    where: {
+      agreementNumber,
+      frn,
+      schemeId
+    },
     transaction
   })
 }

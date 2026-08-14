@@ -4,6 +4,11 @@ const { removePaymentFRNEvents } = require('../../../app/retention/remove-paymen
 jest.mock('../../../app/data', () => ({
   paymentFrnEvents: {
     destroy: jest.fn()
+  },
+  Sequelize: {
+    Op: {
+      in: Symbol('in')
+    }
   }
 }))
 
@@ -13,52 +18,141 @@ describe('removePaymentFRNEvents', () => {
   const schemeId = 10
   const transaction = { id: 'transaction-object' }
 
+  const correlationIds = ['corr-1', 'corr-2']
+  const agreementNumbers = ['AGR123', 'AGR456']
+
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  test('calls db.paymentFrnEvents.destroy with agreementNumber in where when usesContractNumber is false or omitted', async () => {
-    await removePaymentFRNEvents(agreementNumber, frn, schemeId, false, transaction)
+  test('calls db.paymentFrnEvents.destroy with agreementNumber when usesContractNumber is false', async () => {
+    await removePaymentFRNEvents(
+      agreementNumber,
+      frn,
+      schemeId,
+      false,
+      correlationIds,
+      agreementNumbers,
+      transaction
+    )
 
     expect(db.paymentFrnEvents.destroy).toHaveBeenCalledTimes(1)
     expect(db.paymentFrnEvents.destroy).toHaveBeenCalledWith({
-      where: { agreementNumber, frn, schemeId },
+      where: {
+        agreementNumber,
+        frn,
+        schemeId
+      },
       transaction
     })
   })
 
-  test('calls db.paymentFrnEvents.destroy with contractNumber in where when usesContractNumber is true', async () => {
-    await removePaymentFRNEvents(agreementNumber, frn, schemeId, true, transaction)
+  test('calls db.paymentFrnEvents.destroy using correlationIds and agreementNumbers when usesContractNumber is true', async () => {
+    await removePaymentFRNEvents(
+      agreementNumber,
+      frn,
+      schemeId,
+      true,
+      correlationIds,
+      agreementNumbers,
+      transaction
+    )
 
     expect(db.paymentFrnEvents.destroy).toHaveBeenCalledTimes(1)
     expect(db.paymentFrnEvents.destroy).toHaveBeenCalledWith({
-      where: { contractNumber: agreementNumber, frn, schemeId },
+      where: {
+        correlationId: {
+          [db.Sequelize.Op.in]: correlationIds
+        },
+        agreementNumber: {
+          [db.Sequelize.Op.in]: agreementNumbers
+        },
+        frn,
+        schemeId
+      },
       transaction
     })
   })
 
-  test('calls db.paymentFrnEvents.destroy with undefined transaction if not provided, usesContractNumber false', async () => {
-    await removePaymentFRNEvents(agreementNumber, frn, schemeId, false)
+  test('calls destroy with undefined transaction when not provided and usesContractNumber is false', async () => {
+    await removePaymentFRNEvents(
+      agreementNumber,
+      frn,
+      schemeId,
+      false,
+      correlationIds,
+      agreementNumbers
+    )
 
     expect(db.paymentFrnEvents.destroy).toHaveBeenCalledWith({
-      where: { agreementNumber, frn, schemeId },
+      where: {
+        agreementNumber,
+        frn,
+        schemeId
+      },
       transaction: undefined
     })
   })
 
-  test('calls db.paymentFrnEvents.destroy with undefined transaction if not provided, usesContractNumber true', async () => {
-    await removePaymentFRNEvents(agreementNumber, frn, schemeId, true)
+  test('calls destroy with undefined transaction when not provided and usesContractNumber is true', async () => {
+    await removePaymentFRNEvents(
+      agreementNumber,
+      frn,
+      schemeId,
+      true,
+      correlationIds,
+      agreementNumbers
+    )
 
     expect(db.paymentFrnEvents.destroy).toHaveBeenCalledWith({
-      where: { contractNumber: agreementNumber, frn, schemeId },
+      where: {
+        correlationId: {
+          [db.Sequelize.Op.in]: correlationIds
+        },
+        agreementNumber: {
+          [db.Sequelize.Op.in]: agreementNumbers
+        },
+        frn,
+        schemeId
+      },
       transaction: undefined
     })
   })
+
+  test.each([
+    ['empty correlationIds', [], agreementNumbers],
+    ['empty agreementNumbers', correlationIds, []]
+  ])(
+    'returns without destroying when usesContractNumber is true and %s supplied',
+    async (_, testCorrelationIds, testAgreementNumbers) => {
+      await removePaymentFRNEvents(
+        agreementNumber,
+        frn,
+        schemeId,
+        true,
+        testCorrelationIds,
+        testAgreementNumbers,
+        transaction
+      )
+
+      expect(db.paymentFrnEvents.destroy).not.toHaveBeenCalled()
+    }
+  )
 
   test('propagates errors from db.paymentFrnEvents.destroy', async () => {
     const error = new Error('DB failure')
     db.paymentFrnEvents.destroy.mockRejectedValue(error)
 
-    await expect(removePaymentFRNEvents(agreementNumber, frn, schemeId, false, transaction)).rejects.toThrow('DB failure')
+    await expect(
+      removePaymentFRNEvents(
+        agreementNumber,
+        frn,
+        schemeId,
+        false,
+        correlationIds,
+        agreementNumbers,
+        transaction
+      )
+    ).rejects.toThrow('DB failure')
   })
 })
