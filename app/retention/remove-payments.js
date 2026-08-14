@@ -1,15 +1,7 @@
 const db = require('../data')
 
-const removePayments = async (
-  agreementNumber,
-  frn,
-  schemeId,
-  usesContractNumber,
-  transaction
-) => {
-  const agreementKey = usesContractNumber
-    ? 'contractNumber'
-    : 'agreementNumber'
+const removePayments = async (agreementNumber, frn, schemeId, usesContractNumber, transaction) => {
+  const agreementKey = usesContractNumber ? 'contractNumber' : 'agreementNumber'
 
   const where = {
     [db.Sequelize.Op.and]: [
@@ -36,14 +28,8 @@ const removePayments = async (
     const paymentsToDelete = await db.payments.findAll({
       attributes: [
         [db.Sequelize.literal("data->>'batch'"), 'batch'],
-        [
-          db.Sequelize.literal("data->>'agreementNumber'"),
-          'agreementNumber'
-        ],
-        [
-          db.Sequelize.literal("data->>'correlationId'"),
-          'correlationId'
-        ]
+        [db.Sequelize.literal("data->>'agreementNumber'"), 'agreementNumber'],
+        [db.Sequelize.literal("data->>'correlationId'"), 'correlationId']
       ],
       where,
       raw: true,
