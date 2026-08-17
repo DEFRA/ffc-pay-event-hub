@@ -1,6 +1,6 @@
 {
   "name": "ffc-pay-event-hub",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "description": "Event hub",
   "homepage": "https://github.com/DEFRA/ffc-pay-event-hub",
   "main": "app/index.js",
@@ -48,8 +48,6 @@
     "nodemon": "3.1.14"
   },
   "overrides": {
-    "@opentelemetry/propagator-jaeger": "2.9.0",
-    "brace-expansion": "5.0.8",
     "uuid": "11.1.1"
   },
   "nodemonConfig": {
