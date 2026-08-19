@@ -1,22 +1,15 @@
-const db = require('../../../app/data')
-const { removePayments } = require('../../../app/retention/remove-payments')
-const { MANUAL } = require('../../../app/constants/schemes')
-
 jest.mock('../../../app/data', () => {
   const sequelizeWhereMock = jest.fn()
-  const sequelizeJsonMock = jest.fn((path) => path)
-  const sequelizeLiteralMock = jest.fn((sql) => ({ _sql: sql }))
+  const sequelizeJsonMock = jest.fn(path => path)
+  const sequelizeLiteralMock = jest.fn(sql => ({ _sql: sql }))
 
   return {
     payments: {
+      findAll: jest.fn(),
       destroy: jest.fn()
     },
     sequelize: {
-      Op: {
-        and: Symbol('and')
-      },
-      json: sequelizeJsonMock,
-      literal: sequelizeLiteralMock
+      json: sequelizeJsonMock
     },
     Sequelize: {
       Op: {
@@ -28,6 +21,10 @@ jest.mock('../../../app/data', () => {
   }
 })
 
+const db = require('../../../app/data')
+const { removePayments } = require('../../../app/retention/remove-payments')
+const { MANUAL } = require('../../../app/constants/schemes')
+
 describe('removePayments', () => {
   const agreementNumber = 'AGR123'
   const frn = 456789
@@ -36,87 +33,175 @@ describe('removePayments', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+
+    db.payments.findAll.mockResolvedValue([])
+    db.payments.destroy.mockResolvedValue()
   })
 
-  test('calls db.payments.destroy with agreementNumber in where when usesContractNumber is false or omitted', async () => {
-    await removePayments(agreementNumber, frn, schemeId, false, undefined, transaction)
+  test('calls db.payments.destroy with agreementNumber in where when usesContractNumber is false', async () => {
+    const result = await removePayments(
+      agreementNumber,
+      frn,
+      schemeId,
+      false,
+      undefined,
+      transaction
+    )
 
     const { sequelize, Sequelize } = db
     const destroyCallArg = db.payments.destroy.mock.calls[0][0]
 
     expect(sequelize.json).toHaveBeenCalledWith('data.agreementNumber')
-    expect(Sequelize.where).toHaveBeenCalledWith('data.agreementNumber', agreementNumber)
-
-    expect(sequelize.json).not.toHaveBeenCalledWith('data.frn')
-    expect(sequelize.json).not.toHaveBeenCalledWith('data.schemeId')
-
-    expect(sequelize.literal).toHaveBeenCalledWith("(data->>'frn')::int")
-    expect(sequelize.literal).toHaveBeenCalledWith("(data->>'schemeId')::int")
-
     expect(Sequelize.where).toHaveBeenCalledWith(
-      expect.objectContaining({ _sql: "(data->>'frn')::int" }),
-      frn
+      'data.agreementNumber',
+      agreementNumber
     )
-    expect(Sequelize.where).toHaveBeenCalledWith(
-      expect.objectContaining({ _sql: "(data->>'schemeId')::int" }),
-      schemeId
-    )
+
+    expect(db.payments.findAll).not.toHaveBeenCalled()
 
     expect(db.payments.destroy).toHaveBeenCalledTimes(1)
-    expect(destroyCallArg).toHaveProperty('where')
 
     const symbols = Object.getOwnPropertySymbols(destroyCallArg.where)
-    expect(symbols).toContain(db.Sequelize.Op.and)
 
-    expect(destroyCallArg.where[db.Sequelize.Op.and]).toEqual(Sequelize.where.mock.results.map(r => r.value))
+    expect(symbols).toContain(db.Sequelize.Op.and)
+    expect(
+      destroyCallArg.where[db.Sequelize.Op.and]
+    ).toEqual(Sequelize.where.mock.results.map(r => r.value))
+
     expect(destroyCallArg.transaction).toBe(transaction)
+
+    expect(result).toEqual({
+      batches: [],
+      agreementNumbers: [],
+      correlationIds: []
+    })
   })
 
-  test('calls db.payments.destroy with contractNumber in where when usesContractNumber is true', async () => {
-    await removePayments(agreementNumber, frn, schemeId, true, undefined, transaction)
+  test('finds related payment data, removes payments and returns unique values when usesContractNumber is true', async () => {
+    db.payments.findAll.mockResolvedValue([
+      {
+        batch: 'batch-1',
+        agreementNumber: 'AGR001',
+        correlationId: 'corr-1'
+      },
+      {
+        batch: 'batch-1',
+        agreementNumber: 'AGR001',
+        correlationId: 'corr-1'
+      },
+      {
+        batch: 'batch-2',
+        agreementNumber: 'AGR002',
+        correlationId: 'corr-2'
+      }
+    ])
+
+    const result = await removePayments(
+      agreementNumber,
+      frn,
+      schemeId,
+      true,
+      undefined,
+      transaction
+    )
 
     const { sequelize, Sequelize } = db
     const destroyCallArg = db.payments.destroy.mock.calls[0][0]
 
     expect(sequelize.json).toHaveBeenCalledWith('data.contractNumber')
-    expect(Sequelize.where).toHaveBeenCalledWith('data.contractNumber', agreementNumber)
-
-    expect(sequelize.json).not.toHaveBeenCalledWith('data.frn')
-    expect(sequelize.json).not.toHaveBeenCalledWith('data.schemeId')
-
-    expect(sequelize.literal).toHaveBeenCalledWith("(data->>'frn')::int")
-    expect(sequelize.literal).toHaveBeenCalledWith("(data->>'schemeId')::int")
-
     expect(Sequelize.where).toHaveBeenCalledWith(
-      expect.objectContaining({ _sql: "(data->>'frn')::int" }),
-      frn
+      'data.contractNumber',
+      agreementNumber
     )
-    expect(Sequelize.where).toHaveBeenCalledWith(
-      expect.objectContaining({ _sql: "(data->>'schemeId')::int" }),
-      schemeId
-    )
+
+    expect(db.payments.findAll).toHaveBeenCalledTimes(1)
+    expect(db.payments.findAll).toHaveBeenCalledWith({
+      attributes: [
+        [
+          expect.objectContaining({ _sql: "data->>'batch'" }),
+          'batch'
+        ],
+        [
+          expect.objectContaining({ _sql: "data->>'agreementNumber'" }),
+          'agreementNumber'
+        ],
+        [
+          expect.objectContaining({ _sql: "data->>'correlationId'" }),
+          'correlationId'
+        ]
+      ],
+      where: destroyCallArg.where,
+      raw: true,
+      transaction
+    })
 
     expect(db.payments.destroy).toHaveBeenCalledTimes(1)
 
-    const symbols = Object.getOwnPropertySymbols(destroyCallArg.where)
-    expect(symbols).toContain(db.Sequelize.Op.and)
-
-    expect(destroyCallArg.where[db.Sequelize.Op.and]).toEqual(Sequelize.where.mock.results.map(r => r.value))
-    expect(destroyCallArg.transaction).toBe(transaction)
+    expect(result).toEqual({
+      batches: ['batch-1', 'batch-2'],
+      agreementNumbers: ['AGR001', 'AGR002'],
+      correlationIds: ['corr-1', 'corr-2']
+    })
   })
 
-  test('calls db.payments.destroy with undefined transaction if not provided, usesContractNumber false', async () => {
-    await removePayments(agreementNumber, frn, schemeId, false)
+  test('filters null and undefined values from returned arrays', async () => {
+    db.payments.findAll.mockResolvedValue([
+      {
+        batch: 'batch-1',
+        agreementNumber: 'AGR001',
+        correlationId: 'corr-1'
+      },
+      {
+        batch: null,
+        agreementNumber: undefined,
+        correlationId: ''
+      }
+    ])
+
+    const result = await removePayments(
+      agreementNumber,
+      frn,
+      schemeId,
+      true,
+      undefined,
+      transaction
+    )
+
+    expect(result).toEqual({
+      batches: ['batch-1'],
+      agreementNumbers: ['AGR001'],
+      correlationIds: ['corr-1']
+    })
+  })
+
+  test('calls db.payments.destroy with undefined transaction if not provided', async () => {
+    await removePayments(
+      agreementNumber,
+      frn,
+      schemeId,
+      false
+    )
 
     const destroyCallArg = db.payments.destroy.mock.calls[0][0]
+
     expect(destroyCallArg.transaction).toBeUndefined()
   })
 
-  test('calls db.payments.destroy with undefined transaction if not provided, usesContractNumber true', async () => {
-    await removePayments(agreementNumber, frn, schemeId, true)
+  test('propagates errors from db.payments.findAll', async () => {
+    const error = new Error('findAll failure')
 
-    const destroyCallArg = db.payments.destroy.mock.calls[0][0]
-    expect(destroyCallArg.transaction).toBeUndefined()
+    db.payments.findAll.mockRejectedValue(error)
+
+    await expect(
+      removePayments(
+        agreementNumber,
+        frn,
+        schemeId,
+        true,
+        undefined,
+        transaction
+      )
+    ).rejects.toThrow('findAll failure')
   })
 
   test('adds a pillar condition when scheme is manual', async () => {
@@ -152,8 +237,37 @@ describe('removePayments', () => {
 
   test('propagates errors from db.payments.destroy', async () => {
     const error = new Error('DB failure')
+
     db.payments.destroy.mockRejectedValue(error)
 
-    await expect(removePayments(agreementNumber, frn, schemeId, false, undefined, transaction)).rejects.toThrow('DB failure')
+    await expect(
+      removePayments(
+        agreementNumber,
+        frn,
+        schemeId,
+        false,
+        undefined,
+        transaction
+      )
+    ).rejects.toThrow('DB failure')
+  })
+
+  test('returns empty arrays when no matching payments are found', async () => {
+    db.payments.findAll.mockResolvedValue([])
+
+    const result = await removePayments(
+      agreementNumber,
+      frn,
+      schemeId,
+      true,
+      undefined,
+      transaction
+    )
+
+    expect(result).toEqual({
+      batches: [],
+      agreementNumbers: [],
+      correlationIds: []
+    })
   })
 })

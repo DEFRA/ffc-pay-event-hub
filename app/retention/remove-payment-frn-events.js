@@ -1,17 +1,41 @@
 const db = require('../data')
 
-const removePaymentFRNEvents = async (agreementNumber, frn, schemeId, usesContractNumber, transaction) => {
-  const where = {
-    agreementNumber,
-    frn,
-    schemeId
-  }
+const removePaymentFRNEvents = async (
+  agreementNumber,
+  frn,
+  schemeId,
+  usesContractNumber,
+  correlationIds,
+  agreementNumbers,
+  transaction
+) => {
   if (usesContractNumber) {
-    delete where.agreementNumber
-    where.contractNumber = agreementNumber
+    if (!correlationIds.length || !agreementNumbers.length) {
+      return
+    }
+    await db.paymentFrnEvents.destroy({
+      where: {
+        correlationId: {
+          [db.Sequelize.Op.in]: correlationIds
+        },
+        agreementNumber: {
+          [db.Sequelize.Op.in]: agreementNumbers
+        },
+        frn,
+        schemeId
+      },
+      transaction
+    })
+
+    return
   }
+
   await db.paymentFrnEvents.destroy({
-    where,
+    where: {
+      agreementNumber,
+      frn,
+      schemeId
+    },
     transaction
   })
 }

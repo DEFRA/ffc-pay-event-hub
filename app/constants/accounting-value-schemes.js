@@ -1,5 +1,6 @@
-const { FPTT } = require('./schemes')
+const { FPTT, WMP } = require('./schemes')
 
 module.exports = [
-  FPTT
+  FPTT,
+  WMP
 ]

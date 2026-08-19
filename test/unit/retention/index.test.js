@@ -33,12 +33,18 @@ describe('removeAgreementData', () => {
   const frn = 456789
   const schemeId = 10
   const usesContractNumber = false
+
   const retentionData = {
     agreementNumber,
     frn,
     schemeId,
     usesContractNumber
   }
+
+  const batches = ['batch-1', 'batch-2']
+  const agreementNumbers = ['AGR123', 'AGR456']
+  const correlationIds = ['corr-1', 'corr-2']
+
   let transaction
 
   beforeEach(() => {
@@ -48,22 +54,62 @@ describe('removeAgreementData', () => {
       commit: jest.fn().mockResolvedValue(),
       rollback: jest.fn().mockResolvedValue()
     }
+
     db.sequelize.transaction.mockResolvedValue(transaction)
+
+    removePayments.mockResolvedValue({
+      batches,
+      agreementNumbers,
+      correlationIds
+    })
   })
 
   test('removes data from all tables', async () => {
+    removeWarnings.mockResolvedValue()
     removePaymentBatchEvents.mockResolvedValue()
     removePaymentFRNEvents.mockResolvedValue()
-    removePayments.mockResolvedValue()
-    removeWarnings.mockResolvedValue()
 
     await removeAgreementData(retentionData)
 
     expect(db.sequelize.transaction).toHaveBeenCalledTimes(1)
-    expect(removeWarnings).toHaveBeenCalledWith(agreementNumber, frn, schemeId, usesContractNumber, undefined, transaction)
-    expect(removePaymentBatchEvents).toHaveBeenCalledWith(agreementNumber, frn, schemeId, usesContractNumber, transaction)
-    expect(removePaymentFRNEvents).toHaveBeenCalledWith(agreementNumber, frn, schemeId, usesContractNumber, transaction)
-    expect(removePayments).toHaveBeenCalledWith(agreementNumber, frn, schemeId, usesContractNumber, undefined, transaction)
+    expect(removeWarnings).toHaveBeenCalledWith(
+      agreementNumber,
+      frn,
+      schemeId,
+      usesContractNumber,
+      undefined,
+      transaction
+    )
+
+    expect(removePayments).toHaveBeenCalledWith(
+      agreementNumber,
+      frn,
+      schemeId,
+      usesContractNumber,
+      undefined,
+      transaction
+    )
+
+    expect(removePaymentBatchEvents).toHaveBeenCalledWith(
+      agreementNumber,
+      frn,
+      schemeId,
+      usesContractNumber,
+      batches,
+      agreementNumbers,
+      transaction
+    )
+
+    expect(removePaymentFRNEvents).toHaveBeenCalledWith(
+      agreementNumber,
+      frn,
+      schemeId,
+      usesContractNumber,
+      correlationIds,
+      agreementNumbers,
+      transaction
+    )
+
     expect(transaction.commit).toHaveBeenCalledTimes(1)
     expect(transaction.rollback).not.toHaveBeenCalled()
   })
@@ -71,22 +117,35 @@ describe('removeAgreementData', () => {
   test('passes pillar through to the json based removals for manual scheme retention data', async () => {
     removePaymentBatchEvents.mockResolvedValue()
     removePaymentFRNEvents.mockResolvedValue()
-    removePayments.mockResolvedValue()
     removeWarnings.mockResolvedValue()
 
     await removeAgreementData({ ...retentionData, schemeId: 8, pillar: 'SFI23' })
 
     expect(removeWarnings).toHaveBeenCalledWith(agreementNumber, frn, 8, usesContractNumber, 'SFI23', transaction)
     expect(removePayments).toHaveBeenCalledWith(agreementNumber, frn, 8, usesContractNumber, 'SFI23', transaction)
-    expect(removePaymentBatchEvents).toHaveBeenCalledWith(agreementNumber, frn, 8, usesContractNumber, transaction)
-    expect(removePaymentFRNEvents).toHaveBeenCalledWith(agreementNumber, frn, 8, usesContractNumber, transaction)
+    expect(removePaymentBatchEvents).toHaveBeenCalledWith(agreementNumber, frn, 8, usesContractNumber, batches, agreementNumbers, transaction)
+    expect(removePaymentFRNEvents).toHaveBeenCalledWith(agreementNumber, frn, 8, usesContractNumber, correlationIds, agreementNumbers, transaction)
   })
 
   test('rolls back transaction and throws error if removeWarnings throws', async () => {
     const error = new Error('removeWarnings failure')
     removeWarnings.mockRejectedValue(error)
 
-    await expect(removeAgreementData(retentionData)).rejects.toThrow('removeWarnings failure')
+    await expect(removeAgreementData(retentionData))
+      .rejects
+      .toThrow('removeWarnings failure')
+
+    expect(transaction.rollback).toHaveBeenCalledTimes(1)
+    expect(transaction.commit).not.toHaveBeenCalled()
+  })
+
+  test('rolls back transaction and throws error if removePayments throws', async () => {
+    removeWarnings.mockResolvedValue()
+    removePayments.mockRejectedValue(new Error('removePayments error'))
+
+    await expect(removeAgreementData(retentionData))
+      .rejects
+      .toThrow('removePayments error')
 
     expect(transaction.rollback).toHaveBeenCalledTimes(1)
     expect(transaction.commit).not.toHaveBeenCalled()
@@ -94,9 +153,13 @@ describe('removeAgreementData', () => {
 
   test('rolls back transaction and throws error if removePaymentBatchEvents throws', async () => {
     removeWarnings.mockResolvedValue()
-    removePaymentBatchEvents.mockRejectedValue(new Error('removePaymentBatchEvents error'))
+    removePaymentBatchEvents.mockRejectedValue(
+      new Error('removePaymentBatchEvents error')
+    )
 
-    await expect(removeAgreementData(retentionData)).rejects.toThrow('removePaymentBatchEvents error')
+    await expect(removeAgreementData(retentionData))
+      .rejects
+      .toThrow('removePaymentBatchEvents error')
 
     expect(transaction.rollback).toHaveBeenCalledTimes(1)
     expect(transaction.commit).not.toHaveBeenCalled()
@@ -105,21 +168,13 @@ describe('removeAgreementData', () => {
   test('rolls back transaction and throws error if removePaymentFRNEvents throws', async () => {
     removeWarnings.mockResolvedValue()
     removePaymentBatchEvents.mockResolvedValue()
-    removePaymentFRNEvents.mockRejectedValue(new Error('removePaymentFRNEvents error'))
+    removePaymentFRNEvents.mockRejectedValue(
+      new Error('removePaymentFRNEvents error')
+    )
 
-    await expect(removeAgreementData(retentionData)).rejects.toThrow('removePaymentFRNEvents error')
-
-    expect(transaction.rollback).toHaveBeenCalledTimes(1)
-    expect(transaction.commit).not.toHaveBeenCalled()
-  })
-
-  test('rolls back transaction and throws error if removePayments throws', async () => {
-    removeWarnings.mockResolvedValue()
-    removePaymentBatchEvents.mockResolvedValue()
-    removePaymentFRNEvents.mockResolvedValue()
-    removePayments.mockRejectedValue(new Error('removePayments error'))
-
-    await expect(removeAgreementData(retentionData)).rejects.toThrow('removePayments error')
+    await expect(removeAgreementData(retentionData))
+      .rejects
+      .toThrow('removePaymentFRNEvents error')
 
     expect(transaction.rollback).toHaveBeenCalledTimes(1)
     expect(transaction.commit).not.toHaveBeenCalled()

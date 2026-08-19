@@ -10,9 +10,9 @@ const removeAgreementData = async (retentionData) => {
     const { agreementNumber, frn, schemeId, usesContractNumber, pillar } = retentionData
 
     await removeWarnings(agreementNumber, frn, schemeId, usesContractNumber, pillar, transaction)
-    await removePaymentBatchEvents(agreementNumber, frn, schemeId, usesContractNumber, transaction)
-    await removePaymentFRNEvents(agreementNumber, frn, schemeId, usesContractNumber, transaction)
-    await removePayments(agreementNumber, frn, schemeId, usesContractNumber, pillar, transaction)
+    const { batches, agreementNumbers, correlationIds } = await removePayments(agreementNumber, frn, schemeId, usesContractNumber, pillar, transaction)
+    await removePaymentBatchEvents(agreementNumber, frn, schemeId, usesContractNumber, batches, agreementNumbers, transaction)
+    await removePaymentFRNEvents(agreementNumber, frn, schemeId, usesContractNumber, correlationIds, agreementNumbers, transaction)
 
     await transaction.commit()
   } catch (err) {
