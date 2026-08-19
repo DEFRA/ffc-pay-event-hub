@@ -60,12 +60,26 @@ describe('removeAgreementData', () => {
     await removeAgreementData(retentionData)
 
     expect(db.sequelize.transaction).toHaveBeenCalledTimes(1)
-    expect(removeWarnings).toHaveBeenCalledWith(agreementNumber, frn, schemeId, usesContractNumber, transaction)
+    expect(removeWarnings).toHaveBeenCalledWith(agreementNumber, frn, schemeId, usesContractNumber, undefined, transaction)
     expect(removePaymentBatchEvents).toHaveBeenCalledWith(agreementNumber, frn, schemeId, usesContractNumber, transaction)
     expect(removePaymentFRNEvents).toHaveBeenCalledWith(agreementNumber, frn, schemeId, usesContractNumber, transaction)
-    expect(removePayments).toHaveBeenCalledWith(agreementNumber, frn, schemeId, usesContractNumber, transaction)
+    expect(removePayments).toHaveBeenCalledWith(agreementNumber, frn, schemeId, usesContractNumber, undefined, transaction)
     expect(transaction.commit).toHaveBeenCalledTimes(1)
     expect(transaction.rollback).not.toHaveBeenCalled()
+  })
+
+  test('passes pillar through to the json based removals for manual scheme retention data', async () => {
+    removePaymentBatchEvents.mockResolvedValue()
+    removePaymentFRNEvents.mockResolvedValue()
+    removePayments.mockResolvedValue()
+    removeWarnings.mockResolvedValue()
+
+    await removeAgreementData({ ...retentionData, schemeId: 8, pillar: 'SFI23' })
+
+    expect(removeWarnings).toHaveBeenCalledWith(agreementNumber, frn, 8, usesContractNumber, 'SFI23', transaction)
+    expect(removePayments).toHaveBeenCalledWith(agreementNumber, frn, 8, usesContractNumber, 'SFI23', transaction)
+    expect(removePaymentBatchEvents).toHaveBeenCalledWith(agreementNumber, frn, 8, usesContractNumber, transaction)
+    expect(removePaymentFRNEvents).toHaveBeenCalledWith(agreementNumber, frn, 8, usesContractNumber, transaction)
   })
 
   test('rolls back transaction and throws error if removeWarnings throws', async () => {
