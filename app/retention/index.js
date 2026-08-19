@@ -7,10 +7,10 @@ const { removeWarnings } = require('./remove-warnings')
 const removeAgreementData = async (retentionData) => {
   const transaction = await db.sequelize.transaction()
   try {
-    const { agreementNumber, frn, schemeId, usesContractNumber } = retentionData
+    const { agreementNumber, frn, schemeId, usesContractNumber, pillar } = retentionData
 
-    await removeWarnings(agreementNumber, frn, schemeId, usesContractNumber, transaction)
-    const { batches, agreementNumbers, correlationIds } = await removePayments(agreementNumber, frn, schemeId, usesContractNumber, transaction)
+    await removeWarnings(agreementNumber, frn, schemeId, usesContractNumber, pillar, transaction)
+    const { batches, agreementNumbers, correlationIds } = await removePayments(agreementNumber, frn, schemeId, usesContractNumber, pillar, transaction)
     await removePaymentBatchEvents(agreementNumber, frn, schemeId, usesContractNumber, batches, agreementNumbers, transaction)
     await removePaymentFRNEvents(agreementNumber, frn, schemeId, usesContractNumber, correlationIds, agreementNumbers, transaction)
 
