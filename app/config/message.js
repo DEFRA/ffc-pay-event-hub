@@ -30,7 +30,8 @@ const schema = Joi.object({
   },
   alertTopic: {
     address: Joi.string()
-  }
+  },
+  ignoreRetentionMessages: Joi.boolean().default(false)
 })
 
 const config = {
@@ -45,7 +46,7 @@ const config = {
     address: process.env.EVENTS_SUBSCRIPTION_ADDRESS,
     topic: process.env.EVENTS_TOPIC_ADDRESS,
     type: 'subscription',
-    maxConcurrentCalls: parseInt(process.env.MAX_CONCURRENT_CALLS, 10) || 10
+    maxConcurrentCalls: Number.parseInt(process.env.MAX_CONCURRENT_CALLS, 10) || 10
   },
   dataSubscription: {
     address: process.env.DATA_SUBSCRIPTION_ADDRESS,
@@ -62,7 +63,8 @@ const config = {
   },
   alertTopic: {
     address: process.env.ALERT_TOPIC_ADDRESS
-  }
+  },
+  ignoreRetentionMessages: process.env.IGNORE_RETENTION_MESSAGES
 }
 
 const result = schema.validate(config, {
@@ -84,5 +86,6 @@ module.exports = {
   alertTopic,
   dataSubscription,
   retentionSubscription,
-  dataQueue
+  dataQueue,
+  ignoreRetentionMessages: result.value.ignoreRetentionMessages
 }

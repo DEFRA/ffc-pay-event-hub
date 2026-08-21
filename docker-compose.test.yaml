@@ -15,6 +15,7 @@ services:
       MESSAGE_QUEUE_USER: RootManageSharedAccessKey
       MESSAGE_QUEUE_PASSWORD: SAS_KEY_VALUE
       PROCESSING_ACTIVE: true
+      IGNORE_RETENTION_MESSAGES: false
       RETENTION_TOPIC_ADDRESS: fcp-pds-data-retention
       RETENTION_SUBSCRIPTION_ADDRESS: ffc-pay-event-hub
     volumes:
