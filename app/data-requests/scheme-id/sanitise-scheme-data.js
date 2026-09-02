@@ -1,5 +1,4 @@
-const accountingValueSchemes = require('../../constants/accounting-value-schemes')
-const schemeNames = require('../../constants/scheme-names')
+const { getSchemeNameFromSchemeId, schemeProvidesAccountingValues } = require('ffc-pay-schemes')
 
 const showNonAccountingValue = (value) => {
   if (typeof value !== 'string') {
@@ -13,15 +12,15 @@ const showNonAccountingValue = (value) => {
 
 const sanitiseSchemeData = (schemeData) => {
   return schemeData.map((scheme) => {
-    const schemeName = schemeNames[scheme.schemeId]
+    const schemeName = getSchemeNameFromSchemeId(scheme.schemeId)
     if (!schemeName) {
       throw new Error(`Unknown schemeId: ${scheme.schemeId}`)
     }
-    const schemeProvidesAccountingValues = accountingValueSchemes.includes(Number(scheme.schemeId))
+    const providesAccountingValues = schemeProvidesAccountingValues(Number(scheme.schemeId))
     return {
       scheme: schemeName,
       paymentRequests: scheme.paymentRequests,
-      value: schemeProvidesAccountingValues ? showNonAccountingValue(scheme.value) : scheme.value
+      value: providesAccountingValues ? showNonAccountingValue(scheme.value) : scheme.value
     }
   })
 }
