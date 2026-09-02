@@ -1,4 +1,4 @@
-const { getSchemeIds, schemeProvidesAccountingValues, getSchemeNameFromSchemeId } = require('ffc-pay-schemes')
+const { getSchemeIds, getSchemeNameFromSchemeId } = require('ffc-pay-schemes')
 const db = require('../../../../../../app/data')
 const {
   getEventsByScheme
@@ -13,16 +13,6 @@ beforeAll(async () => {
     console.error('Database connection failed:', error.message)
     throw error
   }
-})
-
-beforeEach(async () => {
-  // Clear data from underlying tables that feed the view
-  // Do not call sync() since schemePaymentTotals is a view, not a table
-  rawViewData = SCHEMES.map((scheme, index) => ({
-    schemeId: scheme,
-    paymentRequests: 2 + index,
-    value: schemeProvidesAccountingValues(Number(scheme)) ? `£-${(1000 * (index + 1)).toLocaleString()}.00` : `£${(1000 * (index + 1)).toLocaleString()}.00`
-  }))
 })
 
 afterAll(async () => {
