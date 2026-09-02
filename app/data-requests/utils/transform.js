@@ -1,5 +1,5 @@
+const { getSchemeNameFromSchemeId } = require('ffc-pay-schemes')
 const eventDetails = require('../../constants/event-details')
-const schemeNames = require('../../constants/scheme-names')
 const { convertToString } = require('../../currency')
 
 const copyNonExcludedKeys = (source, excludedKeys) => {
@@ -13,7 +13,7 @@ const copyNonExcludedKeys = (source, excludedKeys) => {
 
 const mapCommonFields = (row, target) => {
   if (row.schemeId) {
-    target.scheme = schemeNames[row.schemeId]
+    target.scheme = getSchemeNameFromSchemeId(row.schemeId)
   }
 
   if (row.type) {

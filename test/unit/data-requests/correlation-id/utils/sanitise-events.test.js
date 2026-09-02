@@ -8,7 +8,7 @@ const processed = require('../../../../mocks/events/processed')
 const submitted = require('../../../../mocks/events/submitted')
 const acknowledged = require('../../../../mocks/events/acknowledged')
 
-const { 1: SFI } = require('../../../../../app/constants/scheme-names')
+const { getSchemeNameFromSchemeId } = require('ffc-pay-schemes')
 const {
   PAYMENT_ACKNOWLEDGED_STATUS,
   PAYMENT_ENRICHED_STATUS
@@ -45,7 +45,7 @@ describe('sanitise events', () => {
   })
 
   test('should add scheme name', () => {
-    expect(result.scheme).toBe(SFI)
+    expect(result.scheme).toBe(getSchemeNameFromSchemeId(groupedEvent.schemeId))
   })
 
   test('should add status based on last event', () => {

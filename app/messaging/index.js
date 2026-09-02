@@ -1,9 +1,8 @@
+const { MessageReceiver } = require('ffc-messaging')
 const { messageConfig } = require('../config')
 const { processEventMessage } = require('./process-event-message')
 const { processDataMessage } = require('./process-data-message')
 const { processRetentionMessage } = require('./process-retention-message')
-
-const { MessageReceiver } = require('ffc-messaging')
 
 let eventsReceiver
 let dataReceiver

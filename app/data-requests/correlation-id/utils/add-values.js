@@ -1,5 +1,7 @@
-const { FC } = require('../../../constants/schemes')
+const { getSchemeIds } = require('ffc-pay-schemes')
 const { convertToString } = require('../../../currency')
+
+const { FC } = getSchemeIds()
 
 const addValues = (events) => {
   return events.map((event) => {

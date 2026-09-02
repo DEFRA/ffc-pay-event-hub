@@ -1,16 +1,26 @@
+jest.mock('ffc-pay-schemes')
+jest.mock('../../../../app/currency')
+jest.mock('../../../../app/constants/event-details')
+
 const {
   copyNonExcludedKeys,
   mapCommonFields
 } = require('../../../../app/data-requests/utils/transform')
-const eventDetails = require('../../../../app/constants/event-details')
-const schemeNames = require('../../../../app/constants/scheme-names')
+const { getSchemeNameFromSchemeId } = require('ffc-pay-schemes')
 const { convertToString } = require('../../../../app/currency')
-
-jest.mock('../../../../app/currency', () => ({
-  convertToString: jest.fn((value) => `£${value}`)
-}))
+const eventDetails = require('../../../../app/constants/event-details')
 
 describe('transform utilities', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    getSchemeNameFromSchemeId.mockImplementation((schemeId) => {
+      const schemes = { SCHEME1: 'Scheme One', SCHEME2: 'Scheme Two' }
+      return schemes[schemeId]
+    })
+    convertToString.mockImplementation((value) => `£${value}`)
+    eventDetails['PAYMENT_ENRICHED'] = { name: 'Enriched', state: 'IN_PROGRESS' }
+  })
+
   describe('copyNonExcludedKeys', () => {
     test('copies keys not in excludedKeys', () => {
       const source = { a: 1, b: 2, c: 3 }
@@ -31,17 +41,15 @@ describe('transform utilities', () => {
     test('maps schemeId to scheme name', () => {
       const row = { schemeId: 'SCHEME1' }
       const target = {}
-      schemeNames['SCHEME1'] = 'Scheme One'
       mapCommonFields(row, target)
       expect(target.scheme).toBe('Scheme One')
     })
 
     test('maps type to status from eventDetails', () => {
-      const row = { type: 'TYPE1' }
+      const row = { type: 'PAYMENT_ENRICHED' }
       const target = {}
-      eventDetails['TYPE1'] = 'Completed'
       mapCommonFields(row, target)
-      expect(target.status).toBe('Completed')
+      expect(target.status).toBe(eventDetails['PAYMENT_ENRICHED'])
     })
 
     test('maps unknown type to UNKNOWN', () => {
@@ -60,14 +68,12 @@ describe('transform utilities', () => {
     })
 
     test('maps multiple fields together', () => {
-      schemeNames['SCHEME2'] = 'Scheme Two'
-      eventDetails['TYPE2'] = 'Pending'
-      const row = { schemeId: 'SCHEME2', type: 'TYPE2', originalValue: 99.99 }
+      const row = { schemeId: 'SCHEME2', type: 'PAYMENT_ENRICHED', originalValue: 99.99 }
       const target = {}
       mapCommonFields(row, target)
       expect(target).toEqual({
         scheme: 'Scheme Two',
-        status: 'Pending',
+        status: eventDetails['PAYMENT_ENRICHED'],
         originalValueText: '£99.99'
       })
     })
