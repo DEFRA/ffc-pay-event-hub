@@ -33,7 +33,6 @@ const getEventOrder = (event) => {
     PAYMENT_RESET,
     PAYMENT_PROCESSED,
     PAYMENT_SUBMITTED,
-    // a duplicate outranks any in progress event, but never a completed one
     PAYMENT_DUPLICATE,
     PAYMENT_PROCESSED_NO_FURTHER_ACTION,
     PAYMENT_ACKNOWLEDGED,
