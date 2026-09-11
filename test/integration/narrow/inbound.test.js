@@ -1,11 +1,8 @@
-const mockSendMessage = jest.fn()
-
-jest.mock('ffc-messaging', () => ({
-  MessageSender: jest.fn().mockImplementation(() => ({
-    sendMessage: mockSendMessage,
-    closeConnection: jest.fn()
-  }))
+jest.mock('../../../app/messaging/send-alert', () => ({
+  sendAlert: jest.fn()
 }))
+
+const { sendAlert: mockSendMessage } = require('../../../app/messaging/send-alert')
 
 const {
   FRN,
@@ -26,6 +23,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   jest.clearAllMocks()
+  mockSendMessage.mockClear()
 
   await db.payments.destroy({ where: {}, truncate: true })
   await db.holds.destroy({ where: {}, truncate: true })
@@ -200,7 +198,7 @@ describe('inbound warning event', () => {
   test('sends alert for warning', async () => {
     await processEvent(events.warning)
     expect(mockSendMessage).toHaveBeenCalledTimes(1)
-    expect(mockSendMessage.mock.calls[0][0].body).toBe(events.warning)
+    expect(mockSendMessage).toHaveBeenCalledWith(events.warning)
   })
 })
 

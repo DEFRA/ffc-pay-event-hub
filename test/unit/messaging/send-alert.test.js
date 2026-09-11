@@ -1,13 +1,9 @@
 const mockSendMessage = jest.fn()
-const mockCloseConnection = jest.fn()
+const mockGetSender = jest.fn()
 
-const MockMessageSender = jest.fn().mockImplementation(() => ({
-  sendMessage: mockSendMessage,
-  closeConnection: mockCloseConnection
-}))
-
-jest.mock('ffc-messaging', () => ({
-  MessageSender: MockMessageSender
+jest.mock('../../../app/messaging/service-bus', () => ({
+  getSender: mockGetSender,
+  sendMessage: mockSendMessage
 }))
 
 jest.mock('../../../app/messaging/create-message')
@@ -20,9 +16,13 @@ const { messageConfig } = require('../../../app/config')
 const { sendAlert } = require('../../../app/messaging/send-alert')
 
 describe('send alert', () => {
+  let mockSender
+
   beforeEach(() => {
     jest.clearAllMocks()
     mockCreateMessage.mockReturnValue(RESPONSE_MESSAGE)
+    mockSender = { close: jest.fn() }
+    mockGetSender.mockReturnValue(mockSender)
   })
 
   test('creates message from event', async () => {
@@ -30,18 +30,18 @@ describe('send alert', () => {
     expect(mockCreateMessage).toHaveBeenCalledWith(warningEvent)
   })
 
-  test('creates message sender from config', async () => {
+  test('gets cached sender from config', async () => {
     await sendAlert(warningEvent)
-    expect(MockMessageSender).toHaveBeenCalledWith(messageConfig.alertTopic)
+    expect(mockGetSender).toHaveBeenCalledWith(messageConfig.alertTopic)
   })
 
   test('sends message', async () => {
     await sendAlert(warningEvent)
-    expect(mockSendMessage).toHaveBeenCalledWith(RESPONSE_MESSAGE)
+    expect(mockSendMessage).toHaveBeenCalledWith(mockSender, RESPONSE_MESSAGE)
   })
 
-  test('closes connection', async () => {
+  test('does not close cached sender connection', async () => {
     await sendAlert(warningEvent)
-    expect(mockCloseConnection).toHaveBeenCalled()
+    expect(mockSender.close).not.toHaveBeenCalled()
   })
 })

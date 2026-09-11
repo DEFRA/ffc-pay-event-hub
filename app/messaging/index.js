@@ -1,34 +1,47 @@
 const { messageConfig } = require('../config')
+const { createServiceBusClient, createReceiver, subscribeReceiver, closeSenders } = require('./service-bus')
 const { processEventMessage } = require('./process-event-message')
 const { processDataMessage } = require('./process-data-message')
 const { processRetentionMessage } = require('./process-retention-message')
-
-const { MessageReceiver } = require('ffc-messaging')
+const { createDiagnosticsHandler } = require('./diagnostics')
 
 let eventsReceiver
 let dataReceiver
 let retentionReceiver
+let sbClient
 
 const start = async () => {
+  sbClient = createServiceBusClient(messageConfig.eventsSubscription)
   const action = message => processEventMessage(message, eventsReceiver)
-  eventsReceiver = new MessageReceiver(messageConfig.eventsSubscription, action)
-  await eventsReceiver.subscribe()
+  eventsReceiver = createReceiver(sbClient, messageConfig.eventsSubscription)
+  subscribeReceiver(eventsReceiver, action, createDiagnosticsHandler('events-receiver'), messageConfig.eventsSubscription)
 
   const calculateAction = message => processDataMessage(message, dataReceiver)
-  dataReceiver = new MessageReceiver(messageConfig.dataSubscription, calculateAction)
-  await dataReceiver.subscribe()
+  dataReceiver = createReceiver(sbClient, messageConfig.dataSubscription)
+  subscribeReceiver(dataReceiver, calculateAction, createDiagnosticsHandler('data-receiver'), messageConfig.dataSubscription)
 
   const retentionAction = message => processRetentionMessage(message, retentionReceiver)
-  retentionReceiver = new MessageReceiver(messageConfig.retentionSubscription, retentionAction)
-  await retentionReceiver.subscribe()
+  retentionReceiver = createReceiver(sbClient, messageConfig.retentionSubscription)
+  subscribeReceiver(retentionReceiver, retentionAction, createDiagnosticsHandler('retention-receiver'), messageConfig.retentionSubscription)
 
   console.info('Ready to receive messages')
 }
 
 const stop = async () => {
-  await eventsReceiver.closeConnection()
-  await dataReceiver.closeConnection()
-  await retentionReceiver.closeConnection()
+  try {
+    await closeSenders()
+  } catch (error) {
+    console.error('Error stopping receiver')
+  }
+  if (eventsReceiver) {
+    await eventsReceiver.closeConnection()
+  }
+  if (dataReceiver) {
+    await dataReceiver.closeConnection()
+  }
+  if (retentionReceiver) {
+    await retentionReceiver.closeConnection()
+  }
 }
 
 module.exports = { start, stop }
