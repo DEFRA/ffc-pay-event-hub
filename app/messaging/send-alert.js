@@ -1,12 +1,11 @@
-const { MessageSender } = require('ffc-messaging')
 const { messageConfig } = require('../config')
 const { createMessage } = require('./create-message')
+const { getSender, sendMessage: sendServiceBusMessage } = require('./service-bus')
 
 const sendAlert = async (body) => {
   const message = createMessage(body)
-  const sender = new MessageSender(messageConfig.alertTopic)
-  await sender.sendMessage(message)
-  await sender.closeConnection()
+  const sender = getSender(messageConfig.alertTopic)
+  await sendServiceBusMessage(sender, message)
   console.log('Request for alert sent')
 }
 
