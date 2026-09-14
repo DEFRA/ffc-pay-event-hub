@@ -15,5 +15,6 @@ module.exports = {
   PAYMENT_SUBMITTED_STATUS: 'Submitted to payment ledger',
   PAYMENT_ACKNOWLEDGED_STATUS: 'Acknowledged by payment ledger',
   PAYMENT_SETTLED_STATUS: 'Settled by payment ledger',
-  PAYMENT_SUPPRESSED_STATUS: 'Accounts Receivable value suppressed due to closure'
+  PAYMENT_SUPPRESSED_STATUS: 'Accounts Receivable value suppressed due to closure',
+  PAYMENT_DUPLICATE_STATUS: 'Duplicate payment request received'
 }
