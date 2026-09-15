@@ -1,12 +1,11 @@
 const mockSendMessage = jest.fn()
-const mockCloseConnection = jest.fn()
+const mockGetSender = jest.fn()
 
-const mockMessageSender = jest.fn().mockImplementation(() => ({
-  sendMessage: mockSendMessage,
-  closeConnection: mockCloseConnection
+jest.mock('../../../app/messaging/service-bus', () => ({
+  getSender: mockGetSender,
+  sendMessage: mockSendMessage
 }))
 
-jest.mock('ffc-messaging', () => ({ MessageSender: mockMessageSender }))
 jest.mock('../../../app/messaging/create-message')
 const { createMessage: mockCreateMessage } = require('../../../app/messaging/create-message')
 
@@ -17,11 +16,13 @@ const { SESSION_ID } = require('../../mocks/messaging/session-id')
 const { RESPONSE_MESSAGE } = require('../../mocks/messaging/message')
 
 describe('sendMessage', () => {
-  let options, config
+  let options, config, mockSender
 
   beforeEach(() => {
     jest.clearAllMocks()
     mockCreateMessage.mockReturnValue(RESPONSE_MESSAGE)
+    mockSender = { close: jest.fn() }
+    mockGetSender.mockReturnValue(mockSender)
     options = { sessionId: SESSION_ID }
     config = {}
   })
@@ -31,14 +32,14 @@ describe('sendMessage', () => {
     expect(mockCreateMessage).toHaveBeenCalledWith(BODY, TYPE, options)
   })
 
-  test('should create message sender with config', async () => {
+  test('should get cached sender with config', async () => {
     await sendMessage(BODY, TYPE, config, options)
-    expect(mockMessageSender).toHaveBeenCalledWith(config)
+    expect(mockGetSender).toHaveBeenCalledWith(config)
   })
 
-  test('should send message and close connection', async () => {
+  test('should send message without closing cached sender', async () => {
     await sendMessage(BODY, TYPE, config, options)
-    expect(mockSendMessage).toHaveBeenCalledWith(RESPONSE_MESSAGE)
-    expect(mockCloseConnection).toHaveBeenCalled()
+    expect(mockSendMessage).toHaveBeenCalledWith(mockSender, RESPONSE_MESSAGE)
+    expect(mockSender.close).not.toHaveBeenCalled()
   })
 })
