@@ -1,5 +1,5 @@
 const moment = require('moment-timezone')
-const schemeNames = require('../../../constants/scheme-names')
+const { getSchemeNameFromSchemeId } = require('ffc-pay-schemes')
 const eventDetails = require('../../../constants/event-details')
 const { TIMEZONE } = require('../../../constants/timezone')
 const { DATE } = require('../../../constants/date-format')
@@ -9,7 +9,7 @@ const { convertToPence } = require('../../../currency')
 const sanitiseEvents = (events) => {
   return events.map((group) => ({
     ...group,
-    scheme: schemeNames[group.schemeId],
+    scheme: getSchemeNameFromSchemeId(group.schemeId),
     status: eventDetails[group.events[group.events.length - 1].type],
     lastUpdated: moment(group.events[group.events.length - 1].time)
       .tz(TIMEZONE)
