@@ -1,15 +1,22 @@
-jest.mock('../../../../app/constants/scheme-names', () => ({
-  1: 'Scheme One',
-  2: 'Scheme Two'
-}))
-
-jest.mock('../../../../app/constants/accounting-value-schemes', () => [1])
+jest.mock('ffc-pay-schemes')
+const {
+  getSchemeNameFromSchemeId,
+  schemeProvidesAccountingValues
+} = require('ffc-pay-schemes')
 
 const {
   sanitiseSchemeData
 } = require('../../../../app/data-requests/scheme-id/sanitise-scheme-data')
 
 describe('sanitiseSchemeData', () => {
+  beforeEach(() => {
+    getSchemeNameFromSchemeId.mockImplementation((schemeId) => {
+      const schemes = { 1: 'Scheme One', 2: 'Scheme Two' }
+      return schemes[schemeId]
+    })
+    schemeProvidesAccountingValues.mockImplementation((schemeId) => schemeId === 1)
+  })
+
   test('maps schemeId to scheme name and preserves fields', () => {
     const input = [
       { schemeId: 1, paymentRequests: 5, value: 100 },
