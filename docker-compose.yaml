@@ -34,6 +34,7 @@ services:
       POSTGRES_SCHEMA_NAME: ${POSTGRES_SCHEMA_NAME:-public}
       POSTGRES_USERNAME: ${POSTGRES_SCHEMA_USERNAME:-postgres}
       PROCESSING_ACTIVE: ${PROCESSING_ACTIVE:-true}
+      IGNORE_RETENTION_MESSAGES: ${IGNORE_RETENTION_MESSAGES:-false}
 
   ffc-pay-event-hub-postgres:
     image: postgres:11.4-alpine

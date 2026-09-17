@@ -15,5 +15,6 @@ module.exports = {
   PAYMENT_SUBMITTED: 'uk.gov.defra.ffc.pay.payment.submitted',
   PAYMENT_ACKNOWLEDGED: 'uk.gov.defra.ffc.pay.payment.acknowledged',
   PAYMENT_SETTLED: 'uk.gov.defra.ffc.pay.payment.settled',
-  PAYMENT_SUPPRESSED: 'uk.gov.defra.ffc.pay.payment.suppressed.recovery'
+  PAYMENT_SUPPRESSED: 'uk.gov.defra.ffc.pay.payment.suppressed.recovery',
+  PAYMENT_DUPLICATE: 'uk.gov.defra.ffc.pay.payment.duplicate'
 }

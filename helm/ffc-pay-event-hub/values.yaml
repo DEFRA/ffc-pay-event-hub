@@ -30,6 +30,7 @@ container:
   limitMemory: 500Mi
   port: 3011
   processingActive: true
+  ignoreRetentionMessages: false
   messageQueueHost: namespace.servicebus.windows.net
   eventsTopicAddress: ffc-pay-events
   eventsSubscriptionAddress: ffc-pay-event-hub
