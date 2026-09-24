@@ -1,5 +1,6 @@
 const db = require('../../../app/data')
 const { removeWarnings } = require('../../../app/retention/remove-warnings')
+const { MANUAL } = require('../../../app/constants/schemes')
 
 jest.mock('../../../app/data', () => {
   const sequelizeWhereMock = jest.fn()
@@ -38,7 +39,7 @@ describe('removeWarnings', () => {
   })
 
   test('calls db.warnings.destroy with agreementNumber in where when usesContractNumber is false or omitted', async () => {
-    await removeWarnings(agreementNumber, frn, schemeId, false, transaction)
+    await removeWarnings(agreementNumber, frn, schemeId, false, undefined, transaction)
 
     const { sequelize, Sequelize } = db
     const destroyCallArg = db.warnings.destroy.mock.calls[0][0]
@@ -72,7 +73,7 @@ describe('removeWarnings', () => {
   })
 
   test('calls db.warnings.destroy with contractNumber in where when usesContractNumber is true', async () => {
-    await removeWarnings(agreementNumber, frn, schemeId, true, transaction)
+    await removeWarnings(agreementNumber, frn, schemeId, true, undefined, transaction)
 
     const { sequelize, Sequelize } = db
     const destroyCallArg = db.warnings.destroy.mock.calls[0][0]
@@ -118,10 +119,41 @@ describe('removeWarnings', () => {
     expect(destroyCallArg.transaction).toBeUndefined()
   })
 
+  test('adds a pillar condition when scheme is manual', async () => {
+    await removeWarnings(agreementNumber, frn, MANUAL, false, 'SFI23', transaction)
+
+    const { sequelize, Sequelize } = db
+    const destroyCallArg = db.warnings.destroy.mock.calls[0][0]
+
+    expect(sequelize.json).toHaveBeenCalledWith('data.pillar')
+    expect(Sequelize.where).toHaveBeenCalledWith('data.pillar', 'SFI23')
+    expect(destroyCallArg.where[db.Sequelize.Op.and]).toHaveLength(4)
+  })
+
+  test('does not add a pillar condition when scheme is manual but no pillar supplied', async () => {
+    await removeWarnings(agreementNumber, frn, MANUAL, false, undefined, transaction)
+
+    const { sequelize } = db
+    const destroyCallArg = db.warnings.destroy.mock.calls[0][0]
+
+    expect(sequelize.json).not.toHaveBeenCalledWith('data.pillar')
+    expect(destroyCallArg.where[db.Sequelize.Op.and]).toHaveLength(3)
+  })
+
+  test('does not add a pillar condition when scheme is not manual', async () => {
+    await removeWarnings(agreementNumber, frn, schemeId, false, 'SFI23', transaction)
+
+    const { sequelize } = db
+    const destroyCallArg = db.warnings.destroy.mock.calls[0][0]
+
+    expect(sequelize.json).not.toHaveBeenCalledWith('data.pillar')
+    expect(destroyCallArg.where[db.Sequelize.Op.and]).toHaveLength(3)
+  })
+
   test('propagates errors from db.warnings.destroy', async () => {
     const error = new Error('DB failure')
     db.warnings.destroy.mockRejectedValue(error)
 
-    await expect(removeWarnings(agreementNumber, frn, schemeId, false, transaction)).rejects.toThrow('DB failure')
+    await expect(removeWarnings(agreementNumber, frn, schemeId, false, undefined, transaction)).rejects.toThrow('DB failure')
   })
 })
