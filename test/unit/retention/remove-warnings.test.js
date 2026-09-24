@@ -1,6 +1,7 @@
+const { getSchemeIds } = require('ffc-pay-schemes')
 const db = require('../../../app/data')
 const { removeWarnings } = require('../../../app/retention/remove-warnings')
-const { MANUAL } = require('../../../app/constants/schemes')
+const { MANUAL } = getSchemeIds()
 
 jest.mock('../../../app/data', () => {
   const sequelizeWhereMock = jest.fn()

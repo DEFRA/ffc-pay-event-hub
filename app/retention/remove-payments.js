@@ -1,5 +1,6 @@
+const { getSchemeIds } = require('ffc-pay-schemes')
 const db = require('../data')
-const { MANUAL } = require('../constants/schemes')
+const { MANUAL } = getSchemeIds()
 
 const removePayments = async (agreementNumber, frn, schemeId, usesContractNumber, pillar, transaction) => {
   const agreementKey = usesContractNumber ? 'contractNumber' : 'agreementNumber'

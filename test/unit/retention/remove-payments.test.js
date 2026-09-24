@@ -21,9 +21,10 @@ jest.mock('../../../app/data', () => {
   }
 })
 
+const { getSchemeIds } = require('ffc-pay-schemes')
 const db = require('../../../app/data')
 const { removePayments } = require('../../../app/retention/remove-payments')
-const { MANUAL } = require('../../../app/constants/schemes')
+const { MANUAL } = getSchemeIds()
 
 describe('removePayments', () => {
   const agreementNumber = 'AGR123'
