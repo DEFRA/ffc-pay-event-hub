@@ -13,7 +13,7 @@ const copyNonExcludedKeys = (source, excludedKeys) => {
 
 const mapCommonFields = (row, target) => {
   if (row.schemeId) {
-    target.scheme = getSchemeNameFromSchemeId(row.schemeId)
+    target.scheme = getSchemeNameFromSchemeId(Number(row.schemeId))
   }
 
   if (row.type) {

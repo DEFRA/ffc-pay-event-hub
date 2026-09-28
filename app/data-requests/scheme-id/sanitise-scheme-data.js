@@ -12,8 +12,8 @@ const showNonAccountingValue = (value) => {
 
 const sanitiseSchemeData = (schemeData) => {
   return schemeData.map((scheme) => {
-    const schemeName = getSchemeNameFromSchemeId(scheme.schemeId)
-    if (!schemeName) {
+    const schemeName = getSchemeNameFromSchemeId(Number(scheme.schemeId))
+    if (!schemeName || schemeName === 'UNKNOWN') {
       throw new Error(`Unknown schemeId: ${scheme.schemeId}`)
     }
     const providesAccountingValues = schemeProvidesAccountingValues(Number(scheme.schemeId))

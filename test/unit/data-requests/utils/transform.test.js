@@ -14,8 +14,8 @@ describe('transform utilities', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     getSchemeNameFromSchemeId.mockImplementation((schemeId) => {
-      const schemes = { SCHEME1: 'Scheme One', SCHEME2: 'Scheme Two' }
-      return schemes[schemeId]
+      const schemes = new Map([[1, 'Scheme One'], [2, 'Scheme Two']])
+      return schemes.get(schemeId)
     })
     convertToString.mockImplementation((value) => `£${value}`)
     eventDetails['PAYMENT_ENRICHED'] = { name: 'Enriched', state: 'IN_PROGRESS' }
@@ -39,9 +39,10 @@ describe('transform utilities', () => {
 
   describe('mapCommonFields', () => {
     test('maps schemeId to scheme name', () => {
-      const row = { schemeId: 'SCHEME1' }
+      const row = { schemeId: '1' }
       const target = {}
       mapCommonFields(row, target)
+      expect(getSchemeNameFromSchemeId).toHaveBeenCalledWith(1)
       expect(target.scheme).toBe('Scheme One')
     })
 
@@ -68,9 +69,10 @@ describe('transform utilities', () => {
     })
 
     test('maps multiple fields together', () => {
-      const row = { schemeId: 'SCHEME2', type: 'PAYMENT_ENRICHED', originalValue: 99.99 }
+      const row = { schemeId: '2', type: 'PAYMENT_ENRICHED', originalValue: 99.99 }
       const target = {}
       mapCommonFields(row, target)
+      expect(getSchemeNameFromSchemeId).toHaveBeenCalledWith(2)
       expect(target).toEqual({
         scheme: 'Scheme Two',
         status: eventDetails['PAYMENT_ENRICHED'],
