@@ -1,10 +1,13 @@
-jest.mock('../../../../../app/data')
-const db = require('../../../../../app/data')
+const { createKnexMock } = require('../../../../helpers/mock-knex')
 
-const mockFindAll = jest.fn()
-db.payments = {
-  findAll: mockFindAll
-}
+const mockDb = createKnexMock(['payments'])
+
+jest.mock('../../../../../app/database', () => ({
+  client: mockDb.knex,
+  transaction: mockDb.transaction,
+  close: mockDb.close,
+  ...mockDb.tables
+}))
 
 const { PARTITION_KEY } = require('../../../../mocks/values/partition-key')
 const { CATEGORY } = require('../../../../mocks/values/category')
@@ -25,7 +28,6 @@ describe('get events', () => {
       require('../../../../mocks/events/enriched')
     )
 
-    // Mock database events with toJSON method
     mockDbEvents = [
       {
         id: 'uuid-1',
@@ -36,20 +38,7 @@ describe('get events', () => {
         subject: extractedEvent.subject,
         time: extractedEvent.time,
         type: extractedEvent.type,
-        data: extractedEvent.data,
-        toJSON: function () {
-          return {
-            id: this.id,
-            partitionKey: this.partitionKey,
-            category: this.category,
-            timestamp: this.timestamp,
-            source: this.source,
-            subject: this.subject,
-            time: this.time,
-            type: this.type,
-            data: this.data
-          }
-        }
+        data: extractedEvent.data
       },
       {
         id: 'uuid-2',
@@ -60,42 +49,26 @@ describe('get events', () => {
         subject: enrichedEvent.subject,
         time: enrichedEvent.time,
         type: enrichedEvent.type,
-        data: enrichedEvent.data,
-        toJSON: function () {
-          return {
-            id: this.id,
-            partitionKey: this.partitionKey,
-            category: this.category,
-            timestamp: this.timestamp,
-            source: this.source,
-            subject: this.subject,
-            time: this.time,
-            type: this.type,
-            data: this.data
-          }
-        }
+        data: enrichedEvent.data
       }
     ]
 
-    mockFindAll.mockResolvedValue(mockDbEvents)
+    mockDb.builder.resolves(mockDbEvents)
   })
 
-  test('should query database with correct where clause', async () => {
+  test('should query the payments table with correct where clause', async () => {
     await getEvents(PARTITION_KEY, CATEGORY)
-    expect(mockFindAll).toHaveBeenCalledTimes(1)
-    expect(mockFindAll).toHaveBeenCalledWith({
-      where: {
-        partitionKey: PARTITION_KEY,
-        category: CATEGORY
-      },
-      order: [['timestamp', 'ASC']]
+    expect(mockDb.tables.payments).toHaveBeenCalledTimes(1)
+    expect(mockDb.tables.payments).toHaveBeenCalledWith()
+    expect(mockDb.builder.where).toHaveBeenCalledWith({
+      partitionKey: PARTITION_KEY,
+      category: CATEGORY
     })
   })
 
   test('should order results by timestamp ascending', async () => {
     await getEvents(PARTITION_KEY, CATEGORY)
-    const callArgs = mockFindAll.mock.calls[0][0]
-    expect(callArgs.order).toEqual([['timestamp', 'ASC']])
+    expect(mockDb.builder.orderBy).toHaveBeenCalledWith('timestamp', 'asc')
   })
 
   test('should return all events and parse data from JSON', async () => {
@@ -105,18 +78,19 @@ describe('get events', () => {
     expect(result[1].data).toEqual(enrichedEvent.data)
   })
 
-  test('should call toJSON on each event', async () => {
-    const toJSONSpy1 = jest.spyOn(mockDbEvents[0], 'toJSON')
-    const toJSONSpy2 = jest.spyOn(mockDbEvents[1], 'toJSON')
+  test('should return new objects rather than the database rows', async () => {
+    const result = await getEvents(PARTITION_KEY, CATEGORY)
+    expect(result[0]).not.toBe(mockDbEvents[0])
+    expect(result[1]).not.toBe(mockDbEvents[1])
+  })
 
-    await getEvents(PARTITION_KEY, CATEGORY)
-
-    expect(toJSONSpy1).toHaveBeenCalledTimes(1)
-    expect(toJSONSpy2).toHaveBeenCalledTimes(1)
+  test('should propagate a database failure', async () => {
+    mockDb.builder.rejects(new Error('DB error'))
+    await expect(getEvents(PARTITION_KEY, CATEGORY)).rejects.toThrow('DB error')
   })
 
   test('should return an empty array if no events', async () => {
-    mockFindAll.mockResolvedValue([])
+    mockDb.builder.resolves([])
     const result = await getEvents(PARTITION_KEY, CATEGORY)
     expect(result).toHaveLength(0)
   })
@@ -131,23 +105,10 @@ describe('get events', () => {
       subject: 'test-subject',
       time: 'test-time',
       type: 'test-type',
-      data: null,
-      toJSON: function () {
-        return {
-          id: this.id,
-          partitionKey: this.partitionKey,
-          category: this.category,
-          timestamp: this.timestamp,
-          source: this.source,
-          subject: this.subject,
-          time: this.time,
-          type: this.type,
-          data: this.data
-        }
-      }
+      data: null
     }
 
-    mockFindAll.mockResolvedValue([eventWithNoData])
+    mockDb.builder.resolves([eventWithNoData])
     const result = await getEvents(PARTITION_KEY, CATEGORY)
     expect(result[0].data).toBeNull()
   })
@@ -162,23 +123,10 @@ describe('get events', () => {
       subject: 'test-subject',
       time: 'test-time',
       type: 'test-type',
-      data: '',
-      toJSON: function () {
-        return {
-          id: this.id,
-          partitionKey: this.partitionKey,
-          category: this.category,
-          timestamp: this.timestamp,
-          source: this.source,
-          subject: this.subject,
-          time: this.time,
-          type: this.type,
-          data: this.data
-        }
-      }
+      data: ''
     }
 
-    mockFindAll.mockResolvedValue([eventWithEmptyData])
+    mockDb.builder.resolves([eventWithEmptyData])
     const result = await getEvents(PARTITION_KEY, CATEGORY)
     expect(result[0].data).toBeNull()
   })
@@ -226,23 +174,10 @@ describe('get events', () => {
       subject: 'test-subject',
       time: 'test-time',
       type: 'test-type',
-      data: complexData,
-      toJSON: function () {
-        return {
-          id: this.id,
-          partitionKey: this.partitionKey,
-          category: this.category,
-          timestamp: this.timestamp,
-          source: this.source,
-          subject: this.subject,
-          time: this.time,
-          type: this.type,
-          data: this.data
-        }
-      }
+      data: complexData
     }
 
-    mockFindAll.mockResolvedValue([eventWithComplexData])
+    mockDb.builder.resolves([eventWithComplexData])
     const result = await getEvents(PARTITION_KEY, CATEGORY)
     expect(result[0].data).toEqual(complexData)
   })
@@ -262,23 +197,10 @@ describe('get events', () => {
       subject: 'test-subject',
       time: 'test-time',
       type: 'test-type',
-      data: stringifiedData,
-      toJSON: function () {
-        return {
-          id: this.id,
-          partitionKey: this.partitionKey,
-          category: this.category,
-          timestamp: this.timestamp,
-          source: this.source,
-          subject: this.subject,
-          time: this.time,
-          type: this.type,
-          data: this.data
-        }
-      }
+      data: stringifiedData
     }
 
-    mockFindAll.mockResolvedValue([eventWithStringData])
+    mockDb.builder.resolves([eventWithStringData])
 
     const result = await getEvents(PARTITION_KEY, CATEGORY)
 

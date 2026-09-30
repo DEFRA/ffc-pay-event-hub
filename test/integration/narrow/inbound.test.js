@@ -15,22 +15,16 @@ const {
   WARNING
 } = require('../../../app/constants/categories')
 
-const db = require('../../../app/data')
+const db = require('../../../app/database')
+const { truncate } = require('../../helpers/truncate')
 const { processEvent } = require('../../../app/inbound/process-event')
 
 let events = {}
 
-beforeAll(async () => {
-  await db.sequelize.sync({ force: true })
-})
-
 beforeEach(async () => {
   jest.clearAllMocks()
 
-  await db.payments.destroy({ where: {}, truncate: true })
-  await db.holds.destroy({ where: {}, truncate: true })
-  await db.batches.destroy({ where: {}, truncate: true })
-  await db.warnings.destroy({ where: {}, truncate: true })
+  await truncate()
 
   events = {
     payment: structuredClone(require('../../mocks/events/payment')),
@@ -41,15 +35,14 @@ beforeEach(async () => {
 })
 
 afterAll(async () => {
-  await db.sequelize.close()
+  await truncate()
+  await db.close()
 })
 
-const expectRecordCreated = async (dbModel, partitionKey, category) => {
-  const records = await dbModel.findAll({
-    where: {
-      partitionKey,
-      category
-    }
+const expectRecordCreated = async (table, partitionKey, category) => {
+  const records = await table().where({
+    partitionKey,
+    category
   })
   expect(records.length).toBeGreaterThan(0)
 }
@@ -66,7 +59,7 @@ describe('inbound payment event', () => {
 
   test('saves 3 payment entities if no batch', async () => {
     await processEvent(events.payment)
-    const records = await db.payments.findAll()
+    const records = await db.payments()
     expect(records).toHaveLength(3)
   })
 
@@ -79,13 +72,13 @@ describe('inbound payment event', () => {
   test('saves 4 payment entities if batch exists', async () => {
     events.payment.data.batch = 'mock-batch'
     await processEvent(events.payment)
-    const records = await db.payments.findAll()
+    const records = await db.payments()
     expect(records).toHaveLength(4)
   })
 
   test('saves payment data as JSON object', async () => {
     await processEvent(events.payment)
-    const records = await db.payments.findAll()
+    const records = await db.payments()
     records.forEach((record) => {
       expect(typeof record.data).toBe('object')
       expect(record.data).toEqual(events.payment.data)
@@ -94,7 +87,7 @@ describe('inbound payment event', () => {
 
   test('saves all payment event properties', async () => {
     await processEvent(events.payment)
-    const record = await db.payments.findOne()
+    const record = await db.payments().first()
     expect(record.source).toBe(events.payment.source)
     expect(record.subject).toBe(events.payment.subject)
     expect(record.time.toISOString()).toBe(events.payment.time)
@@ -118,17 +111,15 @@ describe('inbound hold event', () => {
 
   test('saves 3 hold entities', async () => {
     await processEvent(events.hold)
-    const records = await db.holds.findAll()
+    const records = await db.holds()
     expect(records).toHaveLength(3)
   })
 
   test('saves holdCategoryId entity', async () => {
     await processEvent(events.hold)
 
-    const records = await db.holds.findAll({
-      where: {
-        partitionKey: events.hold.data.holdCategoryId.toString()
-      }
+    const records = await db.holds().where({
+      partitionKey: events.hold.data.holdCategoryId.toString()
     })
 
     expect(records.length).toBeGreaterThan(0)
@@ -136,7 +127,7 @@ describe('inbound hold event', () => {
 
   test('saves hold data as JSON object', async () => {
     await processEvent(events.hold)
-    const records = await db.holds.findAll()
+    const records = await db.holds()
     records.forEach((record) => {
       expect(typeof record.data).toBe('object')
       expect(record.data).toEqual(events.hold.data)
@@ -152,20 +143,20 @@ describe('inbound hold event', () => {
 describe('inbound batch event', () => {
   test('saves batch entity', async () => {
     await processEvent(events.batch)
-    const records = await db.batches.findAll()
+    const records = await db.batches()
     expect(records).toHaveLength(1)
     await expectRecordCreated(db.batches, events.batch.data.filename, BATCH)
   })
 
   test('saves batch with filename as partitionKey', async () => {
     await processEvent(events.batch)
-    const record = await db.batches.findOne()
+    const record = await db.batches().first()
     expect(record.partitionKey).toBe(events.batch.data.filename)
   })
 
   test('saves batch data as JSON string', async () => {
     await processEvent(events.batch)
-    const record = await db.batches.findOne()
+    const record = await db.batches().first()
     expect(typeof record.data).toBe('string')
     expect(JSON.parse(record.data)).toEqual(events.batch.data)
   })
@@ -179,20 +170,20 @@ describe('inbound batch event', () => {
 describe('inbound warning event', () => {
   test('saves warning entity', async () => {
     await processEvent(events.warning)
-    const records = await db.warnings.findAll()
+    const records = await db.warnings()
     expect(records).toHaveLength(1)
     await expectRecordCreated(db.warnings, 'event', WARNING)
   })
 
   test('saves warning with correct category', async () => {
     await processEvent(events.warning)
-    const record = await db.warnings.findOne()
+    const record = await db.warnings().first()
     expect(record.category).toBe(WARNING)
   })
 
   test('saves warning data as JSON object', async () => {
     await processEvent(events.warning)
-    const record = await db.warnings.findOne()
+    const record = await db.warnings().first()
     expect(typeof record.data).toBe('object')
     expect(record.data).toEqual(events.warning.data)
   })
@@ -209,7 +200,7 @@ describe('common event properties', () => {
     events.payment.data.batch = 'mock-batch'
     await processEvent(events.payment)
 
-    const records = await db.payments.findAll()
+    const records = await db.payments()
     const ids = records.map((r) => r.id)
     const uniqueIds = [...new Set(ids)]
     expect(uniqueIds).toHaveLength(records.length)
@@ -218,7 +209,7 @@ describe('common event properties', () => {
   test('sets timestamp for all records', async () => {
     await processEvent(events.payment)
 
-    const records = await db.payments.findAll()
+    const records = await db.payments()
     records.forEach((record) => {
       expect(record.timestamp).toBeDefined()
       expect(record.timestamp).toBeInstanceOf(Date)
@@ -229,7 +220,7 @@ describe('common event properties', () => {
   test('preserves event type across all records', async () => {
     await processEvent(events.payment)
 
-    const records = await db.payments.findAll()
+    const records = await db.payments()
     records.forEach((record) => {
       expect(record.type).toBe(events.payment.type)
     })

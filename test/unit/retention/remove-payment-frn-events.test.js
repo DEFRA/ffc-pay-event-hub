@@ -1,31 +1,31 @@
-const db = require('../../../app/data')
-const { removePaymentFRNEvents } = require('../../../app/retention/remove-payment-frn-events')
+const { createKnexMock } = require('../../helpers/mock-knex')
 
-jest.mock('../../../app/data', () => ({
-  paymentFrnEvents: {
-    destroy: jest.fn()
-  },
-  Sequelize: {
-    Op: {
-      in: Symbol('in')
-    }
-  }
+const mockDb = createKnexMock(['paymentFrnEvents'])
+
+jest.mock('../../../app/database', () => ({
+  client: mockDb.knex,
+  transaction: mockDb.transaction,
+  close: mockDb.close,
+  ...mockDb.tables
 }))
+
+const { removePaymentFRNEvents } = require('../../../app/retention/remove-payment-frn-events')
 
 describe('removePaymentFRNEvents', () => {
   const agreementNumber = 'AGR123'
   const frn = 456789
   const schemeId = 10
-  const transaction = { id: 'transaction-object' }
+  const transaction = mockDb.trx
 
   const correlationIds = ['corr-1', 'corr-2']
   const agreementNumbers = ['AGR123', 'AGR456']
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockDb.builder.resolves()
   })
 
-  test('calls db.paymentFrnEvents.destroy with agreementNumber when usesContractNumber is false', async () => {
+  test('deletes by agreementNumber, frn and schemeId inside the transaction when usesContractNumber is false', async () => {
     await removePaymentFRNEvents(
       agreementNumber,
       frn,
@@ -36,18 +36,17 @@ describe('removePaymentFRNEvents', () => {
       transaction
     )
 
-    expect(db.paymentFrnEvents.destroy).toHaveBeenCalledTimes(1)
-    expect(db.paymentFrnEvents.destroy).toHaveBeenCalledWith({
-      where: {
-        agreementNumber,
-        frn,
-        schemeId
-      },
-      transaction
+    expect(mockDb.tables.paymentFrnEvents).toHaveBeenCalledWith(transaction)
+    expect(mockDb.builder.where).toHaveBeenCalledWith({
+      agreementNumber,
+      frn,
+      schemeId
     })
+    expect(mockDb.builder.whereIn).not.toHaveBeenCalled()
+    expect(mockDb.builder.del).toHaveBeenCalledTimes(1)
   })
 
-  test('calls db.paymentFrnEvents.destroy using correlationIds and agreementNumbers when usesContractNumber is true', async () => {
+  test('deletes by correlationId and agreementNumber lists inside the transaction when usesContractNumber is true', async () => {
     await removePaymentFRNEvents(
       agreementNumber,
       frn,
@@ -58,23 +57,14 @@ describe('removePaymentFRNEvents', () => {
       transaction
     )
 
-    expect(db.paymentFrnEvents.destroy).toHaveBeenCalledTimes(1)
-    expect(db.paymentFrnEvents.destroy).toHaveBeenCalledWith({
-      where: {
-        correlationId: {
-          [db.Sequelize.Op.in]: correlationIds
-        },
-        agreementNumber: {
-          [db.Sequelize.Op.in]: agreementNumbers
-        },
-        frn,
-        schemeId
-      },
-      transaction
-    })
+    expect(mockDb.tables.paymentFrnEvents).toHaveBeenCalledWith(transaction)
+    expect(mockDb.builder.whereIn).toHaveBeenCalledWith('correlationId', correlationIds)
+    expect(mockDb.builder.whereIn).toHaveBeenCalledWith('agreementNumber', agreementNumbers)
+    expect(mockDb.builder.where).toHaveBeenCalledWith({ frn, schemeId })
+    expect(mockDb.builder.del).toHaveBeenCalledTimes(1)
   })
 
-  test('calls destroy with undefined transaction when not provided and usesContractNumber is false', async () => {
+  test('runs on the pool when no transaction is provided and usesContractNumber is false', async () => {
     await removePaymentFRNEvents(
       agreementNumber,
       frn,
@@ -84,17 +74,11 @@ describe('removePaymentFRNEvents', () => {
       agreementNumbers
     )
 
-    expect(db.paymentFrnEvents.destroy).toHaveBeenCalledWith({
-      where: {
-        agreementNumber,
-        frn,
-        schemeId
-      },
-      transaction: undefined
-    })
+    expect(mockDb.tables.paymentFrnEvents).toHaveBeenCalledWith(undefined)
+    expect(mockDb.builder.del).toHaveBeenCalledTimes(1)
   })
 
-  test('calls destroy with undefined transaction when not provided and usesContractNumber is true', async () => {
+  test('runs on the pool when no transaction is provided and usesContractNumber is true', async () => {
     await removePaymentFRNEvents(
       agreementNumber,
       frn,
@@ -104,44 +88,47 @@ describe('removePaymentFRNEvents', () => {
       agreementNumbers
     )
 
-    expect(db.paymentFrnEvents.destroy).toHaveBeenCalledWith({
-      where: {
-        correlationId: {
-          [db.Sequelize.Op.in]: correlationIds
-        },
-        agreementNumber: {
-          [db.Sequelize.Op.in]: agreementNumbers
-        },
-        frn,
-        schemeId
-      },
-      transaction: undefined
-    })
+    expect(mockDb.tables.paymentFrnEvents).toHaveBeenCalledWith(undefined)
+    expect(mockDb.builder.del).toHaveBeenCalledTimes(1)
+  })
+
+  test('runs on the pool when the transaction is null', async () => {
+    await removePaymentFRNEvents(
+      agreementNumber,
+      frn,
+      schemeId,
+      false,
+      correlationIds,
+      agreementNumbers,
+      null
+    )
+
+    expect(mockDb.tables.paymentFrnEvents).toHaveBeenCalledWith(undefined)
   })
 
   test.each([
     ['empty correlationIds', [], agreementNumbers],
     ['empty agreementNumbers', correlationIds, []]
   ])(
-    'returns without destroying when usesContractNumber is true and %s supplied',
-    async (_, testCorrelationIds, testAgreementNumbers) => {
+    'returns without deleting when usesContractNumber is true and %s supplied',
+    async (_, testIds, testAgreementNumbers) => {
       await removePaymentFRNEvents(
         agreementNumber,
         frn,
         schemeId,
         true,
-        testCorrelationIds,
+        testIds,
         testAgreementNumbers,
         transaction
       )
 
-      expect(db.paymentFrnEvents.destroy).not.toHaveBeenCalled()
+      expect(mockDb.tables.paymentFrnEvents).not.toHaveBeenCalled()
+      expect(mockDb.builder.del).not.toHaveBeenCalled()
     }
   )
 
-  test('propagates errors from db.paymentFrnEvents.destroy', async () => {
-    const error = new Error('DB failure')
-    db.paymentFrnEvents.destroy.mockRejectedValue(error)
+  test('propagates database errors', async () => {
+    mockDb.builder.rejects(new Error('DB failure'))
 
     await expect(
       removePaymentFRNEvents(
