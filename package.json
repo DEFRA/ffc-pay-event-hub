@@ -29,15 +29,14 @@
     "@azure/monitor-opentelemetry": "1.19.0",
     "@azure/storage-blob": "12.31.0",
     "@hapi/hapi": "21.4.8",
-    "ffc-database": "1.0.27",
+    "ffc-database": "2.0.0",
     "ffc-messaging": "2.10.10",
     "ffc-pay-schemes": "1.1.0",
     "hapi-pino": "13.0.0",
     "joi": "18.2.9",
     "log-timestamp": "0.3.0",
     "moment-timezone": "0.5.43",
-    "pg-query-stream": "4.9.6",
-    "sequelize": "6.37.8"
+    "pg-query-stream": "4.9.6"
   },
   "devDependencies": {
     "blipp": "4.0.2",
@@ -49,8 +48,7 @@
     "nodemon": "3.1.14"
   },
   "overrides": {
-    "moment": "2.31.0",
-    "uuid": "11.1.1"
+    "moment": "2.31.0"
   },
   "nodemonConfig": {
     "ignore": [
