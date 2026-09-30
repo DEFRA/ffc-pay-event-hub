@@ -1,7 +1,12 @@
-jest.mock('../../../../app/data', () => ({
-  schemePaymentTotals: {
-    findAll: jest.fn()
-  }
+const { createKnexMock } = require('../../../helpers/mock-knex')
+
+const mockDb = createKnexMock(['schemePaymentTotals'])
+
+jest.mock('../../../../app/database', () => ({
+  client: mockDb.knex,
+  transaction: mockDb.transaction,
+  close: mockDb.close,
+  ...mockDb.tables
 }))
 
 jest.mock(
@@ -11,7 +16,6 @@ jest.mock(
   })
 )
 
-const db = require('../../../../app/data')
 const {
   sanitiseSchemeData
 } = require('../../../../app/data-requests/scheme-id//sanitise-scheme-data')
@@ -29,11 +33,13 @@ describe('getEventsByScheme', () => {
       { schemeId: 1, paymentRequests: '5', value: 100 },
       { schemeId: 2, paymentRequests: '10', value: 250 }
     ]
-    db.schemePaymentTotals.findAll.mockResolvedValue(rawData)
+    mockDb.builder.resolves(rawData)
 
     const result = await getEventsByScheme()
 
-    expect(db.schemePaymentTotals.findAll).toHaveBeenCalledWith({ where: {} })
+    expect(mockDb.tables.schemePaymentTotals).toHaveBeenCalledWith()
+    expect(mockDb.builder.select).toHaveBeenCalledWith('schemeId', 'paymentRequests', 'value')
+    expect(mockDb.builder.where).toHaveBeenCalledWith({})
     expect(sanitiseSchemeData).toHaveBeenCalledWith([
       { schemeId: 1, paymentRequests: 5, value: 100 },
       { schemeId: 2, paymentRequests: 10, value: 250 }
@@ -46,13 +52,12 @@ describe('getEventsByScheme', () => {
 
   test('fetches scheme events for a specific schemeId', async () => {
     const rawData = [{ schemeId: 42, paymentRequests: '3', value: 75 }]
-    db.schemePaymentTotals.findAll.mockResolvedValue(rawData)
+    mockDb.builder.resolves(rawData)
 
     const result = await getEventsByScheme(42)
 
-    expect(db.schemePaymentTotals.findAll).toHaveBeenCalledWith({
-      where: { schemeId: 42 }
-    })
+    expect(mockDb.builder.select).toHaveBeenCalledWith('schemeId', 'paymentRequests', 'value')
+    expect(mockDb.builder.where).toHaveBeenCalledWith({ schemeId: 42 })
     expect(sanitiseSchemeData).toHaveBeenCalledWith([
       { schemeId: 42, paymentRequests: 3, value: 75 }
     ])
@@ -60,14 +65,19 @@ describe('getEventsByScheme', () => {
   })
 
   test('handles empty results', async () => {
-    db.schemePaymentTotals.findAll.mockResolvedValue([])
+    mockDb.builder.resolves([])
 
     const result = await getEventsByScheme(99)
 
-    expect(db.schemePaymentTotals.findAll).toHaveBeenCalledWith({
-      where: { schemeId: 99 }
-    })
+    expect(mockDb.builder.where).toHaveBeenCalledWith({ schemeId: 99 })
     expect(sanitiseSchemeData).toHaveBeenCalledWith([])
     expect(result).toEqual([])
+  })
+
+  test('propagates a database failure', async () => {
+    mockDb.builder.rejects(new Error('DB error'))
+
+    await expect(getEventsByScheme(1)).rejects.toThrow('DB error')
+    expect(sanitiseSchemeData).not.toHaveBeenCalled()
   })
 })
