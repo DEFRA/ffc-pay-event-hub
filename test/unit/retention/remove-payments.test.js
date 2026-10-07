@@ -21,8 +21,10 @@ jest.mock('../../../app/data', () => {
   }
 })
 
+const { getSchemeIds } = require('ffc-pay-schemes')
 const db = require('../../../app/data')
 const { removePayments } = require('../../../app/retention/remove-payments')
+const { MANUAL } = getSchemeIds()
 
 describe('removePayments', () => {
   const agreementNumber = 'AGR123'
@@ -43,6 +45,7 @@ describe('removePayments', () => {
       frn,
       schemeId,
       false,
+      undefined,
       transaction
     )
 
@@ -99,6 +102,7 @@ describe('removePayments', () => {
       frn,
       schemeId,
       true,
+      undefined,
       transaction
     )
 
@@ -160,6 +164,7 @@ describe('removePayments', () => {
       frn,
       schemeId,
       true,
+      undefined,
       transaction
     )
 
@@ -194,9 +199,41 @@ describe('removePayments', () => {
         frn,
         schemeId,
         true,
+        undefined,
         transaction
       )
     ).rejects.toThrow('findAll failure')
+  })
+
+  test('adds a pillar condition when scheme is manual', async () => {
+    await removePayments(agreementNumber, frn, MANUAL, false, 'SFI23', transaction)
+
+    const { sequelize, Sequelize } = db
+    const destroyCallArg = db.payments.destroy.mock.calls[0][0]
+
+    expect(sequelize.json).toHaveBeenCalledWith('data.pillar')
+    expect(Sequelize.where).toHaveBeenCalledWith('data.pillar', 'SFI23')
+    expect(destroyCallArg.where[db.Sequelize.Op.and]).toHaveLength(4)
+  })
+
+  test('does not add a pillar condition when scheme is manual but no pillar supplied', async () => {
+    await removePayments(agreementNumber, frn, MANUAL, false, undefined, transaction)
+
+    const { sequelize } = db
+    const destroyCallArg = db.payments.destroy.mock.calls[0][0]
+
+    expect(sequelize.json).not.toHaveBeenCalledWith('data.pillar')
+    expect(destroyCallArg.where[db.Sequelize.Op.and]).toHaveLength(3)
+  })
+
+  test('does not add a pillar condition when scheme is not manual', async () => {
+    await removePayments(agreementNumber, frn, schemeId, false, 'SFI23', transaction)
+
+    const { sequelize } = db
+    const destroyCallArg = db.payments.destroy.mock.calls[0][0]
+
+    expect(sequelize.json).not.toHaveBeenCalledWith('data.pillar')
+    expect(destroyCallArg.where[db.Sequelize.Op.and]).toHaveLength(3)
   })
 
   test('propagates errors from db.payments.destroy', async () => {
@@ -210,6 +247,7 @@ describe('removePayments', () => {
         frn,
         schemeId,
         false,
+        undefined,
         transaction
       )
     ).rejects.toThrow('DB failure')
@@ -223,6 +261,7 @@ describe('removePayments', () => {
       frn,
       schemeId,
       true,
+      undefined,
       transaction
     )
 

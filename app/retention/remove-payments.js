@@ -1,23 +1,31 @@
+const { getSchemeIds } = require('ffc-pay-schemes')
 const db = require('../data')
+const { MANUAL } = getSchemeIds()
 
-const removePayments = async (agreementNumber, frn, schemeId, usesContractNumber, transaction) => {
+const removePayments = async (agreementNumber, frn, schemeId, usesContractNumber, pillar, transaction) => {
   const agreementKey = usesContractNumber ? 'contractNumber' : 'agreementNumber'
 
+  const conditions = [
+    db.Sequelize.where(
+      db.sequelize.json(`data.${agreementKey}`),
+      agreementNumber
+    ),
+    db.Sequelize.where(
+      db.Sequelize.literal("(data->>'frn')::int"),
+      Number(frn)
+    ),
+    db.Sequelize.where(
+      db.Sequelize.literal("(data->>'schemeId')::int"),
+      Number(schemeId)
+    )
+  ]
+
+  if (schemeId === MANUAL && pillar) {
+    conditions.push(db.Sequelize.where(db.sequelize.json('data.pillar'), pillar))
+  }
+
   const where = {
-    [db.Sequelize.Op.and]: [
-      db.Sequelize.where(
-        db.sequelize.json(`data.${agreementKey}`),
-        agreementNumber
-      ),
-      db.Sequelize.where(
-        db.Sequelize.literal("(data->>'frn')::int"),
-        Number(frn)
-      ),
-      db.Sequelize.where(
-        db.Sequelize.literal("(data->>'schemeId')::int"),
-        Number(schemeId)
-      )
-    ]
+    [db.Sequelize.Op.and]: conditions
   }
 
   let batches = []

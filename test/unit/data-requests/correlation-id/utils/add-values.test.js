@@ -11,7 +11,9 @@ const submitted = require('../../../../mocks/events/submitted')
 const {
   addValues
 } = require('../../../../../app/data-requests/correlation-id/utils/add-values')
-const { FC } = require('../../../../../app/constants/schemes')
+const { getSchemeIds } = require('ffc-pay-schemes')
+
+const { FC } = getSchemeIds()
 
 let groupedEvent
 
