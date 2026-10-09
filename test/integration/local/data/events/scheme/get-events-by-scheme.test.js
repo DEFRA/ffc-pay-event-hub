@@ -1,5 +1,5 @@
 const { getSchemeIds, getSchemeNameFromSchemeId } = require('ffc-pay-schemes')
-const db = require('../../../../../../app/data')
+const db = require('../../../../../../app/database')
 const {
   getEventsByScheme
 } = require('../../../../../../app/data-requests/scheme-id/get-events-by-scheme')
@@ -8,7 +8,7 @@ const SCHEMES = Object.keys(getSchemeIds())
 
 beforeAll(async () => {
   try {
-    await db.sequelize.authenticate()
+    await db.client.raw('select 1')
   } catch (error) {
     console.error('Database connection failed:', error.message)
     throw error
@@ -16,7 +16,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await db.sequelize.close()
+  await db.close()
 })
 
 describe('getEventsByScheme (view-based)', () => {

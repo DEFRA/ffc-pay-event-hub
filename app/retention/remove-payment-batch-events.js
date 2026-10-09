@@ -1,4 +1,4 @@
-const db = require('../data')
+const { paymentBatchEvents } = require('../database')
 
 const removePaymentBatchEvents = async (
   agreementNumber,
@@ -14,31 +14,22 @@ const removePaymentBatchEvents = async (
       return
     }
 
-    await db.paymentBatchEvents.destroy({
-      where: {
-        batchName: {
-          [db.Sequelize.Op.in]: batches
-        },
-        agreementNumber: {
-          [db.Sequelize.Op.in]: agreementNumbers
-        },
-        frn,
-        schemeId
-      },
-      transaction
-    })
+    await paymentBatchEvents(transaction ?? undefined)
+      .whereIn('batchName', batches)
+      .whereIn('agreementNumber', agreementNumbers)
+      .where({ frn, schemeId })
+      .del()
 
     return
   }
 
-  await db.paymentBatchEvents.destroy({
-    where: {
+  await paymentBatchEvents(transaction ?? undefined)
+    .where({
       agreementNumber,
       frn,
       schemeId
-    },
-    transaction
-  })
+    })
+    .del()
 }
 
 module.exports = {

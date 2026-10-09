@@ -1,31 +1,19 @@
 const { getSchemeIds } = require('ffc-pay-schemes')
-const db = require('../data')
+const db = require('../database')
 const { MANUAL } = getSchemeIds()
 
 const removePayments = async (agreementNumber, frn, schemeId, usesContractNumber, pillar, transaction) => {
   const agreementKey = usesContractNumber ? 'contractNumber' : 'agreementNumber'
 
-  const conditions = [
-    db.Sequelize.where(
-      db.sequelize.json(`data.${agreementKey}`),
-      agreementNumber
-    ),
-    db.Sequelize.where(
-      db.Sequelize.literal("(data->>'frn')::int"),
-      Number(frn)
-    ),
-    db.Sequelize.where(
-      db.Sequelize.literal("(data->>'schemeId')::int"),
-      Number(schemeId)
-    )
-  ]
+  const applyConditions = (query) => {
+    query
+      .whereRaw(`"data" #>> '{${agreementKey}}' = ?`, [agreementNumber])
+      .whereRaw("(data->>'frn')::int = ?", [Number(frn)])
+      .whereRaw("(data->>'schemeId')::int = ?", [Number(schemeId)])
 
-  if (schemeId === MANUAL && pillar) {
-    conditions.push(db.Sequelize.where(db.sequelize.json('data.pillar'), pillar))
-  }
-
-  const where = {
-    [db.Sequelize.Op.and]: conditions
+    if (schemeId === MANUAL && pillar) {
+      query.whereRaw('"data" #>> \'{pillar}\' = ?', [pillar])
+    }
   }
 
   let batches = []
@@ -33,16 +21,13 @@ const removePayments = async (agreementNumber, frn, schemeId, usesContractNumber
   let correlationIds = []
 
   if (usesContractNumber) {
-    const paymentsToDelete = await db.payments.findAll({
-      attributes: [
-        [db.Sequelize.literal("data->>'batch'"), 'batch'],
-        [db.Sequelize.literal("data->>'agreementNumber'"), 'agreementNumber'],
-        [db.Sequelize.literal("data->>'correlationId'"), 'correlationId']
-      ],
-      where,
-      raw: true,
-      transaction
-    })
+    const paymentsToDelete = await db.payments(transaction ?? undefined)
+      .select(
+        db.client.raw("data->>'batch' AS \"batch\""),
+        db.client.raw("data->>'agreementNumber' AS \"agreementNumber\""),
+        db.client.raw("data->>'correlationId' AS \"correlationId\"")
+      )
+      .modify(applyConditions)
 
     batches = [
       ...new Set(
@@ -69,10 +54,9 @@ const removePayments = async (agreementNumber, frn, schemeId, usesContractNumber
     ]
   }
 
-  await db.payments.destroy({
-    where,
-    transaction
-  })
+  await db.payments(transaction ?? undefined)
+    .modify(applyConditions)
+    .del()
 
   return {
     batches,
