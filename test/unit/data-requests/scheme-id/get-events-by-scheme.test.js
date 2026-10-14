@@ -38,7 +38,7 @@ describe('getEventsByScheme', () => {
     const result = await getEventsByScheme()
 
     expect(mockDb.tables.schemePaymentTotals).toHaveBeenCalledWith()
-    expect(mockDb.builder.select).toHaveBeenCalledWith('schemeId', 'paymentRequests', 'value')
+    expect(mockDb.builder.select).not.toHaveBeenCalled()
     expect(mockDb.builder.where).toHaveBeenCalledWith({})
     expect(sanitiseSchemeData).toHaveBeenCalledWith([
       { schemeId: 1, paymentRequests: 5, value: 100 },
@@ -56,7 +56,7 @@ describe('getEventsByScheme', () => {
 
     const result = await getEventsByScheme(42)
 
-    expect(mockDb.builder.select).toHaveBeenCalledWith('schemeId', 'paymentRequests', 'value')
+    expect(mockDb.builder.select).not.toHaveBeenCalled()
     expect(mockDb.builder.where).toHaveBeenCalledWith({ schemeId: 42 })
     expect(sanitiseSchemeData).toHaveBeenCalledWith([
       { schemeId: 42, paymentRequests: 3, value: 75 }

@@ -5,7 +5,6 @@ const getEventsByScheme = async (schemeId) => {
   const where = schemeId ? { schemeId } : {}
 
   const rawSchemeData = await schemePaymentTotals()
-    .select('schemeId', 'paymentRequests', 'value')
     .where(where)
 
   const schemeData = rawSchemeData.map((event) => ({
