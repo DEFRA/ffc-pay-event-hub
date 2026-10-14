@@ -15,12 +15,14 @@ randomUUID.mockImplementation(() => {
   return uuid
 })
 
-jest.mock('../../../../app/data')
-const db = require('../../../../app/data')
-const mockBulkCreate = jest.fn()
-db.payments = {
-  bulkCreate: mockBulkCreate
-}
+const { createKnexMock } = require('../../../helpers/mock-knex')
+const mockDb = createKnexMock(['payments'])
+jest.mock('../../../../app/database', () => ({
+  client: mockDb.knex,
+  transaction: mockDb.transaction,
+  close: mockDb.close,
+  ...mockDb.tables
+}))
 
 jest.mock('../../../../app/inbound/save-event/create-row')
 const {
@@ -42,6 +44,7 @@ const event = require('../../../mocks/events/payment')
 describe('save payment event', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockDb.builder.resolves()
     uuidCallCount = 0
 
     // Reset the mock implementation for each test
@@ -54,7 +57,7 @@ describe('save payment event', () => {
         subject: event.subject,
         time: event.time,
         type: event.type,
-        data: JSON.stringify(event.data)
+        data: event.data
       })
     )
   })
@@ -162,9 +165,15 @@ describe('save payment event', () => {
     expect(randomUUID).toHaveBeenCalledTimes(4)
   })
 
-  test('calls bulkCreate once', async () => {
+  test('inserts all records into the payments table in one statement', async () => {
     await savePaymentEvent(event)
-    expect(mockBulkCreate).toHaveBeenCalledTimes(1)
+    expect(mockDb.tables.payments).toHaveBeenCalledWith()
+    expect(mockDb.builder.insert).toHaveBeenCalledTimes(1)
+  })
+
+  test('propagates a database failure', async () => {
+    mockDb.builder.rejects(new Error('DB error'))
+    await expect(savePaymentEvent(event)).rejects.toThrow('DB error')
   })
 
   test('creates records with correct structure without batch', async () => {
@@ -180,18 +189,18 @@ describe('save payment event', () => {
     }
     await savePaymentEvent(eventWithoutBatch)
 
-    const records = mockBulkCreate.mock.calls[0][0]
+    const records = mockDb.builder.insert.mock.calls[0][0]
     expect(records).toHaveLength(3)
 
     expect(records[0]).toEqual({
       id: mockUuids[0],
       partitionKey: '1234567890',
       rowKey: 'corr-123|INV-001',
-      timestamp: mockTimestamp,
+      timestamp: new Date(mockTimestamp).toISOString(),
       category: FRN,
       source: event.source,
       subject: event.subject,
-      time: event.time,
+      time: new Date(event.time).toISOString(),
       type: event.type,
       data: JSON.stringify(eventWithoutBatch.data)
     })
@@ -200,11 +209,11 @@ describe('save payment event', () => {
       id: mockUuids[1],
       partitionKey: 'corr-123',
       rowKey: '1234567890|INV-001',
-      timestamp: mockTimestamp,
+      timestamp: new Date(mockTimestamp).toISOString(),
       category: CORRELATION_ID,
       source: event.source,
       subject: event.subject,
-      time: event.time,
+      time: new Date(event.time).toISOString(),
       type: event.type,
       data: JSON.stringify(eventWithoutBatch.data)
     })
@@ -213,11 +222,11 @@ describe('save payment event', () => {
       id: mockUuids[2],
       partitionKey: 'scheme-456',
       rowKey: '1234567890|INV-001',
-      timestamp: mockTimestamp,
+      timestamp: new Date(mockTimestamp).toISOString(),
       category: SCHEME_ID,
       source: event.source,
       subject: event.subject,
-      time: event.time,
+      time: new Date(event.time).toISOString(),
       type: event.type,
       data: JSON.stringify(eventWithoutBatch.data)
     })
@@ -236,18 +245,18 @@ describe('save payment event', () => {
     }
     await savePaymentEvent(eventWithBatch)
 
-    const records = mockBulkCreate.mock.calls[0][0]
+    const records = mockDb.builder.insert.mock.calls[0][0]
     expect(records).toHaveLength(4)
 
     expect(records[3]).toEqual({
       id: mockUuids[3],
       partitionKey: 'batch-999',
       rowKey: '1234567890|INV-001',
-      timestamp: mockTimestamp,
+      timestamp: new Date(mockTimestamp).toISOString(),
       category: BATCH,
       source: event.source,
       subject: event.subject,
-      time: event.time,
+      time: new Date(event.time).toISOString(),
       type: event.type,
       data: JSON.stringify(eventWithBatch.data)
     })
@@ -263,9 +272,9 @@ describe('save payment event', () => {
     }
     await savePaymentEvent(eventWithBatch)
 
-    const records = mockBulkCreate.mock.calls[0][0]
+    const records = mockDb.builder.insert.mock.calls[0][0]
     records.forEach((record) => {
-      expect(record.timestamp).toBe(mockTimestamp)
+      expect(record.timestamp).toBe(new Date(mockTimestamp).toISOString())
     })
   })
 
@@ -279,7 +288,7 @@ describe('save payment event', () => {
     }
     await savePaymentEvent(eventWithBatch)
 
-    const records = mockBulkCreate.mock.calls[0][0]
+    const records = mockDb.builder.insert.mock.calls[0][0]
     const ids = records.map((r) => r.id)
     const uniqueIds = [...new Set(ids)]
     expect(uniqueIds).toHaveLength(records.length)

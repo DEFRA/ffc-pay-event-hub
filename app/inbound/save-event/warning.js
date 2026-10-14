@@ -1,4 +1,4 @@
-const db = require('../../data')
+const { warnings } = require('../../database')
 const { randomUUID } = require('node:crypto')
 const { WARNING } = require('../../constants/categories')
 const { createRow } = require('./create-row')
@@ -14,16 +14,16 @@ const saveWarningEvent = async (event) => {
     id: randomUUID(),
     partitionKey: row.partitionKey,
     rowKey: row.rowKey,
-    timestamp,
+    timestamp: new Date(timestamp).toISOString(),
     category: row.category,
     source: row.source,
     subject: row.subject,
-    time: row.time,
+    time: new Date(row.time).toISOString(),
     type: row.type,
-    data: row.data
+    data: JSON.stringify(row.data)
   }
 
-  await db.warnings.create(record)
+  await warnings().insert(record)
 }
 
 module.exports = {

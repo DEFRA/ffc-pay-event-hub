@@ -1,159 +1,94 @@
+const { createKnexMock } = require('../../helpers/mock-knex')
+
+const mockDb = createKnexMock(['warnings'])
+
+jest.mock('../../../app/database', () => ({
+  client: mockDb.knex,
+  transaction: mockDb.transaction,
+  close: mockDb.close,
+  ...mockDb.tables
+}))
+
 const { getSchemeIds } = require('ffc-pay-schemes')
-const db = require('../../../app/data')
 const { removeWarnings } = require('../../../app/retention/remove-warnings')
 const { MANUAL } = getSchemeIds()
-
-jest.mock('../../../app/data', () => {
-  const sequelizeWhereMock = jest.fn()
-  const sequelizeJsonMock = jest.fn((path) => path)
-  const sequelizeLiteralMock = jest.fn((sql) => ({ _sql: sql }))
-
-  return {
-    warnings: {
-      destroy: jest.fn()
-    },
-    sequelize: {
-      Op: {
-        and: Symbol('and')
-      },
-      json: sequelizeJsonMock,
-      literal: sequelizeLiteralMock
-    },
-    Sequelize: {
-      Op: {
-        and: Symbol('and')
-      },
-      where: sequelizeWhereMock,
-      literal: sequelizeLiteralMock
-    }
-  }
-})
 
 describe('removeWarnings', () => {
   const agreementNumber = 'AGR123'
   const frn = 456789
   const schemeId = 10
-  const transaction = { id: 'transaction-object' }
+  const transaction = mockDb.trx
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockDb.builder.resolves()
   })
 
-  test('calls db.warnings.destroy with agreementNumber in where when usesContractNumber is false or omitted', async () => {
+  test('deletes warnings matching agreementNumber, frn and schemeId inside the transaction when usesContractNumber is false', async () => {
     await removeWarnings(agreementNumber, frn, schemeId, false, undefined, transaction)
 
-    const { sequelize, Sequelize } = db
-    const destroyCallArg = db.warnings.destroy.mock.calls[0][0]
-
-    expect(sequelize.json).toHaveBeenCalledWith('data.agreementNumber')
-    expect(Sequelize.where).toHaveBeenCalledWith('data.agreementNumber', agreementNumber)
-
-    expect(sequelize.json).not.toHaveBeenCalledWith('data.frn')
-    expect(sequelize.json).not.toHaveBeenCalledWith('data.schemeId')
-
-    expect(sequelize.literal).toHaveBeenCalledWith("(data->>'frn')::int")
-    expect(sequelize.literal).toHaveBeenCalledWith("(data->>'schemeId')::int")
-
-    expect(Sequelize.where).toHaveBeenCalledWith(
-      expect.objectContaining({ _sql: "(data->>'frn')::int" }),
-      frn
-    )
-    expect(Sequelize.where).toHaveBeenCalledWith(
-      expect.objectContaining({ _sql: "(data->>'schemeId')::int" }),
-      schemeId
-    )
-
-    expect(db.warnings.destroy).toHaveBeenCalledTimes(1)
-    expect(destroyCallArg).toHaveProperty('where')
-
-    const symbols = Object.getOwnPropertySymbols(destroyCallArg.where)
-    expect(symbols).toContain(db.Sequelize.Op.and)
-
-    expect(destroyCallArg.where[db.Sequelize.Op.and]).toEqual(Sequelize.where.mock.results.map(r => r.value))
-    expect(destroyCallArg.transaction).toBe(transaction)
+    expect(mockDb.tables.warnings).toHaveBeenCalledWith(transaction)
+    expect(mockDb.builder.whereRaw).toHaveBeenCalledTimes(3)
+    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith('"data" #>> \'{agreementNumber}\' = ?', [agreementNumber])
+    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith("(data->>'frn')::int = ?", [frn])
+    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith("(data->>'schemeId')::int = ?", [schemeId])
+    expect(mockDb.builder.del).toHaveBeenCalledTimes(1)
   })
 
-  test('calls db.warnings.destroy with contractNumber in where when usesContractNumber is true', async () => {
+  test('deletes warnings matching contractNumber when usesContractNumber is true', async () => {
     await removeWarnings(agreementNumber, frn, schemeId, true, undefined, transaction)
 
-    const { sequelize, Sequelize } = db
-    const destroyCallArg = db.warnings.destroy.mock.calls[0][0]
-
-    expect(sequelize.json).toHaveBeenCalledWith('data.contractNumber')
-    expect(Sequelize.where).toHaveBeenCalledWith('data.contractNumber', agreementNumber)
-
-    expect(sequelize.json).not.toHaveBeenCalledWith('data.frn')
-    expect(sequelize.json).not.toHaveBeenCalledWith('data.schemeId')
-
-    expect(sequelize.literal).toHaveBeenCalledWith("(data->>'frn')::int")
-    expect(sequelize.literal).toHaveBeenCalledWith("(data->>'schemeId')::int")
-
-    expect(Sequelize.where).toHaveBeenCalledWith(
-      expect.objectContaining({ _sql: "(data->>'frn')::int" }),
-      frn
-    )
-    expect(Sequelize.where).toHaveBeenCalledWith(
-      expect.objectContaining({ _sql: "(data->>'schemeId')::int" }),
-      schemeId
-    )
-
-    expect(db.warnings.destroy).toHaveBeenCalledTimes(1)
-
-    const symbols = Object.getOwnPropertySymbols(destroyCallArg.where)
-    expect(symbols).toContain(db.Sequelize.Op.and)
-
-    expect(destroyCallArg.where[db.Sequelize.Op.and]).toEqual(Sequelize.where.mock.results.map(r => r.value))
-    expect(destroyCallArg.transaction).toBe(transaction)
+    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith('"data" #>> \'{contractNumber}\' = ?', [agreementNumber])
+    expect(mockDb.builder.whereRaw).not.toHaveBeenCalledWith('"data" #>> \'{agreementNumber}\' = ?', expect.anything())
+    expect(mockDb.builder.del).toHaveBeenCalledTimes(1)
   })
 
-  test('calls db.warnings.destroy with undefined transaction if not provided, usesContractNumber false', async () => {
+  test('binds frn and schemeId as numbers', async () => {
+    await removeWarnings(agreementNumber, '1234567890', '5', false, undefined, transaction)
+
+    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith("(data->>'frn')::int = ?", [1234567890])
+    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith("(data->>'schemeId')::int = ?", [5])
+  })
+
+  test('runs on the pool when no transaction is provided, usesContractNumber false', async () => {
     await removeWarnings(agreementNumber, frn, schemeId, false)
 
-    const destroyCallArg = db.warnings.destroy.mock.calls[0][0]
-    expect(destroyCallArg.transaction).toBeUndefined()
+    expect(mockDb.tables.warnings).toHaveBeenCalledWith(undefined)
   })
 
-  test('calls db.warnings.destroy with undefined transaction if not provided, usesContractNumber true', async () => {
+  test('runs on the pool when no transaction is provided, usesContractNumber true', async () => {
     await removeWarnings(agreementNumber, frn, schemeId, true)
 
-    const destroyCallArg = db.warnings.destroy.mock.calls[0][0]
-    expect(destroyCallArg.transaction).toBeUndefined()
+    expect(mockDb.tables.warnings).toHaveBeenCalledWith(undefined)
+  })
+
+  test('runs on the pool when the transaction is null', async () => {
+    await removeWarnings(agreementNumber, frn, schemeId, false, undefined, null)
+
+    expect(mockDb.tables.warnings).toHaveBeenCalledWith(undefined)
   })
 
   test('adds a pillar condition when scheme is manual', async () => {
     await removeWarnings(agreementNumber, frn, MANUAL, false, 'SFI23', transaction)
 
-    const { sequelize, Sequelize } = db
-    const destroyCallArg = db.warnings.destroy.mock.calls[0][0]
-
-    expect(sequelize.json).toHaveBeenCalledWith('data.pillar')
-    expect(Sequelize.where).toHaveBeenCalledWith('data.pillar', 'SFI23')
-    expect(destroyCallArg.where[db.Sequelize.Op.and]).toHaveLength(4)
+    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith('"data" #>> \'{pillar}\' = ?', ['SFI23'])
+    expect(mockDb.builder.whereRaw).toHaveBeenCalledTimes(4)
   })
 
   test('does not add a pillar condition when scheme is manual but no pillar supplied', async () => {
     await removeWarnings(agreementNumber, frn, MANUAL, false, undefined, transaction)
 
-    const { sequelize } = db
-    const destroyCallArg = db.warnings.destroy.mock.calls[0][0]
-
-    expect(sequelize.json).not.toHaveBeenCalledWith('data.pillar')
-    expect(destroyCallArg.where[db.Sequelize.Op.and]).toHaveLength(3)
+    expect(mockDb.builder.whereRaw).toHaveBeenCalledTimes(3)
   })
 
   test('does not add a pillar condition when scheme is not manual', async () => {
     await removeWarnings(agreementNumber, frn, schemeId, false, 'SFI23', transaction)
 
-    const { sequelize } = db
-    const destroyCallArg = db.warnings.destroy.mock.calls[0][0]
-
-    expect(sequelize.json).not.toHaveBeenCalledWith('data.pillar')
-    expect(destroyCallArg.where[db.Sequelize.Op.and]).toHaveLength(3)
+    expect(mockDb.builder.whereRaw).toHaveBeenCalledTimes(3)
   })
 
-  test('propagates errors from db.warnings.destroy', async () => {
-    const error = new Error('DB failure')
-    db.warnings.destroy.mockRejectedValue(error)
+  test('propagates database errors', async () => {
+    mockDb.builder.rejects(new Error('DB failure'))
 
     await expect(removeWarnings(agreementNumber, frn, schemeId, false, undefined, transaction)).rejects.toThrow('DB failure')
   })

@@ -5,12 +5,14 @@ jest.mock('node:crypto', () => ({ randomUUID: jest.fn() }))
 const mockUuid = 'test-uuid-5678'
 randomUUID.mockReturnValue(mockUuid)
 
-jest.mock('../../../../app/data')
-const db = require('../../../../app/data')
-const mockCreate = jest.fn()
-db.warnings = {
-  create: mockCreate
-}
+const { createKnexMock } = require('../../../helpers/mock-knex')
+const mockDb = createKnexMock(['warnings'])
+jest.mock('../../../../app/database', () => ({
+  client: mockDb.knex,
+  transaction: mockDb.transaction,
+  close: mockDb.close,
+  ...mockDb.tables
+}))
 
 jest.mock('../../../../app/inbound/save-event/create-row')
 const {
@@ -22,9 +24,9 @@ const mockRow = {
   category: WARNING,
   source: 'test-source',
   subject: 'test-subject',
-  time: 'test-time',
+  time: '2024-01-01T10:00:00.000Z',
   type: 'test-type',
-  data: 'test-data'
+  data: { message: 'test-data' }
 }
 mockCreateRow.mockReturnValue(mockRow)
 
@@ -50,6 +52,7 @@ const event = require('../../../mocks/events/warning')
 describe('save warning event', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockDb.builder.resolves()
   })
 
   test('calls getTimestamp with event time', async () => {
@@ -77,58 +80,64 @@ describe('save warning event', () => {
     expect(randomUUID).toHaveBeenCalledTimes(1)
   })
 
-  test('creates one warning record', async () => {
+  test('creates one warning record in the warnings table', async () => {
     await saveWarningEvent(event)
-    expect(mockCreate).toHaveBeenCalledTimes(1)
+    expect(mockDb.tables.warnings).toHaveBeenCalledWith()
+    expect(mockDb.builder.insert).toHaveBeenCalledTimes(1)
+  })
+
+  test('propagates a database failure', async () => {
+    mockDb.builder.rejects(new Error('DB error'))
+    await expect(saveWarningEvent(event)).rejects.toThrow('DB error')
   })
 
   test('creates warning record with correct structure', async () => {
     await saveWarningEvent(event)
-    expect(mockCreate).toHaveBeenCalledWith({
+    expect(mockDb.builder.insert).toHaveBeenCalledWith({
       id: mockUuid,
       partitionKey: mockRow.partitionKey,
       rowKey: mockRow.rowKey,
-      timestamp: mockTimestamp,
+      timestamp: new Date(mockTimestamp).toISOString(),
       category: mockRow.category,
       source: mockRow.source,
       subject: mockRow.subject,
-      time: mockRow.time,
+      time: new Date(mockRow.time).toISOString(),
       type: mockRow.type,
-      data: mockRow.data
+      data: JSON.stringify(mockRow.data)
     })
   })
 
   test('uses row partition key from createRow', async () => {
     await saveWarningEvent(event)
-    const callArg = mockCreate.mock.calls[0][0]
+    const callArg = mockDb.builder.insert.mock.calls[0][0]
     expect(callArg.partitionKey).toBe(mockRow.partitionKey)
   })
 
   test('uses row key from createRow', async () => {
     await saveWarningEvent(event)
-    const callArg = mockCreate.mock.calls[0][0]
+    const callArg = mockDb.builder.insert.mock.calls[0][0]
     expect(callArg.rowKey).toBe(mockRow.rowKey)
   })
 
   test('uses timestamp for timestamp field', async () => {
     await saveWarningEvent(event)
-    const callArg = mockCreate.mock.calls[0][0]
-    expect(callArg.timestamp).toBe(mockTimestamp)
+    const callArg = mockDb.builder.insert.mock.calls[0][0]
+    expect(callArg.timestamp).toBe(new Date(mockTimestamp).toISOString())
   })
 
   test('uses category from createRow', async () => {
     await saveWarningEvent(event)
-    const callArg = mockCreate.mock.calls[0][0]
+    const callArg = mockDb.builder.insert.mock.calls[0][0]
     expect(callArg.category).toBe(mockRow.category)
   })
 
   test('preserves all row properties in record', async () => {
     await saveWarningEvent(event)
-    const callArg = mockCreate.mock.calls[0][0]
+    const callArg = mockDb.builder.insert.mock.calls[0][0]
     expect(callArg.source).toBe(mockRow.source)
     expect(callArg.subject).toBe(mockRow.subject)
-    expect(callArg.time).toBe(mockRow.time)
+    expect(callArg.time).toBe(new Date(mockRow.time).toISOString())
     expect(callArg.type).toBe(mockRow.type)
-    expect(callArg.data).toBe(mockRow.data)
+    expect(callArg.data).toBe(JSON.stringify(mockRow.data))
   })
 })

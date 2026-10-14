@@ -10,12 +10,14 @@ randomUUID.mockImplementation(() => {
   return uuid
 })
 
-jest.mock('../../../../app/data')
-const db = require('../../../../app/data')
-const mockBulkCreate = jest.fn()
-db.holds = {
-  bulkCreate: mockBulkCreate
-}
+const { createKnexMock } = require('../../../helpers/mock-knex')
+const mockDb = createKnexMock(['holds'])
+jest.mock('../../../../app/database', () => ({
+  client: mockDb.knex,
+  transaction: mockDb.transaction,
+  close: mockDb.close,
+  ...mockDb.tables
+}))
 
 jest.mock('../../../../app/inbound/save-event/create-row')
 const {
@@ -29,7 +31,7 @@ mockCreateRow.mockImplementation((partitionKey, rowKey, category, event) => ({
   subject: event.subject,
   time: event.time,
   type: event.type,
-  data: JSON.stringify(event.data)
+  data: event.data
 }))
 
 jest.mock('../../../../app/inbound/save-event/get-timestamp')
@@ -45,6 +47,7 @@ const event = require('../../../mocks/events/hold')
 describe('save hold event', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockDb.builder.resolves()
     uuidCallCount = 0
   })
 
@@ -93,9 +96,15 @@ describe('save hold event', () => {
     expect(randomUUID).toHaveBeenCalledTimes(3)
   })
 
-  test('calls bulkCreate once', async () => {
+  test('inserts all records into the holds table in one statement', async () => {
     await saveHoldEvent(event)
-    expect(mockBulkCreate).toHaveBeenCalledTimes(1)
+    expect(mockDb.tables.holds).toHaveBeenCalledWith()
+    expect(mockDb.builder.insert).toHaveBeenCalledTimes(1)
+  })
+
+  test('propagates a database failure', async () => {
+    mockDb.builder.rejects(new Error('DB error'))
+    await expect(saveHoldEvent(event)).rejects.toThrow('DB error')
   })
 
   test('creates records with correct structure', async () => {
@@ -110,18 +119,17 @@ describe('save hold event', () => {
     }
     await saveHoldEvent(holdEvent)
 
-    const records = mockBulkCreate.mock.calls[0][0]
+    const records = mockDb.builder.insert.mock.calls[0][0]
     expect(records).toHaveLength(3)
 
     expect(records[0]).toEqual({
       id: mockUuids[0],
       partitionKey: '9876543210',
       rowKey: 'scheme-789',
-      timestamp: mockTimestamp,
+      timestamp: new Date(mockTimestamp).toISOString(),
       category: FRN,
       source: event.source,
-      subject: event.subject,
-      time: event.time,
+      time: new Date(event.time).toISOString(),
       type: event.type,
       data: JSON.stringify(holdEvent.data)
     })
@@ -130,11 +138,10 @@ describe('save hold event', () => {
       id: mockUuids[1],
       partitionKey: 'scheme-789',
       rowKey: '9876543210',
-      timestamp: mockTimestamp,
+      timestamp: new Date(mockTimestamp).toISOString(),
       category: SCHEME_ID,
       source: event.source,
-      subject: event.subject,
-      time: event.time,
+      time: new Date(event.time).toISOString(),
       type: event.type,
       data: JSON.stringify(holdEvent.data)
     })
@@ -143,11 +150,10 @@ describe('save hold event', () => {
       id: mockUuids[2],
       partitionKey: 'hold-cat-123',
       rowKey: '9876543210',
-      timestamp: mockTimestamp,
+      timestamp: new Date(mockTimestamp).toISOString(),
       category: SCHEME_ID,
       source: event.source,
-      subject: event.subject,
-      time: event.time,
+      time: new Date(event.time).toISOString(),
       type: event.type,
       data: JSON.stringify(holdEvent.data)
     })
@@ -156,16 +162,16 @@ describe('save hold event', () => {
   test('all records have same timestamp', async () => {
     await saveHoldEvent(event)
 
-    const records = mockBulkCreate.mock.calls[0][0]
+    const records = mockDb.builder.insert.mock.calls[0][0]
     records.forEach((record) => {
-      expect(record.timestamp).toBe(mockTimestamp)
+      expect(record.timestamp).toBe(new Date(mockTimestamp).toISOString())
     })
   })
 
   test('each record has unique UUID', async () => {
     await saveHoldEvent(event)
 
-    const records = mockBulkCreate.mock.calls[0][0]
+    const records = mockDb.builder.insert.mock.calls[0][0]
     const ids = records.map((r) => r.id)
     const uniqueIds = [...new Set(ids)]
     expect(uniqueIds).toHaveLength(records.length)
@@ -182,7 +188,7 @@ describe('save hold event', () => {
   test('uses correct categories for each row', async () => {
     await saveHoldEvent(event)
 
-    const records = mockBulkCreate.mock.calls[0][0]
+    const records = mockDb.builder.insert.mock.calls[0][0]
     expect(records[0].category).toBe(FRN)
     expect(records[1].category).toBe(SCHEME_ID)
     expect(records[2].category).toBe(SCHEME_ID)
@@ -191,11 +197,11 @@ describe('save hold event', () => {
   test('preserves all event properties in records', async () => {
     await saveHoldEvent(event)
 
-    const records = mockBulkCreate.mock.calls[0][0]
+    const records = mockDb.builder.insert.mock.calls[0][0]
     records.forEach((record) => {
       expect(record.source).toBe(event.source)
-      expect(record.subject).toBe(event.subject)
-      expect(record.time).toBe(event.time)
+      expect(record).not.toHaveProperty('subject')
+      expect(record.time).toBe(new Date(event.time).toISOString())
       expect(record.type).toBe(event.type)
       expect(record.data).toBe(JSON.stringify(event.data))
     })
