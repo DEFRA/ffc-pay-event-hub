@@ -27,20 +27,42 @@ const start = async () => {
   console.info('Ready to receive messages')
 }
 
+const closeResource = async (resource, name) => {
+  if (!resource) {
+    return false
+  }
+
+  try {
+    await resource.close()
+    console.info(`Closed ${name}`)
+    return true
+  } catch (error) {
+    console.error(`Error closing ${name}:`, error)
+    return false
+  }
+}
+
 const stop = async () => {
   try {
     await closeSenders()
   } catch (error) {
-    console.error('Error stopping receiver')
+    console.error('Error closing message senders:', error)
   }
-  if (eventsReceiver) {
-    await eventsReceiver.closeConnection()
+
+  if (await closeResource(eventsReceiver, 'events receiver')) {
+    eventsReceiver = undefined
   }
-  if (dataReceiver) {
-    await dataReceiver.closeConnection()
+
+  if (await closeResource(dataReceiver, 'data receiver')) {
+    dataReceiver = undefined
   }
-  if (retentionReceiver) {
-    await retentionReceiver.closeConnection()
+
+  if (await closeResource(retentionReceiver, 'retention receiver')) {
+    retentionReceiver = undefined
+  }
+
+  if (await closeResource(sbClient, 'Service Bus client')) {
+    sbClient = undefined
   }
 }
 
