@@ -1,45 +1,102 @@
-const config = require('../../../app/config/message')
-const mockSubscribe = jest.fn()
-const mockCloseConnection = jest.fn()
-const MockReceiver = jest.fn().mockImplementation(() => {
-  return {
-    subscribe: mockSubscribe,
-    closeConnection: mockCloseConnection
-  }
-})
-jest.mock('ffc-messaging', () => {
-  return {
-    MessageReceiver: MockReceiver
-  }
-})
+const mockCreateServiceBusClient = jest.fn()
+const mockCreateReceiver = jest.fn()
+const mockSubscribeReceiver = jest.fn()
+const mockCloseSenders = jest.fn()
+
+jest.mock('../../../app/messaging/service-bus', () => ({
+  createServiceBusClient: mockCreateServiceBusClient,
+  createReceiver: mockCreateReceiver,
+  subscribeReceiver: mockSubscribeReceiver,
+  closeSenders: mockCloseSenders
+}))
+
+jest.mock('../../../app/messaging/process-event-message')
+jest.mock('../../../app/messaging/process-data-message')
+jest.mock('../../../app/messaging/process-retention-message')
+
+const mockCreateDiagnosticsHandler = jest.fn()
+jest.mock('../../../app/messaging/diagnostics', () => ({
+  createDiagnosticsHandler: mockCreateDiagnosticsHandler
+}))
+
 jest.mock('../../../app/storage')
+
+const config = require('../../../app/config/message')
 const messageService = require('../../../app/messaging')
 
 describe('messaging', () => {
+  let mockSbClient
+  let mockEventsReceiver
+  let mockDataReceiver
+  let mockRetentionReceiver
+
   beforeEach(() => {
     jest.clearAllMocks()
+
+    mockSbClient = { close: jest.fn() }
+    mockCreateServiceBusClient.mockReturnValue(mockSbClient)
+
+    mockEventsReceiver = { closeConnection: jest.fn() }
+    mockDataReceiver = { closeConnection: jest.fn() }
+    mockRetentionReceiver = { closeConnection: jest.fn() }
+
+    mockCreateReceiver
+      .mockReturnValueOnce(mockEventsReceiver)
+      .mockReturnValueOnce(mockDataReceiver)
+      .mockReturnValueOnce(mockRetentionReceiver)
+
+    mockCreateDiagnosticsHandler.mockReturnValue('diagnostics-handler')
   })
 
-  test('creates receiver for events and data topics', async () => {
+  test('creates service bus client', async () => {
     await messageService.start()
-    expect(MockReceiver).toHaveBeenCalledWith(config.eventsSubscription, expect.any(Function))
-    expect(MockReceiver).toHaveBeenCalledWith(config.dataSubscription, expect.any(Function))
+    expect(mockCreateServiceBusClient).toHaveBeenCalledWith(config.eventsSubscription)
   })
 
-  test('creates receiver for retention topic', async () => {
+  test('creates receivers for events, data, and retention subscriptions', async () => {
     await messageService.start()
-    expect(MockReceiver).toHaveBeenCalledWith(config.retentionSubscription, expect.any(Function))
+    expect(mockCreateReceiver).toHaveBeenCalledWith(mockSbClient, config.eventsSubscription)
+    expect(mockCreateReceiver).toHaveBeenCalledWith(mockSbClient, config.dataSubscription)
+    expect(mockCreateReceiver).toHaveBeenCalledWith(mockSbClient, config.retentionSubscription)
   })
 
-  test('subscribes to all topics', async () => {
+  test('subscribes to all receivers', async () => {
     await messageService.start()
-    expect(mockSubscribe).toHaveBeenCalledTimes(3)
+    expect(mockSubscribeReceiver).toHaveBeenCalledTimes(3)
+    expect(mockSubscribeReceiver).toHaveBeenCalledWith(
+      mockEventsReceiver,
+      expect.any(Function),
+      'diagnostics-handler',
+      config.eventsSubscription
+    )
+    expect(mockSubscribeReceiver).toHaveBeenCalledWith(
+      mockDataReceiver,
+      expect.any(Function),
+      'diagnostics-handler',
+      config.dataSubscription
+    )
+    expect(mockSubscribeReceiver).toHaveBeenCalledWith(
+      mockRetentionReceiver,
+      expect.any(Function),
+      'diagnostics-handler',
+      config.retentionSubscription
+    )
   })
 
-  test('closes connections for all receivers when stopped', async () => {
+  test('creates diagnostics handlers for each receiver', async () => {
+    await messageService.start()
+    expect(mockCreateDiagnosticsHandler).toHaveBeenCalledWith('events-receiver')
+    expect(mockCreateDiagnosticsHandler).toHaveBeenCalledWith('data-receiver')
+    expect(mockCreateDiagnosticsHandler).toHaveBeenCalledWith('retention-receiver')
+  })
+
+  test('closes senders and receiver connections when stopped', async () => {
     await messageService.start()
     await messageService.stop()
-    expect(mockCloseConnection).toHaveBeenCalledTimes(3)
+    expect(mockCloseSenders).toHaveBeenCalled()
+    expect(mockEventsReceiver.closeConnection).toHaveBeenCalled()
+    expect(mockDataReceiver.closeConnection).toHaveBeenCalled()
+    expect(mockRetentionReceiver.closeConnection).toHaveBeenCalled()
   })
 
   test('logs readiness message after starting', async () => {
