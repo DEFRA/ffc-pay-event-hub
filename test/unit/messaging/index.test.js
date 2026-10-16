@@ -36,9 +36,9 @@ describe('messaging', () => {
     mockSbClient = { close: jest.fn() }
     mockCreateServiceBusClient.mockReturnValue(mockSbClient)
 
-    mockEventsReceiver = { closeConnection: jest.fn() }
-    mockDataReceiver = { closeConnection: jest.fn() }
-    mockRetentionReceiver = { closeConnection: jest.fn() }
+    mockEventsReceiver = { close: jest.fn() }
+    mockDataReceiver = { close: jest.fn() }
+    mockRetentionReceiver = { close: jest.fn() }
 
     mockCreateReceiver
       .mockReturnValueOnce(mockEventsReceiver)
@@ -90,13 +90,36 @@ describe('messaging', () => {
     expect(mockCreateDiagnosticsHandler).toHaveBeenCalledWith('retention-receiver')
   })
 
-  test('closes senders and receiver connections when stopped', async () => {
+  test('closes senders, receivers, and client when stopped', async () => {
     await messageService.start()
     await messageService.stop()
     expect(mockCloseSenders).toHaveBeenCalled()
-    expect(mockEventsReceiver.closeConnection).toHaveBeenCalled()
-    expect(mockDataReceiver.closeConnection).toHaveBeenCalled()
-    expect(mockRetentionReceiver.closeConnection).toHaveBeenCalled()
+    expect(mockEventsReceiver.close).toHaveBeenCalledTimes(1)
+    expect(mockDataReceiver.close).toHaveBeenCalledTimes(1)
+    expect(mockRetentionReceiver.close).toHaveBeenCalledTimes(1)
+    expect(mockSbClient.close).toHaveBeenCalledTimes(1)
+
+    await messageService.stop()
+    expect(mockEventsReceiver.close).toHaveBeenCalledTimes(1)
+    expect(mockDataReceiver.close).toHaveBeenCalledTimes(1)
+    expect(mockRetentionReceiver.close).toHaveBeenCalledTimes(1)
+    expect(mockSbClient.close).toHaveBeenCalledTimes(1)
+  })
+
+  test('continues closing resources and logs when a receiver close fails', async () => {
+    const closeError = new Error('receiver close failed')
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    mockEventsReceiver.close.mockRejectedValueOnce(closeError)
+
+    await messageService.start()
+    await messageService.stop()
+
+    expect(mockEventsReceiver.close).toHaveBeenCalledTimes(1)
+    expect(mockDataReceiver.close).toHaveBeenCalledTimes(1)
+    expect(mockRetentionReceiver.close).toHaveBeenCalledTimes(1)
+    expect(mockSbClient.close).toHaveBeenCalledTimes(1)
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Error closing events receiver:', closeError)
+    consoleErrorSpy.mockRestore()
   })
 
   test('logs readiness message after starting', async () => {
