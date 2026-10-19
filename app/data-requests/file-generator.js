@@ -43,7 +43,7 @@ const createStreamingQuery = (sql, client, batchSize = 5000) => {
   return client.query(new QueryStream(sql, [], { batchSize }))
 }
 
-// db.client is the knex instance and knex.client is its pg dialect client, which owns the connection pool
+// db.client is the knex instance and knex.client is its pg client, which owns the connection pool
 const getDbClient = async () => {
   const knex = db.client
   return knex.client.acquireConnection()
