@@ -22,7 +22,7 @@ const saveHoldEvent = async (event) => {
     source: row.source,
     time: new Date(row.time).toISOString(),
     type: row.type,
-    data: JSON.stringify(row.data)
+    data: row.data
   }))
 
   await holds().insert(records)

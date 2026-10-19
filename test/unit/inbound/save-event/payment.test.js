@@ -202,7 +202,7 @@ describe('save payment event', () => {
       subject: event.subject,
       time: new Date(event.time).toISOString(),
       type: event.type,
-      data: JSON.stringify(eventWithoutBatch.data)
+      data: eventWithoutBatch.data
     })
 
     expect(records[1]).toEqual({
@@ -215,7 +215,7 @@ describe('save payment event', () => {
       subject: event.subject,
       time: new Date(event.time).toISOString(),
       type: event.type,
-      data: JSON.stringify(eventWithoutBatch.data)
+      data: eventWithoutBatch.data
     })
 
     expect(records[2]).toEqual({
@@ -228,7 +228,7 @@ describe('save payment event', () => {
       subject: event.subject,
       time: new Date(event.time).toISOString(),
       type: event.type,
-      data: JSON.stringify(eventWithoutBatch.data)
+      data: eventWithoutBatch.data
     })
   })
 
@@ -258,7 +258,7 @@ describe('save payment event', () => {
       subject: event.subject,
       time: new Date(event.time).toISOString(),
       type: event.type,
-      data: JSON.stringify(eventWithBatch.data)
+      data: eventWithBatch.data
     })
   })
 

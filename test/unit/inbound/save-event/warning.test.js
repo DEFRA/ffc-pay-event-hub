@@ -103,7 +103,7 @@ describe('save warning event', () => {
       subject: mockRow.subject,
       time: new Date(mockRow.time).toISOString(),
       type: mockRow.type,
-      data: JSON.stringify(mockRow.data)
+      data: mockRow.data
     })
   })
 
@@ -138,6 +138,6 @@ describe('save warning event', () => {
     expect(callArg.subject).toBe(mockRow.subject)
     expect(callArg.time).toBe(new Date(mockRow.time).toISOString())
     expect(callArg.type).toBe(mockRow.type)
-    expect(callArg.data).toBe(JSON.stringify(mockRow.data))
+    expect(callArg.data).toEqual(mockRow.data)
   })
 })

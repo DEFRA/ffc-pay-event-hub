@@ -54,7 +54,7 @@ const savePaymentEvent = async (event) => {
     subject: row.subject,
     time: new Date(row.time).toISOString(),
     type: row.type,
-    data: JSON.stringify(row.data)
+    data: row.data
   }))
 
   await payments().insert(records)

@@ -131,7 +131,7 @@ describe('save hold event', () => {
       source: event.source,
       time: new Date(event.time).toISOString(),
       type: event.type,
-      data: JSON.stringify(holdEvent.data)
+      data: holdEvent.data
     })
 
     expect(records[1]).toEqual({
@@ -143,7 +143,7 @@ describe('save hold event', () => {
       source: event.source,
       time: new Date(event.time).toISOString(),
       type: event.type,
-      data: JSON.stringify(holdEvent.data)
+      data: holdEvent.data
     })
 
     expect(records[2]).toEqual({
@@ -155,7 +155,7 @@ describe('save hold event', () => {
       source: event.source,
       time: new Date(event.time).toISOString(),
       type: event.type,
-      data: JSON.stringify(holdEvent.data)
+      data: holdEvent.data
     })
   })
 
@@ -203,7 +203,7 @@ describe('save hold event', () => {
       expect(record).not.toHaveProperty('subject')
       expect(record.time).toBe(new Date(event.time).toISOString())
       expect(record.type).toBe(event.type)
-      expect(record.data).toBe(JSON.stringify(event.data))
+      expect(record.data).toEqual(event.data)
     })
   })
 })
