@@ -12,7 +12,9 @@ const { saveBatchEvent: mockSaveBatchEvent } = require('../../../../app/inbound/
 
 const { saveEvent } = require('../../../../app/inbound/save-event')
 const event = require('../../../mocks/events/event')
+const paymentEvent = require('../../../mocks/events/payment')
 const { HOLD_EVENT, WARNING_EVENT, PAYMENT_EVENT, BATCH_EVENT } = require('../../../../app/constants/event-types')
+const { WARNING_PAYMENT_REJECTED } = require('../../../../app/constants/events')
 
 describe('save event', () => {
   beforeEach(() => jest.clearAllMocks())
@@ -36,6 +38,19 @@ describe('save event', () => {
     const frnlessEvent = { ...event }
     delete frnlessEvent.data.frn
     await saveEvent(frnlessEvent, PAYMENT_EVENT)
+    expect(mockSavePaymentEvent).not.toHaveBeenCalled()
+  })
+
+  test('saves payment warning as warning and payment event when payment request can be identified', async () => {
+    const paymentWarning = { ...paymentEvent, type: WARNING_PAYMENT_REJECTED, data: { ...paymentEvent.data, message: 'Rejected' } }
+    await saveEvent(paymentWarning, WARNING_EVENT)
+    expect(mockSaveWarningEvent).toHaveBeenCalledWith(paymentWarning)
+    expect(mockSavePaymentEvent).toHaveBeenCalledWith(paymentWarning)
+  })
+
+  test('saves warning as warning event only when not linked to a payment request', async () => {
+    await saveEvent(event, WARNING_EVENT)
+    expect(mockSaveWarningEvent).toHaveBeenCalledWith(event)
     expect(mockSavePaymentEvent).not.toHaveBeenCalled()
   })
 
