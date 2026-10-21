@@ -1,7 +1,8 @@
 const { PassThrough } = require('node:stream')
 const QueryStream = require('pg-query-stream')
 
-const db = require('../data')
+const db = require('../database')
+const TABLE_COLUMNS = require('../constants/table-columns')
 const { streamDataRequestFile } = require('../storage')
 const { generateUniqueFilename } = require('./utils/generate-unique-filename')
 
@@ -42,12 +43,15 @@ const createStreamingQuery = (sql, client, batchSize = 5000) => {
   return client.query(new QueryStream(sql, [], { batchSize }))
 }
 
+// db.client is the knex instance and knex.client is its pg client, which owns the connection pool
 const getDbClient = async () => {
-  return db.sequelize.connectionManager.getConnection()
+  const knex = db.client
+  return knex.client.acquireConnection()
 }
 
 const releaseDbClient = async (client) => {
-  return db.sequelize.connectionManager.releaseConnection(client)
+  const knex = db.client
+  return knex.client.releaseConnection(client)
 }
 
 const exportQueryToJsonFile = async (
@@ -83,25 +87,15 @@ const exportQueryToJsonFile = async (
 }
 
 const generateSqlQuery = (whereClause, tableName, orderBy = null) => {
-  const model = db[tableName]
-
-  if (!model) {
+  if (!Object.hasOwn(TABLE_COLUMNS, tableName)) {
     throw new Error(`Table model '${tableName}' not found in database`)
   }
 
-  const actualTableName = model.getTableName()
-  const baseQuery = `SELECT * FROM ${actualTableName}`
-
-  const queryGenerator = db.sequelize.getQueryInterface().queryGenerator
-
-  let query = baseQuery
+  const validColumns = TABLE_COLUMNS[tableName]
+  const query = db[tableName]()
 
   if (whereClause) {
-    const whereSql = queryGenerator.getWhereConditions(
-      whereClause,
-      actualTableName
-    )
-    query += ` WHERE ${whereSql}`
+    query.where(whereClause)
   }
 
   if (orderBy) {
@@ -109,9 +103,7 @@ const generateSqlQuery = (whereClause, tableName, orderBy = null) => {
       throw new TypeError('orderBy must be an array')
     }
 
-    const validColumns = Object.keys(model.rawAttributes)
-
-    const orderParts = orderBy.map(([column, direction]) => {
+    orderBy.forEach(([column, direction]) => {
       if (!validColumns.includes(column)) {
         throw new Error(`Invalid order column: ${column}`)
       }
@@ -121,13 +113,11 @@ const generateSqlQuery = (whereClause, tableName, orderBy = null) => {
         throw new Error(`Invalid order direction: ${direction}`)
       }
 
-      return `"${column}" ${dir}`
+      query.orderBy(column, dir.toLowerCase())
     })
-
-    query += ` ORDER BY ${orderParts.join(', ')}`
   }
 
-  return query
+  return query.toQuery()
 }
 
 module.exports = { generateSqlQuery, exportQueryToJsonFile }

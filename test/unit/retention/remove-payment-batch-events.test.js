@@ -1,31 +1,31 @@
-const db = require('../../../app/data')
-const { removePaymentBatchEvents } = require('../../../app/retention/remove-payment-batch-events')
+const { createKnexMock } = require('../../helpers/mock-knex')
 
-jest.mock('../../../app/data', () => ({
-  paymentBatchEvents: {
-    destroy: jest.fn()
-  },
-  Sequelize: {
-    Op: {
-      in: Symbol('in')
-    }
-  }
+const mockDb = createKnexMock(['paymentBatchEvents'])
+
+jest.mock('../../../app/database', () => ({
+  client: mockDb.knex,
+  transaction: mockDb.transaction,
+  close: mockDb.close,
+  ...mockDb.tables
 }))
+
+const { removePaymentBatchEvents } = require('../../../app/retention/remove-payment-batch-events')
 
 describe('removePaymentBatchEvents', () => {
   const agreementNumber = 'AGR123'
   const frn = 456789
   const schemeId = 10
-  const transaction = { id: 'transaction-object' }
+  const transaction = mockDb.trx
 
   const batches = ['batch-1', 'batch-2']
   const agreementNumbers = ['AGR123', 'AGR456']
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockDb.builder.resolves()
   })
 
-  test('calls db.paymentBatchEvents.destroy with agreementNumber when usesContractNumber is false', async () => {
+  test('deletes by agreementNumber, frn and schemeId inside the transaction when usesContractNumber is false', async () => {
     await removePaymentBatchEvents(
       agreementNumber,
       frn,
@@ -36,18 +36,17 @@ describe('removePaymentBatchEvents', () => {
       transaction
     )
 
-    expect(db.paymentBatchEvents.destroy).toHaveBeenCalledTimes(1)
-    expect(db.paymentBatchEvents.destroy).toHaveBeenCalledWith({
-      where: {
-        agreementNumber,
-        frn,
-        schemeId
-      },
-      transaction
+    expect(mockDb.tables.paymentBatchEvents).toHaveBeenCalledWith(transaction)
+    expect(mockDb.builder.where).toHaveBeenCalledWith({
+      agreementNumber,
+      frn,
+      schemeId
     })
+    expect(mockDb.builder.whereIn).not.toHaveBeenCalled()
+    expect(mockDb.builder.del).toHaveBeenCalledTimes(1)
   })
 
-  test('calls db.paymentBatchEvents.destroy using batches and agreementNumbers when usesContractNumber is true', async () => {
+  test('deletes by batchName and agreementNumber lists inside the transaction when usesContractNumber is true', async () => {
     await removePaymentBatchEvents(
       agreementNumber,
       frn,
@@ -58,51 +57,14 @@ describe('removePaymentBatchEvents', () => {
       transaction
     )
 
-    expect(db.paymentBatchEvents.destroy).toHaveBeenCalledTimes(1)
-    expect(db.paymentBatchEvents.destroy).toHaveBeenCalledWith({
-      where: {
-        batchName: {
-          [db.Sequelize.Op.in]: batches
-        },
-        agreementNumber: {
-          [db.Sequelize.Op.in]: agreementNumbers
-        },
-        frn,
-        schemeId
-      },
-      transaction
-    })
+    expect(mockDb.tables.paymentBatchEvents).toHaveBeenCalledWith(transaction)
+    expect(mockDb.builder.whereIn).toHaveBeenCalledWith('batchName', batches)
+    expect(mockDb.builder.whereIn).toHaveBeenCalledWith('agreementNumber', agreementNumbers)
+    expect(mockDb.builder.where).toHaveBeenCalledWith({ frn, schemeId })
+    expect(mockDb.builder.del).toHaveBeenCalledTimes(1)
   })
 
-  test('does not call destroy when usesContractNumber is true and batches is empty', async () => {
-    await removePaymentBatchEvents(
-      agreementNumber,
-      frn,
-      schemeId,
-      true,
-      [],
-      agreementNumbers,
-      transaction
-    )
-
-    expect(db.paymentBatchEvents.destroy).not.toHaveBeenCalled()
-  })
-
-  test('does not call destroy when usesContractNumber is true and agreementNumbers is empty', async () => {
-    await removePaymentBatchEvents(
-      agreementNumber,
-      frn,
-      schemeId,
-      true,
-      batches,
-      [],
-      transaction
-    )
-
-    expect(db.paymentBatchEvents.destroy).not.toHaveBeenCalled()
-  })
-
-  test('calls destroy with undefined transaction when not provided and usesContractNumber is false', async () => {
+  test('runs on the pool when no transaction is provided and usesContractNumber is false', async () => {
     await removePaymentBatchEvents(
       agreementNumber,
       frn,
@@ -112,17 +74,11 @@ describe('removePaymentBatchEvents', () => {
       agreementNumbers
     )
 
-    expect(db.paymentBatchEvents.destroy).toHaveBeenCalledWith({
-      where: {
-        agreementNumber,
-        frn,
-        schemeId
-      },
-      transaction: undefined
-    })
+    expect(mockDb.tables.paymentBatchEvents).toHaveBeenCalledWith(undefined)
+    expect(mockDb.builder.del).toHaveBeenCalledTimes(1)
   })
 
-  test('calls destroy with undefined transaction when not provided and usesContractNumber is true', async () => {
+  test('runs on the pool when no transaction is provided and usesContractNumber is true', async () => {
     await removePaymentBatchEvents(
       agreementNumber,
       frn,
@@ -132,44 +88,47 @@ describe('removePaymentBatchEvents', () => {
       agreementNumbers
     )
 
-    expect(db.paymentBatchEvents.destroy).toHaveBeenCalledWith({
-      where: {
-        batchName: {
-          [db.Sequelize.Op.in]: batches
-        },
-        agreementNumber: {
-          [db.Sequelize.Op.in]: agreementNumbers
-        },
-        frn,
-        schemeId
-      },
-      transaction: undefined
-    })
+    expect(mockDb.tables.paymentBatchEvents).toHaveBeenCalledWith(undefined)
+    expect(mockDb.builder.del).toHaveBeenCalledTimes(1)
+  })
+
+  test('runs on the pool when the transaction is null', async () => {
+    await removePaymentBatchEvents(
+      agreementNumber,
+      frn,
+      schemeId,
+      false,
+      batches,
+      agreementNumbers,
+      null
+    )
+
+    expect(mockDb.tables.paymentBatchEvents).toHaveBeenCalledWith(undefined)
   })
 
   test.each([
     ['empty batches', [], agreementNumbers],
     ['empty agreementNumbers', batches, []]
   ])(
-    'returns without destroying when usesContractNumber is true and %s supplied',
-    async (_, testBatches, testAgreementNumbers) => {
+    'returns without deleting when usesContractNumber is true and %s supplied',
+    async (_, testIds, testAgreementNumbers) => {
       await removePaymentBatchEvents(
         agreementNumber,
         frn,
         schemeId,
         true,
-        testBatches,
+        testIds,
         testAgreementNumbers,
         transaction
       )
 
-      expect(db.paymentBatchEvents.destroy).not.toHaveBeenCalled()
+      expect(mockDb.tables.paymentBatchEvents).not.toHaveBeenCalled()
+      expect(mockDb.builder.del).not.toHaveBeenCalled()
     }
   )
 
-  test('propagates errors from db.paymentBatchEvents.destroy', async () => {
-    const error = new Error('DB failure')
-    db.paymentBatchEvents.destroy.mockRejectedValue(error)
+  test('propagates database errors', async () => {
+    mockDb.builder.rejects(new Error('DB failure'))
 
     await expect(
       removePaymentBatchEvents(

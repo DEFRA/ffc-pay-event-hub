@@ -5,12 +5,14 @@ jest.mock('node:crypto', () => ({ randomUUID: jest.fn() }))
 const mockUuid = 'test-uuid-1234'
 randomUUID.mockReturnValue(mockUuid)
 
-jest.mock('../../../../app/data')
-const db = require('../../../../app/data')
-const mockCreate = jest.fn()
-db.batches = {
-  create: mockCreate
-}
+const { createKnexMock } = require('../../../helpers/mock-knex')
+const mockDb = createKnexMock(['batches'])
+jest.mock('../../../../app/database', () => ({
+  client: mockDb.knex,
+  transaction: mockDb.transaction,
+  close: mockDb.close,
+  ...mockDb.tables
+}))
 
 jest.mock('../../../../app/inbound/save-event/get-timestamp')
 const {
@@ -25,6 +27,7 @@ const event = require('../../../mocks/events/batch')
 describe('save batch event', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockDb.builder.resolves()
   })
 
   test('calls getTimestamp with event time', async () => {
@@ -37,48 +40,54 @@ describe('save batch event', () => {
     expect(randomUUID).toHaveBeenCalledTimes(1)
   })
 
-  test('creates one batch record', async () => {
+  test('creates one batch record in the batches table', async () => {
     await saveBatchEvent(event)
-    expect(mockCreate).toHaveBeenCalledTimes(1)
+    expect(mockDb.tables.batches).toHaveBeenCalledWith()
+    expect(mockDb.builder.insert).toHaveBeenCalledTimes(1)
+  })
+
+  test('propagates a database failure', async () => {
+    mockDb.builder.rejects(new Error('DB error'))
+    await expect(saveBatchEvent(event)).rejects.toThrow('DB error')
   })
 
   test('creates batch record with correct structure', async () => {
     await saveBatchEvent(event)
-    expect(mockCreate).toHaveBeenCalledWith({
+    expect(mockDb.builder.insert).toHaveBeenCalledWith({
       id: mockUuid,
       partitionKey: event.data.filename,
-      timestamp: mockTimestamp,
+      timestamp: new Date(mockTimestamp).toISOString(),
       rowKey: mockTimestamp.toString(),
       category: BATCH,
       source: event.source,
       subject: event.subject,
-      time: event.time,
+      time: new Date(event.time).toISOString(),
       type: event.type,
-      data: JSON.stringify(event.data)
+      data: JSON.stringify(JSON.stringify(event.data))
     })
   })
 
   test('uses filename as partition key', async () => {
     await saveBatchEvent(event)
-    const callArg = mockCreate.mock.calls[0][0]
+    const callArg = mockDb.builder.insert.mock.calls[0][0]
     expect(callArg.partitionKey).toBe(event.data.filename)
   })
 
   test('uses timestamp as rowKey', async () => {
     await saveBatchEvent(event)
-    const callArg = mockCreate.mock.calls[0][0]
+    const callArg = mockDb.builder.insert.mock.calls[0][0]
     expect(callArg.rowKey).toBe(mockTimestamp.toString())
   })
 
-  test('stringifies event data', async () => {
+  test('stores event data as a JSON string value', async () => {
     await saveBatchEvent(event)
-    const callArg = mockCreate.mock.calls[0][0]
-    expect(callArg.data).toBe(JSON.stringify(event.data))
+    const callArg = mockDb.builder.insert.mock.calls[0][0]
+    expect(JSON.parse(callArg.data)).toBe(JSON.stringify(event.data))
   })
 
   test('sets category to BATCH', async () => {
     await saveBatchEvent(event)
-    const callArg = mockCreate.mock.calls[0][0]
+    const callArg = mockDb.builder.insert.mock.calls[0][0]
     expect(callArg.category).toBe(BATCH)
   })
 })
