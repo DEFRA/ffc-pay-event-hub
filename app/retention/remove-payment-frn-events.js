@@ -1,4 +1,4 @@
-const db = require('../data')
+const { paymentFrnEvents } = require('../database')
 
 const removePaymentFRNEvents = async (
   agreementNumber,
@@ -13,31 +13,22 @@ const removePaymentFRNEvents = async (
     if (!correlationIds.length || !agreementNumbers.length) {
       return
     }
-    await db.paymentFrnEvents.destroy({
-      where: {
-        correlationId: {
-          [db.Sequelize.Op.in]: correlationIds
-        },
-        agreementNumber: {
-          [db.Sequelize.Op.in]: agreementNumbers
-        },
-        frn,
-        schemeId
-      },
-      transaction
-    })
+    await paymentFrnEvents(transaction ?? undefined)
+      .whereIn('correlationId', correlationIds)
+      .whereIn('agreementNumber', agreementNumbers)
+      .where({ frn, schemeId })
+      .del()
 
     return
   }
 
-  await db.paymentFrnEvents.destroy({
-    where: {
+  await paymentFrnEvents(transaction ?? undefined)
+    .where({
       agreementNumber,
       frn,
       schemeId
-    },
-    transaction
-  })
+    })
+    .del()
 }
 
 module.exports = {

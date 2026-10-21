@@ -1,10 +1,11 @@
-const db = require('../../data')
+const { schemePaymentTotals } = require('../../database')
 const { sanitiseSchemeData } = require('./sanitise-scheme-data')
 
 const getEventsByScheme = async (schemeId) => {
   const where = schemeId ? { schemeId } : {}
 
-  const rawSchemeData = await db.schemePaymentTotals.findAll({ where })
+  const rawSchemeData = await schemePaymentTotals()
+    .where(where)
 
   const schemeData = rawSchemeData.map((event) => ({
     schemeId: event.schemeId,

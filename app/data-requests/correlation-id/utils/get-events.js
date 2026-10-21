@@ -1,13 +1,14 @@
-const db = require('../../../data')
+const { payments } = require('../../../database')
+const TABLE_COLUMNS = require('../../../constants/table-columns')
 
 const getEvents = async (id, category) => {
-  const events = await db.payments.findAll({
-    where: {
+  const events = await payments()
+    .select(TABLE_COLUMNS.payments)
+    .where({
       partitionKey: id,
       category
-    },
-    order: [['timestamp', 'ASC']]
-  })
+    })
+    .orderBy('timestamp', 'asc')
 
   return events.map((event) => {
     const raw = event.data
@@ -23,7 +24,7 @@ const getEvents = async (id, category) => {
     }
 
     return {
-      ...event.toJSON(),
+      ...event,
       data: parsed
     }
   })

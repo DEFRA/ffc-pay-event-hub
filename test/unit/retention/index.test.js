@@ -1,10 +1,11 @@
-const { removeAgreementData } = require('../../../app/retention')
-const db = require('../../../app/data')
+const { createKnexMock } = require('../../helpers/mock-knex')
 
-jest.mock('../../../app/data', () => ({
-  sequelize: {
-    transaction: jest.fn()
-  }
+const mockDb = createKnexMock()
+
+jest.mock('../../../app/database', () => ({
+  client: mockDb.knex,
+  transaction: mockDb.transaction,
+  close: mockDb.close
 }))
 
 jest.mock('../../../app/retention/remove-payment-batch-events', () => ({
@@ -23,6 +24,7 @@ jest.mock('../../../app/retention/remove-warnings', () => ({
   removeWarnings: jest.fn()
 }))
 
+const { removeAgreementData } = require('../../../app/retention')
 const { removePaymentBatchEvents } = require('../../../app/retention/remove-payment-batch-events')
 const { removePaymentFRNEvents } = require('../../../app/retention/remove-payment-frn-events')
 const { removePayments } = require('../../../app/retention/remove-payments')
@@ -45,17 +47,10 @@ describe('removeAgreementData', () => {
   const agreementNumbers = ['AGR123', 'AGR456']
   const correlationIds = ['corr-1', 'corr-2']
 
-  let transaction
+  const transaction = mockDb.trx
 
   beforeEach(() => {
     jest.clearAllMocks()
-
-    transaction = {
-      commit: jest.fn().mockResolvedValue(),
-      rollback: jest.fn().mockResolvedValue()
-    }
-
-    db.sequelize.transaction.mockResolvedValue(transaction)
 
     removePayments.mockResolvedValue({
       batches,
@@ -71,7 +66,8 @@ describe('removeAgreementData', () => {
 
     await removeAgreementData(retentionData)
 
-    expect(db.sequelize.transaction).toHaveBeenCalledTimes(1)
+    expect(mockDb.transaction).toHaveBeenCalledTimes(1)
+    expect(mockDb.transaction).toHaveBeenCalledWith()
     expect(removeWarnings).toHaveBeenCalledWith(
       agreementNumber,
       frn,
