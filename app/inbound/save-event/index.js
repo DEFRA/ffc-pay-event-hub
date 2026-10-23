@@ -3,6 +3,7 @@ const { saveHoldEvent } = require('./hold')
 const { savePaymentEvent } = require('./payment')
 const { saveWarningEvent } = require('./warning')
 const { saveBatchEvent } = require('./batch')
+const { isPaymentWarning } = require('./is-payment-warning')
 
 const saveEvent = async (event, eventType) => {
   switch (eventType) {
@@ -16,6 +17,9 @@ const saveEvent = async (event, eventType) => {
       break
     case WARNING_EVENT:
       await saveWarningEvent(event)
+      if (isPaymentWarning(event)) {
+        await savePaymentEvent(event)
+      }
       break
     case BATCH_EVENT:
       await saveBatchEvent(event)
