@@ -82,7 +82,7 @@ const {
   WARNING_PAYMENT_REQUEST_BLOCKED_STATUS
 } = require('./statuses')
 
-const { IN_PROGRESS, WAITING, COMPLETED, STOPPED } = require('./states')
+const { IN_PROGRESS, WAITING, COMPLETED, FAILED } = require('./states')
 
 module.exports = {
   [PAYMENT_EXTRACTED]: {
@@ -177,25 +177,25 @@ module.exports = {
   [PAYMENT_DUPLICATE]: {
     name: PAYMENT_DUPLICATE_NAME,
     detail: PAYMENT_DUPLICATE_STATUS,
-    state: STOPPED,
+    state: FAILED,
     warning: true
   },
   [WARNING_DUPLICATE_PAYMENT]: {
     name: WARNING_DUPLICATE_PAYMENT_NAME,
     detail: WARNING_DUPLICATE_PAYMENT_STATUS,
-    state: STOPPED,
+    state: FAILED,
     warning: true
   },
   [WARNING_PAYMENT_REJECTED]: {
     name: WARNING_PAYMENT_REJECTED_NAME,
     detail: WARNING_PAYMENT_REJECTED_STATUS,
-    state: STOPPED,
+    state: FAILED,
     warning: true
   },
   [WARNING_PAYMENT_DAX_REJECTED]: {
     name: WARNING_PAYMENT_DAX_REJECTED_NAME,
     detail: WARNING_PAYMENT_DAX_REJECTED_STATUS,
-    state: STOPPED,
+    state: FAILED,
     warning: true
   },
   [WARNING_PAYMENT_INVALID_BANK]: {
@@ -207,13 +207,13 @@ module.exports = {
   [WARNING_PAYMENT_PROCESSING_FAILED]: {
     name: WARNING_PAYMENT_PROCESSING_FAILED_NAME,
     detail: WARNING_PAYMENT_PROCESSING_FAILED_STATUS,
-    state: STOPPED,
+    state: FAILED,
     warning: true
   },
   [WARNING_PAYMENT_SETTLEMENT_UNSETTLED]: {
     name: WARNING_PAYMENT_SETTLEMENT_UNSETTLED_NAME,
     detail: WARNING_PAYMENT_SETTLEMENT_UNSETTLED_STATUS,
-    state: STOPPED,
+    state: FAILED,
     warning: true
   },
   [WARNING_PAYMENT_REQUEST_BLOCKED]: {

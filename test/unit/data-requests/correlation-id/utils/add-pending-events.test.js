@@ -18,7 +18,7 @@ const {
 const {
   PAYMENT_PROCESSED_NO_FURTHER_ACTION_STATUS
 } = require('../../../../../app/constants/statuses')
-const { STOPPED, WAITING } = require('../../../../../app/constants/states')
+const { FAILED, WAITING } = require('../../../../../app/constants/states')
 
 let groupedEvent
 
@@ -68,9 +68,9 @@ describe('add pending events', () => {
     )
   })
 
-  test('should not add any events if grouped event has been stopped by a warning', () => {
+  test('should not add any events if grouped event has failed with a warning', () => {
     groupedEvent.events = [enriched]
-    groupedEvent.status = { state: STOPPED }
+    groupedEvent.status = { state: FAILED }
     const result = addPendingEvents([groupedEvent])
     expect(result[0].events).toHaveLength(1)
   })
