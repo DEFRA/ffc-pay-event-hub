@@ -16,5 +16,12 @@ module.exports = {
   PAYMENT_ACKNOWLEDGED_STATUS: 'Acknowledged by payment ledger',
   PAYMENT_SETTLED_STATUS: 'Settled by payment ledger',
   PAYMENT_SUPPRESSED_STATUS: 'Accounts Receivable value suppressed due to closure',
-  PAYMENT_DUPLICATE_STATUS: 'Duplicate payment request received'
+  PAYMENT_DUPLICATE_STATUS: 'Duplicate payment request received',
+  WARNING_DUPLICATE_PAYMENT_STATUS: 'Duplicate payment request received',
+  WARNING_PAYMENT_REJECTED_STATUS: 'Payment request rejected',
+  WARNING_PAYMENT_DAX_REJECTED_STATUS: 'Rejected by payment ledger',
+  WARNING_PAYMENT_INVALID_BANK_STATUS: 'No valid bank details held',
+  WARNING_PAYMENT_PROCESSING_FAILED_STATUS: 'Payment request failed to process',
+  WARNING_PAYMENT_SETTLEMENT_UNSETTLED_STATUS: 'Settlement reported as unsuccessful by payment ledger',
+  WARNING_PAYMENT_REQUEST_BLOCKED_STATUS: 'Blocked, no debt data to attach'
 }
