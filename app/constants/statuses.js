@@ -1,6 +1,7 @@
 module.exports = {
   PAYMENT_EXTRACTED_STATUS: 'Batch received',
   PAYMENT_ENRICHED_STATUS: 'Request enriched with mandatory data',
+  PAYMENT_PAUSED_HOLD_STATUS: 'On hold, waiting for hold to be removed',
   PAYMENT_PAUSED_CROSS_BORDER_STATUS: 'Waiting for Cross Border calculation',
   PAYMENT_PAUSED_DEBT_STATUS: 'Waiting for debt data',
   PAYMENT_DEBT_ATTACHED_STATUS: 'Debt data attached',
