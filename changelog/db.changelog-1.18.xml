@@ -1,0 +1,49 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+
+    <changeSet author="Oliver Lewington" id="1">
+        <tagDatabase tag="v1.18.0"/>
+    </changeSet>
+
+    <changeSet author="Oliver Lewington" id="2">
+        <sql splitStatements="false" stripComments="false">
+            <![CDATA[
+            CREATE OR REPLACE FUNCTION payment_event_rank(p_type text)
+                RETURNS int AS $$
+                BEGIN
+                    RETURN CASE p_type
+                        WHEN 'uk.gov.defra.ffc.pay.payment.extracted' THEN 1
+                        WHEN 'uk.gov.defra.ffc.pay.payment.enriched' THEN 2
+                        WHEN 'uk.gov.defra.ffc.pay.payment.paused.hold' THEN 3
+                        WHEN 'uk.gov.defra.ffc.pay.payment.paused.cross-border' THEN 4
+                        WHEN 'uk.gov.defra.ffc.pay.payment.paused.debt' THEN 5
+                        WHEN 'uk.gov.defra.ffc.pay.warning.payment.debt.missing' THEN 6
+                        WHEN 'uk.gov.defra.ffc.pay.payment.debt.attached' THEN 7
+                        WHEN 'uk.gov.defra.ffc.pay.payment.paused.ledger' THEN 8
+                        WHEN 'uk.gov.defra.ffc.pay.payment.ledger.assigned' THEN 9
+                        WHEN 'uk.gov.defra.ffc.pay.payment.ledger.quality-check.pending' THEN 10
+                        WHEN 'uk.gov.defra.ffc.pay.payment.ledger.quality-check.failed' THEN 11
+                        WHEN 'uk.gov.defra.ffc.pay.payment.ledger.quality-check.passed' THEN 12
+                        WHEN 'uk.gov.defra.ffc.pay.payment.reset' THEN 13
+                        WHEN 'uk.gov.defra.ffc.pay.payment.processed' THEN 14
+                        WHEN 'uk.gov.defra.ffc.pay.warning.processing.failed' THEN 15
+                        WHEN 'uk.gov.defra.ffc.pay.payment.submitted' THEN 16
+                        WHEN 'uk.gov.defra.ffc.pay.warning.bank.missing' THEN 17
+                        WHEN 'uk.gov.defra.ffc.pay.payment.processed.no.further.action' THEN 18
+                        WHEN 'uk.gov.defra.ffc.pay.payment.acknowledged' THEN 19
+                        WHEN 'uk.gov.defra.ffc.pay.warning.settlement.unsettled' THEN 20
+                        WHEN 'uk.gov.defra.ffc.pay.payment.settled' THEN 21
+                        WHEN 'uk.gov.defra.ffc.pay.payment.suppressed.recovery' THEN 22
+                        WHEN 'uk.gov.defra.ffc.pay.payment.duplicate' THEN 23
+                        WHEN 'uk.gov.defra.ffc.pay.warning.duplicate.payment' THEN 24
+                        WHEN 'uk.gov.defra.ffc.pay.warning.payment.rejected' THEN 25
+                        WHEN 'uk.gov.defra.ffc.pay.warning.payment.dax.rejected' THEN 26
+                        ELSE 0
+                    END;
+                END;
+                $$ LANGUAGE plpgsql IMMUTABLE;
+            ]]>
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
