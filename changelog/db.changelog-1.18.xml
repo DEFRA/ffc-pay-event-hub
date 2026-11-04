@@ -46,4 +46,58 @@
         </sql>
     </changeSet>
 
+    <changeSet author="Oliver Lewington" id="3">
+        <sql splitStatements="false" stripComments="false">
+            <![CDATA[
+            WITH ranked AS (
+                SELECT
+                    p."partitionKey" AS frn,
+                    split_part(p."rowKey", '|', 1) AS "correlationId",
+                    p.type,
+                    p."time",
+                    ROW_NUMBER() OVER (
+                        PARTITION BY p."partitionKey", split_part(p."rowKey", '|', 1)
+                        ORDER BY payment_event_rank(p.type) DESC, p."time" DESC
+                    ) AS rn
+                FROM payments p
+                WHERE p.category = 'frn'
+            )
+            UPDATE payment_frn_events pfe
+            SET type          = r.type,
+                "lastUpdated" = r."time"
+            FROM ranked r
+            WHERE r.rn = 1
+              AND pfe.frn = r.frn
+              AND pfe."correlationId" = r."correlationId"
+              AND pfe.type IS DISTINCT FROM r.type;
+            ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet author="Oliver Lewington" id="4">
+        <sql splitStatements="false" stripComments="false">
+            <![CDATA[
+            WITH ranked AS (
+                SELECT
+                    p."partitionKey" AS "batchName",
+                    p.data->>'frn' AS frn,
+                    p.type,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY p."partitionKey", p.data->>'frn'
+                        ORDER BY payment_event_rank(p.type) DESC, p."time" DESC
+                    ) AS rn
+                FROM payments p
+                WHERE p.category = 'batch'
+            )
+            UPDATE payment_batch_events pbe
+            SET type = r.type
+            FROM ranked r
+            WHERE r.rn = 1
+              AND pbe."batchName" = r."batchName"
+              AND pbe.frn = r.frn
+              AND pbe.type IS DISTINCT FROM r.type;
+            ]]>
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
