@@ -1,6 +1,7 @@
 module.exports = {
   PAYMENT_EXTRACTED: 'uk.gov.defra.ffc.pay.payment.extracted',
   PAYMENT_ENRICHED: 'uk.gov.defra.ffc.pay.payment.enriched',
+  PAYMENT_PAUSED_HOLD: 'uk.gov.defra.ffc.pay.payment.paused.hold',
   PAYMENT_PAUSED_CROSS_BORDER: 'uk.gov.defra.ffc.pay.payment.paused.cross-border',
   PAYMENT_PAUSED_DEBT: 'uk.gov.defra.ffc.pay.payment.paused.debt',
   PAYMENT_DEBT_ATTACHED: 'uk.gov.defra.ffc.pay.payment.debt.attached',
