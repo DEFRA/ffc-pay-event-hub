@@ -14,6 +14,7 @@ jest.mock('../../../app/storage', () => ({
 
 const { randomUUID } = require('node:crypto')
 const db = require('../../../app/database')
+const { streamDataRequestFile } = require('../../../app/storage')
 const { truncate } = require('../../helpers/truncate')
 const { generateSqlQuery } = require('../../../app/data-requests/file-generator')
 const { getEventsByFrn } = require('../../../app/data-requests/frn/get-events-by-frn')
@@ -129,6 +130,43 @@ describe('data requests against Postgres', () => {
     await getEventsByFrn('1234567890')
 
     expect(pool.numUsed()).toBe(0)
+  })
+
+  test('allows other database work while report uploads are pending', async () => {
+    const pool = db.client.client.pool
+    const originalAcquireTimeout = pool.acquireTimeoutMillis
+    const originalUpload = streamDataRequestFile.getMockImplementation()
+    let finishUploads
+    const uploadsFinished = new Promise((resolve) => {
+      finishUploads = resolve
+    })
+
+    const rowsRead = Array.from({ length: pool.max }, () => new Promise((resolve, reject) => {
+      streamDataRequestFile.mockImplementationOnce((_filename, stream) => {
+        stream.once('end', resolve)
+        stream.once('error', reject)
+        stream.resume()
+        return uploadsFinished
+      })
+    }))
+    const reports = Array.from({ length: pool.max }, () => getSuppressedReportData())
+
+    try {
+      await Promise.all(rowsRead)
+      pool.acquireTimeoutMillis = 500
+
+      const { rows } = await db.client.raw('SELECT 1 AS result')
+
+      expect(rows).toEqual([{ result: 1 }])
+      expect(pool.numUsed()).toBe(0)
+    } finally {
+      finishUploads()
+      await Promise.allSettled(reports)
+      pool.acquireTimeoutMillis = originalAcquireTimeout
+      streamDataRequestFile.mockReset().mockImplementation(originalUpload)
+    }
+
+    await expect(Promise.all(reports)).resolves.toHaveLength(pool.max)
   })
 
   test('getEvents returns events in timestamp order with parsed data', async () => {

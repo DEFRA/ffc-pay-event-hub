@@ -37,7 +37,7 @@ services:
       IGNORE_RETENTION_MESSAGES: ${IGNORE_RETENTION_MESSAGES:-false}
 
   ffc-pay-event-hub-postgres:
-    image: postgres:11.4-alpine
+    image: postgres:16.5-alpine
     environment:
       POSTGRES_DB: ffc_pay_event_hub
       POSTGRES_PASSWORD: ppp
