@@ -63,6 +63,7 @@ const exportQueryToJsonFile = async (
 ) => {
   const client = await getDbClient()
   const passThrough = new PassThrough()
+  let clientReleased = false
 
   try {
     const filename = generateUniqueFilename(fileIdentifier)
@@ -75,6 +76,8 @@ const exportQueryToJsonFile = async (
       rowProcessor,
       streamOptions
     )
+    await releaseDbClient(client)
+    clientReleased = true
     await savePromise
 
     return filename
@@ -82,7 +85,9 @@ const exportQueryToJsonFile = async (
     console.error('Failed to export report:', err)
     throw err
   } finally {
-    await releaseDbClient(client)
+    if (!clientReleased) {
+      await releaseDbClient(client)
+    }
   }
 }
 
