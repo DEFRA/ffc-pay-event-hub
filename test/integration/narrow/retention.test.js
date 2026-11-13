@@ -17,6 +17,7 @@ const { getSchemeIds } = require('ffc-pay-schemes')
 const db = require('../../../app/database')
 const { truncate } = require('../../helpers/truncate')
 const { removeAgreementData } = require('../../../app/retention')
+const { saveWarningEvent } = require('../../../app/inbound/save-event/warning')
 
 const { SFI, CS, MANUAL } = getSchemeIds()
 
@@ -147,6 +148,70 @@ describe('removeAgreementData against Postgres', () => {
     const warnings = await db.warnings()
     expect(warnings).toHaveLength(1)
     expect(warnings[0].data.pillar).toBe('P2')
+  })
+
+  test('removes warnings stored with string frn and schemeId values', async () => {
+    await db.warnings().insert([
+      createWarning({ frn: '1234567890', schemeId: String(SFI), agreementNumber: 'AG1' }),
+      createWarning({ frn: 1234567890, schemeId: SFI, agreementNumber: 'AG1' })
+    ])
+
+    await removeAgreementData({ agreementNumber: 'AG1', frn: '1234567890', schemeId: SFI, usesContractNumber: false })
+
+    expect(await db.warnings()).toHaveLength(0)
+  })
+
+  test.each([
+    ['zero padded to 15 characters', '000001234567890', 1234567890],
+    ['zero padded to 10 characters', '0123456789', '123456789']
+  ])('removes warnings when the stored frn is %s', async (_description, storedFrn, frn) => {
+    await db.warnings().insert(createWarning({ frn: storedFrn, schemeId: SFI, agreementNumber: 'AG1' }))
+
+    await removeAgreementData({ agreementNumber: 'AG1', frn, schemeId: SFI, usesContractNumber: false })
+
+    expect(await db.warnings()).toHaveLength(0)
+  })
+
+  test('removes warnings by contract number when the scheme uses contract numbers', async () => {
+    await db.warnings().insert([
+      createWarning({ frn: 1111111111, schemeId: CS, contractNumber: 'CN1' }),
+      createWarning({ frn: 1111111111, schemeId: CS, contractNumber: 'CN2' })
+    ])
+
+    await removeAgreementData({ agreementNumber: 'CN1', frn: 1111111111, schemeId: CS, usesContractNumber: true })
+
+    const warnings = await db.warnings()
+    expect(warnings).toHaveLength(1)
+    expect(warnings[0].data.contractNumber).toBe('CN2')
+  })
+
+  test('removes warnings for an agreement when another warning on it has an unusable frn', async () => {
+    await db.warnings().insert([
+      createWarning({ frn: 1234567890, schemeId: SFI, agreementNumber: 'AG1' }),
+      createWarning({ frn: 'Unknown', schemeId: SFI, agreementNumber: 'AG1' })
+    ])
+
+    await removeAgreementData({ agreementNumber: 'AG1', frn: 1234567890, schemeId: SFI, usesContractNumber: false })
+
+    const warnings = await db.warnings()
+    expect(warnings).toHaveLength(1)
+    expect(warnings[0].data.frn).toBe('Unknown')
+  })
+
+  test.each([
+    ['above the integer range', 3000000000],
+    ['the Unknown placeholder', 'Unknown'],
+    ['an empty string', '']
+  ])('saves a warning when frn is %s', async (_description, frn) => {
+    await saveWarningEvent({
+      id: randomUUID(),
+      time: new Date().toISOString(),
+      type: 'uk.gov.defra.ffc.pay.warning.event',
+      source: 'test',
+      data: { frn, message: 'test warning' }
+    })
+
+    expect(await db.warnings()).toHaveLength(1)
   })
 
   test('rolls back every removal when a later step fails', async () => {
