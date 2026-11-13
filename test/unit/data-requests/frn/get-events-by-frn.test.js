@@ -86,8 +86,8 @@ describe('events-by-frn module', () => {
       const file = await getEventsByFrn(frn)
 
       expect(generateSqlQuery).toHaveBeenCalledWith(
-        { frn },
         'paymentFrnEvents',
+        { frn },
         [
           ['schemeId', 'ASC'],
           ['agreementNumber', 'ASC'],

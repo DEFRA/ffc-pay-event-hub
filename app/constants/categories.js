@@ -3,5 +3,6 @@ module.exports = {
   CORRELATION_ID: 'correlationId',
   SCHEME_ID: 'schemeId',
   BATCH: 'batch',
-  WARNING: 'warning'
+  WARNING: 'warning',
+  DATE: 'date'
 }

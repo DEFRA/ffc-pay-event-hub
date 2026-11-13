@@ -67,7 +67,7 @@ describe('data requests against Postgres', () => {
       createPayment('9999999999', 'frn', PAYMENT_EXTRACTED, { ...payment, frn: 9999999999, correlationId: 'c3' }, '2026-09-30T12:00:00.000Z')
     ])
 
-    const sql = generateSqlQuery({ frn: '1234567890' }, 'paymentFrnEvents', [['schemeId', 'ASC'], ['lastUpdated', 'DESC']])
+    const sql = generateSqlQuery('paymentFrnEvents', { frn: '1234567890' }, [['schemeId', 'ASC'], ['lastUpdated', 'DESC']])
     const { rows } = await db.client.raw(sql)
 
     expect(rows.map(row => [row.frn, row.schemeId, row.correlationId])).toEqual([
@@ -79,7 +79,7 @@ describe('data requests against Postgres', () => {
   test('generated SQL escapes quotes in filter values', async () => {
     await db.payments().insert(createPayment(payment.batch, 'batch', PAYMENT_EXTRACTED, payment, '2026-09-30T10:00:00.000Z'))
 
-    const sql = generateSqlQuery({ batchName: payment.batch }, 'paymentBatchEvents')
+    const sql = generateSqlQuery('paymentBatchEvents', { batchName: payment.batch })
     const { rows } = await db.client.raw(sql)
 
     expect(rows).toHaveLength(1)
