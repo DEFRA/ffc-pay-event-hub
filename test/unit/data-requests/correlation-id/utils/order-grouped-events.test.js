@@ -2,6 +2,7 @@ const acknowledged = require('../../../../mocks/events/acknowledged')
 const enriched = require('../../../../mocks/events/enriched')
 const processed = require('../../../../mocks/events/processed')
 const submitted = require('../../../../mocks/events/submitted')
+const { PAYMENT_PAUSED_HOLD } = require('../../../../../app/constants/events')
 
 const {
   orderGroupedEvents
@@ -23,5 +24,12 @@ describe('order grouped events', () => {
     expect(orderedGroupedEvents[0].events[1]).toEqual(processed)
     expect(orderedGroupedEvents[0].events[2]).toEqual(submitted)
     expect(orderedGroupedEvents[0].events[3]).toEqual(acknowledged)
+  })
+
+  test('should order hold event between enriched and processed', () => {
+    const held = { ...enriched, type: PAYMENT_PAUSED_HOLD }
+    groupedEvent.events = [processed, held, enriched]
+    const orderedGroupedEvents = orderGroupedEvents([groupedEvent])
+    expect(orderedGroupedEvents[0].events.map(x => x.type)).toEqual([enriched.type, PAYMENT_PAUSED_HOLD, processed.type])
   })
 })
