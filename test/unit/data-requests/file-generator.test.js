@@ -44,7 +44,7 @@ describe('file-generator', () => {
     })
 
     test('returns the query for the table accessor without a where clause when none supplied', () => {
-      const result = generateSqlQuery(null, 'payments')
+      const result = generateSqlQuery('payments')
 
       expect(mockDb.tables.payments).toHaveBeenCalledWith()
       expect(mockDb.builder.where).not.toHaveBeenCalled()
@@ -53,14 +53,14 @@ describe('file-generator', () => {
     })
 
     test('applies the where clause', () => {
-      const result = generateSqlQuery({ category: 'frn', type: 'x' }, 'payments')
+      const result = generateSqlQuery('payments', { category: 'frn', type: 'x' })
 
       expect(mockDb.builder.where).toHaveBeenCalledWith({ category: 'frn', type: 'x' })
       expect(result).toBe('select * from "payments"')
     })
 
     test('uses the accessor for the requested table', () => {
-      generateSqlQuery({ frn: '1234567890' }, 'paymentFrnEvents')
+      generateSqlQuery('paymentFrnEvents', { frn: '1234567890' })
 
       expect(mockDb.tables.paymentFrnEvents).toHaveBeenCalledWith()
       expect(mockDb.tables.payments).not.toHaveBeenCalled()
@@ -68,8 +68,8 @@ describe('file-generator', () => {
 
     test('adds order by clauses in the order given with normalised directions', () => {
       generateSqlQuery(
-        null,
         'paymentFrnEvents',
+        null,
         [['schemeId', 'asc'], ['lastUpdated', 'DESC']]
       )
 
@@ -79,7 +79,7 @@ describe('file-generator', () => {
 
     test('throws if table not found', () => {
       expect(() => {
-        generateSqlQuery(null, 'missing')
+        generateSqlQuery('missing')
       }).toThrow("Table model 'missing' not found in database")
     })
 
@@ -87,32 +87,32 @@ describe('file-generator', () => {
       'throws for %s, which is not a table',
       (name) => {
         expect(() => {
-          generateSqlQuery(null, name)
+          generateSqlQuery(name)
         }).toThrow(`Table model '${name}' not found in database`)
       }
     )
 
     test('throws if orderBy not array', () => {
       expect(() => {
-        generateSqlQuery(null, 'payments', 'id')
+        generateSqlQuery('payments', null, 'id')
       }).toThrow(TypeError)
     })
 
     test('throws for invalid column', () => {
       expect(() => {
-        generateSqlQuery(null, 'payments', [['bad', 'ASC']])
+        generateSqlQuery('payments', null, [['bad', 'ASC']])
       }).toThrow('Invalid order column: bad')
     })
 
     test('throws for a column that belongs to a different table', () => {
       expect(() => {
-        generateSqlQuery(null, 'payments', [['lastUpdated', 'ASC']])
+        generateSqlQuery('payments', null, [['lastUpdated', 'ASC']])
       }).toThrow('Invalid order column: lastUpdated')
     })
 
     test('throws for invalid direction', () => {
       expect(() => {
-        generateSqlQuery(null, 'payments', [['id', 'SIDEWAYS']])
+        generateSqlQuery('payments', null, [['id', 'SIDEWAYS']])
       }).toThrow('Invalid order direction: SIDEWAYS')
     })
   })

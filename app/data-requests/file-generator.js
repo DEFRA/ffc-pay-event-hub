@@ -91,7 +91,7 @@ const exportQueryToJsonFile = async (
   }
 }
 
-const generateSqlQuery = (whereClause, tableName, orderBy = null) => {
+const generateSqlQuery = (tableName, whereClause = null, orderBy = null, whereInClause = null) => {
   if (!Object.hasOwn(TABLE_COLUMNS, tableName)) {
     throw new Error(`Table model '${tableName}' not found in database`)
   }
@@ -101,6 +101,10 @@ const generateSqlQuery = (whereClause, tableName, orderBy = null) => {
 
   if (whereClause) {
     query.where(whereClause)
+  }
+
+  if (whereInClause) {
+    query.whereIn(whereInClause.column, whereInClause.values)
   }
 
   if (orderBy) {
