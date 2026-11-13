@@ -1,6 +1,7 @@
 module.exports = {
   PAYMENT_EXTRACTED_NAME: 'Extracted from batch',
   PAYMENT_ENRICHED_NAME: 'Enriched with mandatory data',
+  PAYMENT_PAUSED_HOLD_NAME: 'Payment held',
   PAYMENT_PAUSED_CROSS_BORDER_NAME: 'Routed to Cross Border for calculation',
   PAYMENT_PAUSED_DEBT_NAME: 'Routed to Request Editor for debt data',
   PAYMENT_DEBT_ATTACHED_NAME: 'Debt data attached',
