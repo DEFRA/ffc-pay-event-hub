@@ -183,6 +183,34 @@ describe('file-generator', () => {
       expect(mockDb.knex.client.releaseConnection).toHaveBeenCalledWith(mockClient)
     })
 
+    test('releases the connection before the blob upload completes', async () => {
+      let resolveUpload
+      let notifyRelease
+      const connectionReleased = new Promise((resolve) => {
+        notifyRelease = resolve
+      })
+
+      storage.streamDataRequestFile.mockImplementation((_filename, stream) => {
+        stream.resume()
+        return new Promise((resolve) => {
+          resolveUpload = resolve
+        })
+      })
+      mockDb.knex.client.releaseConnection.mockImplementation(async (client) => {
+        notifyRelease(client)
+      })
+
+      const promise = exportQueryToJsonFile('SELECT 1', rowProcessor)
+
+      emit('end')
+
+      await expect(connectionReleased).resolves.toBe(mockClient)
+      expect(mockDb.knex.client.releaseConnection).toHaveBeenCalledTimes(1)
+
+      resolveUpload()
+      await expect(promise).resolves.toBe('generated-file.json')
+    })
+
     test('uses custom streamOptions', async () => {
       const customOptions = {
         onStart: jest.fn(),
