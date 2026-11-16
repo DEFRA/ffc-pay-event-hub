@@ -29,25 +29,31 @@ describe('removeWarnings', () => {
 
     expect(mockDb.tables.warnings).toHaveBeenCalledWith(transaction)
     expect(mockDb.builder.whereRaw).toHaveBeenCalledTimes(3)
-    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith('"data" #>> \'{agreementNumber}\' = ?', [agreementNumber])
-    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith("(data->>'frn')::int = ?", [frn])
-    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith("(data->>'schemeId')::int = ?", [schemeId])
+    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith("data->>'agreementNumber' = ?", [agreementNumber])
+    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith("ltrim(data->>'frn', '0') = ?", [String(frn)])
+    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith("data->>'schemeId' = ?", [String(schemeId)])
     expect(mockDb.builder.del).toHaveBeenCalledTimes(1)
   })
 
   test('deletes warnings matching contractNumber when usesContractNumber is true', async () => {
     await removeWarnings(agreementNumber, frn, schemeId, true, undefined, transaction)
 
-    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith('"data" #>> \'{contractNumber}\' = ?', [agreementNumber])
-    expect(mockDb.builder.whereRaw).not.toHaveBeenCalledWith('"data" #>> \'{agreementNumber}\' = ?', expect.anything())
+    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith("data->>'contractNumber' = ?", [agreementNumber])
+    expect(mockDb.builder.whereRaw).not.toHaveBeenCalledWith("data->>'agreementNumber' = ?", expect.anything())
     expect(mockDb.builder.del).toHaveBeenCalledTimes(1)
   })
 
-  test('binds frn and schemeId as numbers', async () => {
-    await removeWarnings(agreementNumber, '1234567890', '5', false, undefined, transaction)
+  test('binds frn and schemeId as text so they match the index expressions', async () => {
+    await removeWarnings(agreementNumber, 1234567890, 5, false, undefined, transaction)
 
-    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith("(data->>'frn')::int = ?", [1234567890])
-    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith("(data->>'schemeId')::int = ?", [5])
+    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith("ltrim(data->>'frn', '0') = ?", ['1234567890'])
+    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith("data->>'schemeId' = ?", ['5'])
+  })
+
+  test('strips leading zeros from frn before binding', async () => {
+    await removeWarnings(agreementNumber, '0123456789', schemeId, false, undefined, transaction)
+
+    expect(mockDb.builder.whereRaw).toHaveBeenCalledWith("ltrim(data->>'frn', '0') = ?", ['123456789'])
   })
 
   test('runs on the pool when no transaction is provided, usesContractNumber false', async () => {

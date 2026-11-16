@@ -1,0 +1,25 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+
+    <changeSet author="Oliver Lewington" id="1">
+        <tagDatabase tag="v1.19.0"/>
+    </changeSet>
+
+    <changeSet author="Oliver Lewington" id="2">
+        <sql splitStatements="false" stripComments="false">
+            <![CDATA[
+            CREATE INDEX IF NOT EXISTS idx_warnings_frn_scheme_agreement
+            ON warnings (
+                (ltrim(data->>'frn', '0')),
+                (data->>'schemeId'),
+                (data->>'agreementNumber'),
+                (data->>'contractNumber')
+            );
+            ]]>
+        </sql>
+        <rollback>
+            <sql>DROP INDEX IF EXISTS idx_warnings_frn_scheme_agreement;</sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
