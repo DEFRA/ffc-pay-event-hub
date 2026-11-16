@@ -6,9 +6,9 @@ const removeWarnings = async (agreementNumber, frn, schemeId, usesContractNumber
   const agreementKey = usesContractNumber ? 'contractNumber' : 'agreementNumber'
 
   await warnings(transaction ?? undefined)
-    .whereRaw(`"data" #>> '{${agreementKey}}' = ?`, [agreementNumber])
-    .whereRaw('(data->>\'frn\')::int = ?', [Number(frn)])
-    .whereRaw('(data->>\'schemeId\')::int = ?', [Number(schemeId)])
+    .whereRaw(`data->>'${agreementKey}' = ?`, [agreementNumber])
+    .whereRaw("ltrim(data->>'frn', '0') = ?", [String(frn).replace(/^0+/, '')])
+    .whereRaw("data->>'schemeId' = ?", [String(schemeId)])
     .modify((query) => {
       if (schemeId === MANUAL && pillar) {
         query.whereRaw('"data" #>> \'{pillar}\' = ?', [pillar])
