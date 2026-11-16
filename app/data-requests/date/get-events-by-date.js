@@ -41,23 +41,22 @@ const getEventsByDate = async (params) => {
     day: Number(day)
   }, TIMEZONE).startOf('day')
   const end = start.clone().add(1, 'day')
-
-  const paymentRows = await payments()
-    .select('id')
-    .where('partitionKey', schemeId)
+  const paymentQuery = payments()
+  const paymentRows = await paymentQuery
+    .select(paymentQuery.client.raw('data->>? as id', ['correlationId']))
+    .where('partitionKey', String(schemeId))
     .where('timestamp', '>=', start.toDate())
     .where('timestamp', '<', end.toDate())
     .where('type', PAYMENT_ENRICHED)
 
   const paymentIds = paymentRows.map(({ id }) => id)
-
   const sql = generateSqlQuery('paymentFrnEvents', null, [
     ['schemeId', 'ASC'],
     ['agreementNumber', 'ASC'],
     ['paymentRequestNumber', 'ASC'],
     ['lastUpdated', 'DESC']
   ],
-  { column: 'id', values: paymentIds })
+  { column: 'correlationId', values: paymentIds })
 
   return exportQueryToJsonFile(
     sql,

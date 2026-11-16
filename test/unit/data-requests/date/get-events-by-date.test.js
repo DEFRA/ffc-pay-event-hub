@@ -63,12 +63,17 @@ describe('events-by-date module', () => {
   let mockStartDate
   let mockEndDate
   let paymentRows
+  let raw
+  let rawExpression
 
   beforeEach(() => {
     jest.clearAllMocks()
 
     paymentRows = [{ id: 'payment-id-1' }, { id: 'payment-id-2' }]
+    rawExpression = {}
+    raw = jest.fn().mockReturnValue(rawExpression)
     query = {
+      client: { raw },
       select: jest.fn(),
       where: jest.fn(),
       then: jest.fn((resolve) => resolve(paymentRows))
@@ -144,8 +149,12 @@ describe('events-by-date module', () => {
       expect(end.add).toHaveBeenCalledWith(1, 'day')
 
       expect(payments).toHaveBeenCalled()
-      expect(query.select).toHaveBeenCalledWith('id')
-      expect(query.where).toHaveBeenNthCalledWith(1, 'partitionKey', 3)
+      expect(raw).toHaveBeenCalledWith(
+        'data->>? as id',
+        ['correlationId']
+      )
+      expect(query.select).toHaveBeenCalledWith(rawExpression)
+      expect(query.where).toHaveBeenNthCalledWith(1, 'partitionKey', '3')
       expect(query.where).toHaveBeenNthCalledWith(
         2,
         'timestamp',
@@ -173,7 +182,7 @@ describe('events-by-date module', () => {
           ['paymentRequestNumber', 'ASC'],
           ['lastUpdated', 'DESC']
         ],
-        { column: 'id', values: ['payment-id-1', 'payment-id-2'] }
+        { column: 'correlationId', values: ['payment-id-1', 'payment-id-2'] }
       )
 
       expect(createReportProcessor).toHaveBeenCalledWith(expect.any(Function))
