@@ -82,8 +82,8 @@ describe('events-by-batch module', () => {
       const file = await getEventsByBatch(batch)
 
       expect(generateSqlQuery).toHaveBeenCalledWith(
-        { batchName: batch },
         'paymentBatchEvents',
+        { batchName: batch },
         [['frn', 'ASC']]
       )
 

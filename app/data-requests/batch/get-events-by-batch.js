@@ -24,7 +24,7 @@ const transformRow = (row) => {
 }
 
 const getEventsByBatch = async (batch) => {
-  const sql = generateSqlQuery({ batchName: batch }, 'paymentBatchEvents', [
+  const sql = generateSqlQuery('paymentBatchEvents', { batchName: batch }, [
     ['frn', 'ASC']
   ])
   return exportQueryToJsonFile(

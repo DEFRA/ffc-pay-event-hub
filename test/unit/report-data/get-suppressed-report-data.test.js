@@ -38,11 +38,11 @@ describe('getSuppressedReportData', () => {
       const { result } = await setup(sqlValue, inputTable)
 
       expect(generateSqlQuery).toHaveBeenCalledWith(
+        expectedTable,
         {
           category: FRN,
           type: PAYMENT_SUPPRESSED
-        },
-        expectedTable
+        }
       )
 
       expect(exportQueryToJsonFile).toHaveBeenCalledWith(

@@ -14,7 +14,7 @@ const generateSuppressedReportSql = async (tableName = 'payments') => {
     type: PAYMENT_SUPPRESSED
   }
 
-  return generateSqlQuery(whereClause, tableName)
+  return generateSqlQuery(tableName, whereClause)
 }
 
 const getSuppressedReportData = async (tableName = 'payments') => {
